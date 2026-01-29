@@ -3,73 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mina & Tyler Hub ❤️</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&family=Pacifico&display=swap" rel="stylesheet">
+    <title>Böcek & Mein Hub ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --main-pink: #ff9a9e; --dark-pink: #d63384; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: #fdfbfb; color: #333; }
-        .page { display: none; padding: 20px; padding-bottom: 100px; animation: fadeIn 0.4s ease; text-align: center; }
+        :root { --main-pink: #ff9a9e; --dark-pink: #d63384; --bg: #fdfbfb; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: #333; overflow-x: hidden; }
+        
+        /* Navigasyon */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 1000; }
+        .nav-item { cursor: pointer; font-size: 1.5rem; filter: grayscale(1); transition: 0.3s; }
+        .nav-item.active { filter: grayscale(0); transform: scale(1.2); }
+
+        /* Sayfa Yapısı */
+        .page { display: none; padding: 20px; padding-bottom: 100px; animation: fadeIn 0.4s ease; }
         .page.active { display: block; }
-        .status-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; }
-        .btn { background: var(--main-pink); border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin: 10px; }
-        .poke-btn { background: #6a11cb; }
-        textarea { width: 90%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- HOME (NOTLAR) --- */
+        .status-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; border: 1px solid #eee; }
+        .mood-bubble { background: #fff0f5; padding: 15px; border-radius: 15px; display: block; margin: 10px 0; font-style: italic; border-left: 5px solid var(--dark-pink); }
+        textarea { width: 90%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; }
+        .btn { background: var(--main-pink); border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .poke-btn { background: #6a11cb; margin-left: 5px; }
+
+        /* --- TIMELINE --- */
+        .timeline-item { border-left: 3px solid var(--main-pink); margin-left: 20px; padding-left: 20px; position: relative; margin-bottom: 30px; }
+        .timeline-item::before { content: '❤️'; position: absolute; left: -14px; top: 0; background: var(--bg); }
+        .date-tag { font-size: 0.8rem; font-weight: bold; color: var(--dark-pink); }
+
+        /* --- KUPONLAR & HEDİYE --- */
+        .coupon-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; border-top: 4px solid var(--main-pink); }
+        #box { font-size: 80px; cursor: pointer; transition: transform 0.1s; display: inline-block; }
+        .progress-bar { width: 100%; height: 15px; background: #eee; border-radius: 10px; margin-top: 10px; overflow: hidden; }
+        .fill { height: 100%; width: 0%; background: var(--dark-pink); transition: width 0.2s; }
     </style>
 </head>
 <body>
 
     <div id="home" class="page active">
-        <h1 style="font-family: 'Pacifico'; color: var(--dark-pink);">Selam Tyler!</h1>
+        <h1 style="font-family: 'Pacifico'; color: var(--dark-pink); text-align: center;">Selam Böcek! ❤️</h1>
         <div class="status-card">
-            <h3>Mina'dan Gelen:</h3>
-            <p id="mina-note-display"><i>Mesaj bekleniyor...</i></p>
-            <button class="btn poke-btn" onclick="sendAction('tylerPoke', 'Tyler seni dürttü! 👉')">Onu Dürt!</button>
+            <h3>Mein'dan Mesaj:</h3>
+            <div id="mina-status" class="mood-bubble">Yükleniyor...</div>
+            <button class="btn poke-btn" onclick="sendAction('böcekPoke', 'Mein seni dürttü! 💖')">Onu Dürt! 👉</button>
         </div>
         <div class="status-card">
-            <h3>Mina'ya Notun:</h3>
-            <textarea id="tylerNoteInput" placeholder="Bir şeyler yaz..."></textarea>
-            <button class="btn" onclick="updateNote()">Gönder</button>
+            <h3>Mein'a Notun:</h3>
+            <textarea id="myNote" placeholder="Mein'a ne söylemek istersin?"></textarea>
+            <button class="btn" onclick="updateStatus()">Notu Gönder</button>
         </div>
     </div>
 
-    <div id="history" class="page"><h1>Zaman Tüneli yakında...</h1></div>
+    <div id="history" class="page">
+        <h2 style="text-align:center;">Hikayemiz ✨</h2>
+        <div id="countdown" style="text-align:center; color:var(--dark-pink); font-weight:bold; margin-bottom:20px;"></div>
+        <div class="timeline-item"><div class="date-tag">7 Ocak 2026</div><p>Bizim Miladımız 💑</p></div>
+        <div class="timeline-item"><div class="date-tag">27 Ocak 2026</div><p>102 dakikalık o görüntülü konuşma... ❤️</p></div>
+    </div>
+
+    <div id="coupons" class="page">
+        <h2 style="text-align:center;">Aşk Kuponların 🎟️</h2>
+        <div class="coupon-card"><h3>🍔 Yemek Ismarlama</h3><button class="btn" onclick="this.parentElement.style.display='none'">Kullan</button></div>
+        <div class="coupon-card"><h3>💋 Sınırsız Öpücük</h3><button class="btn" onclick="this.parentElement.style.display='none'">Kullan</button></div>
+    </div>
+
+    <div id="gift" class="page">
+        <h2 style="text-align:center;">Hediye Paketi 🎁</h2>
+        <div style="text-align:center;">
+            <div id="box" onclick="giftClick()">🎁</div>
+            <div class="progress-bar"><div class="fill" id="fill"></div></div>
+        </div>
+    </div>
 
     <nav class="bottom-nav">
-        <div onclick="showPage('home')">🏠</div>
-        <div onclick="showPage('history')">📜</div>
+        <div class="nav-item active" onclick="showPage('home', this)">🏠</div>
+        <div class="nav-item" onclick="showPage('history', this)">📜</div>
+        <div class="nav-item" onclick="showPage('coupons', this)">🎟️</div>
+        <div class="nav-item" onclick="showPage('gift', this)">🎁</div>
     </nav>
 
     <script>
         const dbURL = "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app/status.json";
 
-        async function updateNote() {
-            const note = document.getElementById('tylerNoteInput').value;
-            await fetch(dbURL, {
-                method: 'PATCH',
-                body: JSON.stringify({ tylerNote: note, lastUpdate: new Date().toLocaleTimeString() })
-            });
-            alert("Notun Mina'ya uçtu! 🚀");
+        function showPage(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
         }
 
-        async function sendAction(key, value) {
-            let data = {}; data[key] = value;
-            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify(data) });
+        async function updateStatus() {
+            const note = document.getElementById('myNote').value;
+            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify({ böcekNote: note, lastUpdate: new Date().toLocaleTimeString() }) });
+            alert("Notun iletildi Böcek! 🚀");
+            document.getElementById('myNote').value = "";
+        }
+
+        async function sendAction(key, val) {
+            let d = {}; d[key] = val;
+            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify(d) });
             alert("Dürttün! 😉");
         }
 
         async function sync() {
             const res = await fetch(dbURL);
             const data = await res.json();
-            if(data && data.minaNote) document.getElementById('mina-note-display').innerText = data.minaNote;
+            if(data && data.meinNote) document.getElementById('mina-status').innerText = data.meinNote;
         }
-        setInterval(sync, 5000); // 5 saniyede bir güncelle
-        sync();
+        setInterval(sync, 5000); sync();
 
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+        const start = new Date("Jan 7, 2026 00:00:00").getTime();
+        setInterval(() => {
+            const now = new Date().getTime();
+            const days = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+            document.getElementById('countdown').innerText = days + " gündür seninle... ❤️";
+        }, 1000);
+
+        let c = 0;
+        function giftClick() {
+            c++; document.getElementById('fill').style.width = (c/20)*100 + "%";
+            if(c >= 20) alert("Seni çok seviyorum Mein! ❤️");
         }
     </script>
 </body>
