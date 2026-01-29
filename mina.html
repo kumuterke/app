@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mina'nın Paneli ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        :root { --main-pink: #ff9a9e; --dark-pink: #d63384; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: #fdfbfb; color: #333; text-align: center; }
+        
+        .header { background: white; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        h1 { font-family: 'Pacifico'; color: var(--dark-pink); margin: 0; }
+        
+        .container { padding: 20px; }
+        .status-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; }
+        
+        .btn { background: var(--main-pink); border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin: 10px; transition: 0.3s; width: 80%; }
+        .btn:active { transform: scale(0.95); }
+        .poke-btn { background: #6a11cb; }
+        
+        textarea { width: 90%; padding: 12px; border-radius: 15px; border: 1px solid #ddd; font-family: inherit; margin-top: 10px; }
+        
+        #tyler-note-display { font-style: italic; color: #555; background: #fff0f5; padding: 15px; border-radius: 15px; display: block; margin-top: 10px; border-left: 5px solid var(--dark-pink); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Selam Mina! ❤️</h1>
+    </div>
+
+    <div class="container">
+        <div class="status-card">
+            <h3>Tyler'dan Gelen:</h3>
+            <div id="tyler-note-display">Mesaj yükleniyor...</div>
+            <p id="update-time" style="font-size: 0.7rem; color: #aaa; margin-top: 5px;"></p>
+            <button class="btn poke-btn" onclick="sendAction('minaPoke', 'Mina seni dürttü! 💖')">Tyler'ı Dürt!</button>
+        </div>
+
+        <div class="status-card">
+            <h3>Tyler'a Notun:</h3>
+            <textarea id="minaNoteInput" rows="3" placeholder="Tyler'a bir şeyler yaz..."></textarea>
+            <button class="btn" onclick="updateMinaNote()">Notu Gönder</button>
+        </div>
+        
+        <p style="font-size: 0.8rem; color: #ccc;">Senin için Tyler tarafından yapıldı. ∞</p>
+    </div>
+
+    <script>
+        // Senin Firebase URL'in
+        const dbURL = "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app/status.json";
+
+        // --- MİNA NOTUNU GÜNCELLE ---
+        async function updateMinaNote() {
+            const note = document.getElementById('minaNoteInput').value;
+            if(!note) return alert("Boş not gönderemezsin birtanem!");
+
+            try {
+                await fetch(dbURL, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ 
+                        minaNote: note, 
+                        lastMinaUpdate: new Date().toLocaleTimeString() 
+                    })
+                });
+                alert("Notun Tyler'a uçtu! 🚀");
+                document.getElementById('minaNoteInput').value = ""; // Kutuyu temizle
+            } catch (err) {
+                alert("Bir hata oluştu Tyler'a ulaşılamıyor!");
+            }
+        }
+
+        // --- TYLER'I DÜRT ---
+        async function sendAction(key, value) {
+            let data = {}; 
+            data[key] = value;
+            data['lastPokeTime'] = new Date().getTime();
+
+            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify(data) });
+            alert("Umut'u dürttün! 😉");
+        }
+
+        // --- TYLER'IN NOTUNU ÇEK (CANLI SENKRON) ---
+        async function syncWithTyler() {
+            try {
+                const res = await fetch(dbURL);
+                const data = await res.json();
+                
+                if(data && data.tylerNote) {
+                    document.getElementById('tyler-note-display').innerText = data.tylerNote;
+                    document.getElementById('update-time').innerText = "Son güncelleme: " + (data.lastUpdate || "");
+                }
+            } catch (err) {
+                console.log("Veri çekme hatası");
+            }
+        }
+
+        // Her 5 saniyede bir kontrol et
+        setInterval(syncWithTyler, 5000);
+        syncWithTyler();
+    </script>
+</body>
+</html>
