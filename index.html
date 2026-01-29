@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mina & Tyler Hub ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        :root { --main-pink: #ff9a9e; --dark-pink: #d63384; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: #fdfbfb; color: #333; }
+        .page { display: none; padding: 20px; padding-bottom: 100px; animation: fadeIn 0.4s ease; text-align: center; }
+        .page.active { display: block; }
+        .status-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; }
+        .btn { background: var(--main-pink); border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin: 10px; }
+        .poke-btn { background: #6a11cb; }
+        textarea { width: 90%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="home" class="page active">
+        <h1 style="font-family: 'Pacifico'; color: var(--dark-pink);">Selam Tyler!</h1>
+        <div class="status-card">
+            <h3>Mina'dan Gelen:</h3>
+            <p id="mina-note-display"><i>Mesaj bekleniyor...</i></p>
+            <button class="btn poke-btn" onclick="sendAction('tylerPoke', 'Tyler seni dürttü! 👉')">Onu Dürt!</button>
+        </div>
+        <div class="status-card">
+            <h3>Mina'ya Notun:</h3>
+            <textarea id="tylerNoteInput" placeholder="Bir şeyler yaz..."></textarea>
+            <button class="btn" onclick="updateNote()">Gönder</button>
+        </div>
+    </div>
+
+    <div id="history" class="page"><h1>Zaman Tüneli yakında...</h1></div>
+
+    <nav class="bottom-nav">
+        <div onclick="showPage('home')">🏠</div>
+        <div onclick="showPage('history')">📜</div>
+    </nav>
+
+    <script>
+        const dbURL = "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app/status.json";
+
+        async function updateNote() {
+            const note = document.getElementById('tylerNoteInput').value;
+            await fetch(dbURL, {
+                method: 'PATCH',
+                body: JSON.stringify({ tylerNote: note, lastUpdate: new Date().toLocaleTimeString() })
+            });
+            alert("Notun Mina'ya uçtu! 🚀");
+        }
+
+        async function sendAction(key, value) {
+            let data = {}; data[key] = value;
+            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify(data) });
+            alert("Dürttün! 😉");
+        }
+
+        async function sync() {
+            const res = await fetch(dbURL);
+            const data = await res.json();
+            if(data && data.minaNote) document.getElementById('mina-note-display').innerText = data.minaNote;
+        }
+        setInterval(sync, 5000); // 5 saniyede bir güncelle
+        sync();
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
+</body>
+</html>
