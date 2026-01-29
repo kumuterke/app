@@ -8,14 +8,15 @@
     <style>
         :root { --main-pink: #ff9a9e; --dark-pink: #d63384; --bg: #fdfbfb; }
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: #333; overflow-x: hidden; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 1000; }
         .nav-item { cursor: pointer; font-size: 1.5rem; filter: grayscale(1); transition: 0.3s; }
         .nav-item.active { filter: grayscale(0); transform: scale(1.2); }
         .page { display: none; padding: 20px; padding-bottom: 100px; animation: fadeIn 0.4s ease; text-align: center; }
         .page.active { display: block; }
         .status-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; }
         .mood-bubble { background: #fff0f5; padding: 15px; border-radius: 15px; display: block; margin: 10px 0; font-style: italic; border-left: 5px solid var(--dark-pink); }
-        textarea { width: 90%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; }
+        textarea { width: 90%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; }
+        .mood-btn { font-size: 1.8rem; cursor: pointer; transition: 0.2s; padding: 5px; display: inline-block; }
         .btn { background: var(--main-pink); border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -25,14 +26,21 @@
     <div id="home" class="page active">
         <h1 style="font-family: 'Pacifico'; color: var(--dark-pink);">Selam Mein! ❤️</h1>
         <div class="status-card">
-            <h3>Böcek'ten Mesaj:</h3>
-            <div id="böcek-status" class="mood-bubble">Yükleniyor...</div>
-            <button class="btn" style="background:#6a11cb" onclick="sendAction('meinPoke', 'Mein seni dürttü! 💖')">Böcek'i Dürt!</button>
+            <h3>Böcek'in Modu:</h3>
+            <div id="böcek-mood-display" style="font-size: 3.5rem; margin: 10px 0;">⌛</div>
+            <div id="böcek-status" class="mood-bubble">Not bekleniyor...</div>
         </div>
         <div class="status-card">
-            <h3>Böcek'e Notun:</h3>
-            <textarea id="myNote" placeholder="Böcek'e ne söylemek istersin?"></textarea>
-            <button class="btn" onclick="updateStatus()">Notu Gönder</button>
+            <h3>Modunu Seç:</h3>
+            <div id="mood-selector">
+                <span class="mood-btn" onclick="updateMood('😊')">😊</span>
+                <span class="mood-btn" onclick="updateMood('🥰')">🥰</span>
+                <span class="mood-btn" onclick="updateMood('😴')">😴</span>
+                <span class="mood-btn" onclick="updateMood('😔')">😔</span>
+                <span class="mood-btn" onclick="updateMood('🍕')">🍕</span>
+            </div>
+            <textarea id="minaNote" placeholder="Böcek'e bir şeyler yaz..."></textarea>
+            <button class="btn" onclick="updateMinaStatus()">Notu Gönder</button>
         </div>
     </div>
 
@@ -48,23 +56,25 @@
             document.getElementById(id).classList.add('active');
         }
 
-        async function updateStatus() {
-            const note = document.getElementById('myNote').value;
-            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify({ meinNote: note, lastUpdate: new Date().toLocaleTimeString() }) });
-            alert("Notun Böcek'e uçtu! 🚀");
-            document.getElementById('myNote').value = "";
+        async function updateMood(emoji) {
+            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify({ meinMood: emoji }) });
+            alert("Modun güncellendi Mein! 🥰");
         }
 
-        async function sendAction(key, val) {
-            let d = {}; d[key] = val;
-            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify(d) });
-            alert("Dürttün! 😉");
+        async function updateMinaStatus() {
+            const note = document.getElementById('minaNote').value;
+            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify({ meinNote: note, lastUpdate: new Date().toLocaleTimeString() }) });
+            alert("Notun Böcek'e uçtu! 🚀");
+            document.getElementById('minaNote').value = "";
         }
 
         async function sync() {
             const res = await fetch(dbURL);
             const data = await res.json();
-            if(data && data.böcekNote) document.getElementById('böcek-status').innerText = data.böcekNote;
+            if(data) {
+                if(data.böcekNote) document.getElementById('böcek-status').innerText = data.böcekNote;
+                if(data.böcekMood) document.getElementById('böcek-mood-display').innerText = data.böcekMood;
+            }
         }
         setInterval(sync, 5000); sync();
     </script>
