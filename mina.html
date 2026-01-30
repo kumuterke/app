@@ -13,13 +13,12 @@
         .nav-item.active { filter: grayscale(0); transform: scale(1.2); }
         .page { display: none; padding: 20px; padding-bottom: 100px; animation: fadeIn 0.4s ease; text-align: center; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .status-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; }
         .mood-bubble { background: #fff0f5; padding: 15px; border-radius: 15px; display: block; margin: 10px 0; font-style: italic; border-left: 5px solid var(--dark-pink); }
         textarea { width: 90%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; }
-        .mood-btn { font-size: 1.8rem; cursor: pointer; padding: 5px; display: inline-block; }
+        .mood-btn { font-size: 1.8rem; cursor: pointer; padding: 5px; display: inline-block; transition: 0.2s; }
         .btn { background: var(--main-pink); border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        iframe { width: 100%; height: 500px; border: none; border-radius: 15px; }
+        iframe { width: 100%; height: 600px; border: none; border-radius: 15px; }
     </style>
 </head>
 <body>
@@ -27,22 +26,21 @@
     <div id="home" class="page active">
         <h1 style="font-family: 'Pacifico'; color: var(--dark-pink);">Selam Mein! ❤️</h1>
         <div class="status-card">
-            <h3>Böcek'ten Mesaj:</h3>
-            <div id="böcek-status-display" style="font-size: 3.5rem; margin: 10px 0;">⌛</div>
+            <h3>Böcek'in Modu:</h3>
+            <div id="böcek-mood-display" style="font-size: 3.5rem; margin: 10px 0;">⌛</div>
             <div id="böcek-note" class="mood-bubble">Not bekleniyor...</div>
         </div>
         <div class="status-card">
             <h3>Modunu Seç:</h3>
-            <div>
-                <span class="mood-btn" onclick="updateMood('😊')">😊</span>
-                <span class="mood-btn" onclick="updateMood('🥰')">🥰</span>
-                <span class="mood-btn" onclick="updateMood('😴')">😴</span>
-                <span class="mood-btn" onclick="updateMood('😔')">😔</span>
-                <span class="mood-btn" onclick="updateMood('🍕')">🍕</span>
-            </div>
+            <div id="mina-mood-selector"></div>
             <textarea id="minaNote" placeholder="Böcek'e ne söylemek istersin?"></textarea>
             <button class="btn" onclick="updateMinaStatus()">Gönder</button>
         </div>
+    </div>
+
+    <div id="quiz-page" class="page">
+        <h2 style="font-family: 'Pacifico'; color: var(--dark-pink);">Günün Testi ✨</h2>
+        <iframe src="https://kumuterke.github.io/quiz/quiz.html"></iframe>
     </div>
 
     <div id="history" class="page">
@@ -60,6 +58,7 @@
 
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="showPage('home', this)">🏠</div>
+        <div class="nav-item" onclick="showPage('quiz-page', this)">📝</div>
         <div class="nav-item" onclick="showPage('history', this)">📜</div>
         <div class="nav-item" onclick="showPage('coupons', this)">🎟️</div>
         <div class="nav-item" onclick="showPage('gift', this)">🎁</div>
@@ -67,25 +66,43 @@
 
     <script>
         const dbURL = "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app/status.json";
+
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
         }
-        async function updateMood(e) { await fetch(dbURL, { method: 'PATCH', body: JSON.stringify({ meinMood: e }) }); alert("Mod iletildi!"); }
+
+        function updateMinaMoodOptions() {
+            const selector = document.getElementById('mina-mood-selector');
+            const hour = new Date().getHours();
+            let moods = ['😊', '🥰', '😴'];
+            if (hour >= 0 && hour < 4) { moods = moods.concat(['😈', '🔞', '🫦', '🔥', '🍷']); }
+            selector.innerHTML = moods.map(e => `<span class="mood-btn" onclick="updateMood('${e}')">${e}</span>`).join('');
+        }
+
+        async function updateMood(e) { 
+            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify({ meinMood: e }) }); 
+            alert("Mod Böcek'e iletildi!"); 
+        }
+
         async function updateMinaStatus() {
             const n = document.getElementById('minaNote').value;
             await fetch(dbURL, { method: 'PATCH', body: JSON.stringify({ meinNote: n, lastUpdate: new Date().toLocaleTimeString() }) });
             alert("Not iletildi!"); document.getElementById('minaNote').value = "";
         }
+
         async function sync() {
             const res = await fetch(dbURL); const data = await res.json();
             if(data) {
                 if(data.böcekNote) document.getElementById('böcek-note').innerText = data.böcekNote;
-                if(data.böcekMood) document.getElementById('böcek-status-display').innerText = data.böcekMood;
+                if(data.böcekMood) document.getElementById('böcek-mood-display').innerText = data.böcekMood;
             }
         }
+
+        updateMinaMoodOptions();
+        setInterval(updateMinaMoodOptions, 60000);
         setInterval(sync, 5000); sync();
     </script>
 </body>
