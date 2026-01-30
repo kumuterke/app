@@ -27,7 +27,6 @@
 
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: background 0.3s ease, color 0.3s ease; min-height: 100vh; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         
-        /* Header & Status */
         .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         h1 { font-family: 'Pacifico'; color: var(--accent-blue); margin: 0; font-size: 1.8rem; }
         .connection-dot { width: 10px; height: 10px; background: #e74c3c; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #e74c3c; transition: 0.3s; }
@@ -38,13 +37,11 @@
             width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
         }
 
-        /* Navigation */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav); display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.4); z-index: 1000; border-top: 1px solid rgba(255,255,255,0.05); }
         .nav-item { cursor: pointer; font-size: 1.6rem; filter: grayscale(1); opacity: 0.6; transition: 0.3s; transform: scale(0.9); }
         .nav-item.active { filter: grayscale(0); opacity: 1; transform: scale(1.1); }
         
-        /* Cards & Layout */
-        .page { display: none; padding: 20px; padding-bottom: 100px; animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; }
+        .page { display: none; padding: 20px; padding-bottom: 100px; animation: slideUp 0.4s ease; text-align: center; }
         .page.active { display: block; }
         
         .status-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
@@ -52,16 +49,20 @@
         .mini-card { background: var(--card); border-radius: 18px; padding: 15px; border: 1px solid rgba(128,128,128,0.1); position: relative; overflow: hidden; transition: transform 0.1s; }
         .mini-card:active { transform: scale(0.96); }
         
-        /* Elements */
         .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 14px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; width: 100%; font-size: 1rem; box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3); transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
         
         textarea { width: 100%; padding: 15px; border: none; border-radius: 15px; background: rgba(0,0,0,0.2); color: var(--text); font-family: inherit; resize: none; box-sizing: border-box; outline: none; border: 1px solid transparent; transition: 0.3s; }
         textarea:focus { border-color: var(--accent-blue); background: rgba(0,0,0,0.3); }
 
+        /* To-Do Styles */
+        .todo-item { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 8px; text-align: left; }
+        .todo-item input { margin-right: 15px; accent-color: var(--accent-blue); transform: scale(1.2); }
+        .todo-input-container { display: flex; gap: 10px; margin-top: 15px; }
+        .todo-input-container input { flex: 1; padding: 12px; border-radius: 50px; border: none; background: rgba(255,255,255,0.1); color: var(--text); outline: none; }
+
         iframe { width: 100%; height: 75vh; border: none; border-radius: 15px; background: white; }
         
-        /* Animations & Toast */
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes floatHeart { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-100px) scale(1.5); opacity: 0; } }
         
@@ -89,6 +90,15 @@
         <div class="grid-container">
             <div class="mini-card"><small style="opacity:0.7">Mina Batarya</small><div id="mina-bat" style="font-size:1.4rem; font-weight:bold; margin-top:5px;">--%</div></div>
             <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="font-size:1.1rem; font-weight:bold; margin-top:5px; color: #00d2ff;">--:--</div></div>
+        </div>
+
+        <div class="status-card" style="margin-top: 15px;">
+            <h3>📝 Aşk Görevleri</h3>
+            <div id="todo-list"></div>
+            <div class="todo-input-container">
+                <input type="text" id="todo-input" placeholder="Yeni görev ekle...">
+                <button onclick="addTodo()" style="background: var(--accent-blue); border:none; width: 40px; height: 40px; border-radius: 50%; color: white; font-weight: bold;">+</button>
+            </div>
         </div>
 
         <div class="status-card" style="margin-top:20px;">
@@ -119,13 +129,12 @@
     <div id="quiz-page" class="page"><iframe src="https://kumuterke.github.io/quiz/quiz.html"></iframe></div>
     <div id="history" class="page"><iframe src="https://kumuterke.github.io/time/"></iframe></div>
     <div id="coupons" class="page"><iframe src="https://kumuterke.github.io/kupon/"></iframe></div>
-
-    <nav class="bottom-nav">
+    <div id="gift" class="page"><iframe src="https://kumuterke.github.io/hediye/"></iframe></div> <nav class="bottom-nav">
         <div class="nav-item active" onclick="showPage('home', this)">🏠</div>
         <div class="nav-item" onclick="showPage('quiz-page', this)">📝</div>
         <div class="nav-item" onclick="showPage('history', this)">📜</div>
         <div class="nav-item" onclick="showPage('coupons', this)">🎟️</div>
-    </nav>
+        <div class="nav-item" onclick="showPage('gift', this)">🎁</div> </nav>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyBnCvyBVmQgEs4hl94K-WBYCWVpeJR9PtA", authDomain: "minatyler-b7212.firebaseapp.com", databaseURL: "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app", projectId: "minatyler-b7212", storageBucket: "minatyler-b7212.firebasestorage.app", messagingSenderId: "599344339158", appId: "1:599344339158:web:11e6083e5d56ffae91d177" };
@@ -137,7 +146,6 @@
             document.getElementById('conn-dot').classList.toggle('online', snap.val() === true);
         });
 
-        // PRO UI Functions
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         
         function showPage(id, el) {
@@ -161,7 +169,29 @@
             setTimeout(() => heart.remove(), 1000);
         }
 
-        // Logic
+        // --- GÖREVLER (TO-DO) ---
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            if(input.value.trim() !== "") {
+                db.ref('todos').push({ text: input.value, done: false });
+                input.value = "";
+                showToast("Görev eklendi!");
+            }
+        }
+        db.ref('todos').on('value', snap => {
+            const list = document.getElementById('todo-list');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const item = child.val();
+                list.innerHTML += `
+                    <div class="todo-item" style="${item.done ? 'opacity:0.5' : ''}">
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onclick="db.ref('todos/${child.key}/done').set(${!item.done})">
+                        <span style="${item.done ? 'text-decoration:line-through' : ''}">${item.text}</span>
+                    </div>`;
+            });
+        });
+
+        // Diğer Fonksiyonlar
         function addKiss(who, event) { 
             db.ref('kisses/' + who).transaction(c => (c || 0) + 1); 
             createHeart(event.clientX, event.clientY);
@@ -199,7 +229,6 @@
             document.getElementById('tylerNote').value = "";
         }
 
-        // Countdown
         const target = new Date("2026-06-15T00:00:00").getTime();
         setInterval(() => {
             const diff = target - Date.now();

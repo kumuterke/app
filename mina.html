@@ -53,6 +53,12 @@
         textarea { width: 100%; padding: 15px; border: 1px solid #ffe3e3; border-radius: 15px; background: var(--bg); color: var(--text); font-family: inherit; resize: none; box-sizing: border-box; outline: none; margin-top: 10px; transition: 0.3s; }
         textarea:focus { border-color: var(--main-pink); }
 
+        /* To-Do Styles */
+        .todo-item { display: flex; align-items: center; background: rgba(255,154,158,0.1); padding: 12px; border-radius: 12px; margin-bottom: 8px; text-align: left; }
+        .todo-item input { margin-right: 15px; accent-color: var(--dark-pink); transform: scale(1.2); }
+        .todo-input-container { display: flex; gap: 10px; margin-top: 15px; }
+        .todo-input-container input { flex: 1; padding: 12px; border-radius: 50px; border: 1px solid #ffe3e3; background: var(--bg); color: var(--text); outline: none; }
+
         iframe { width: 100%; height: 75vh; border: none; border-radius: 15px; background: white; }
         
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -87,6 +93,15 @@
                 <span id="tyler-mood-display" style="font-size: 2.5rem;">⌛</span>
             </div>
             <p id="tyler-note" style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; margin-top: 15px; border-left: 4px solid var(--dark-pink); font-style: italic;">Not bekleniyor...</p>
+        </div>
+
+        <div class="status-card" style="margin-top: 15px;">
+            <h3>📝 Aşk Görevleri</h3>
+            <div id="todo-list"></div>
+            <div class="todo-input-container">
+                <input type="text" id="todo-input" placeholder="Yeni görev ekle...">
+                <button onclick="addTodo()" style="background: var(--main-pink); border:none; width: 40px; height: 40px; border-radius: 50%; color: white; font-weight: bold;">+</button>
+            </div>
         </div>
 
         <div class="grid-container">
@@ -145,6 +160,28 @@
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 1000);
         }
+
+        // --- GÖREVLER (TO-DO) ---
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            if(input.value.trim() !== "") {
+                db.ref('todos').push({ text: input.value, done: false });
+                input.value = "";
+                showToast("Görev eklendi!");
+            }
+        }
+        db.ref('todos').on('value', snap => {
+            const list = document.getElementById('todo-list');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const item = child.val();
+                list.innerHTML += `
+                    <div class="todo-item" style="${item.done ? 'opacity:0.5' : ''}">
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onclick="db.ref('todos/${child.key}/done').set(${!item.done})">
+                        <span style="${item.done ? 'text-decoration:line-through' : ''}">${item.text}</span>
+                    </div>`;
+            });
+        });
 
         if ('getBattery' in navigator) {
             navigator.getBattery().then(bat => {
