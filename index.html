@@ -135,7 +135,7 @@
             db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() });
             
             // 2. Senin (Böcek/Tyler) gönderdiğin öpücük sayısını +1 artır
-            db.ref('kisses/Tyler').transaction(c => (c || 0) + 1);
+            db.ref('kisses/Böcek').transaction(c => (c || 0) + 1);
 
             // 3. Ekrana bildirim çıkar
             const sn = document.getElementById("sent-notification");
