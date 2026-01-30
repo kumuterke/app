@@ -15,6 +15,7 @@
             --text: #ffffff; 
             --nav: #151515;
             --toast-bg: #333;
+            --input-bg: rgba(255,255,255,0.1);
         }
 
         body.light-mode {
@@ -23,6 +24,7 @@
             --text: #333333;
             --nav: #ffffff;
             --toast-bg: #222;
+            --input-bg: rgba(0,0,0,0.05);
         }
 
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: background 0.3s ease; min-height: 100vh; overflow-x: hidden; -webkit-tap-highlight-color: transparent; padding-bottom: 120px; }
@@ -49,16 +51,15 @@
         .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 14px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; width: 100%; font-size: 1rem; box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3); transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
         
-        textarea { width: 100%; padding: 15px; border: none; border-radius: 15px; background: rgba(0,0,0,0.2); color: var(--text); font-family: inherit; resize: none; box-sizing: border-box; outline: none; border: 1px solid transparent; transition: 0.3s; margin-top:10px;}
-        textarea:focus { border-color: var(--accent-blue); background: rgba(0,0,0,0.3); }
+        textarea { width: 100%; padding: 15px; border: none; border-radius: 15px; background: var(--input-bg); color: var(--text); font-family: inherit; resize: none; box-sizing: border-box; outline: none; border: 1px solid transparent; transition: 0.3s; margin-top:10px;}
+        textarea:focus { border-color: var(--accent-blue); }
 
-        /* To-Do Styles */
         .todo-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 8px; text-align: left; }
         .todo-content { display: flex; align-items: center; width: 85%; }
         .todo-item input { margin-right: 15px; accent-color: var(--accent-blue); transform: scale(1.2); }
         .delete-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.7; }
         .todo-input-container { display: flex; gap: 10px; margin-top: 15px; }
-        .todo-input-container input { flex: 1; padding: 12px; border-radius: 50px; border: none; background: rgba(255,255,255,0.1); color: var(--text); outline: none; }
+        .todo-input-container input { flex: 1; padding: 12px; border-radius: 50px; border: none; background: var(--input-bg); color: var(--text); outline: none; }
 
         iframe { width: 100%; height: 75vh; border: none; border-radius: 15px; background: white; margin-top: 20px; }
         
@@ -73,7 +74,6 @@
     </style>
 </head>
 <body>
-
     <div id="toast">Bildirim</div>
 
     <div id="home" class="page active">
@@ -91,6 +91,19 @@
             <div class="mini-card">
                 <small style="opacity:0.7">Kavuşma (6 Şub)</small>
                 <div id="countdown" style="font-size:1.1rem; font-weight:bold; margin-top:5px; color: #00d2ff;">--:--</div>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <h3 style="font-family: 'Pacifico'; font-size: 1rem; color: var(--accent-blue);">Kalplerimiz Arasındaki Mesafe</h3>
+            <div id="distance-display" style="font-size: 1.5rem; font-weight: bold; margin: 10px 0; color: var(--accent-blue);">Hesaplanıyor...</div>
+            <div id="gps-status" style="font-size: 0.6rem; opacity: 0.6; margin-bottom:5px;">📡 Konum izni bekleniyor...</div>
+            <div style="display: flex; justify-content: space-around; font-size: 0.8rem; opacity: 0.8;">
+                <div>🇩🇪 Augsburg: <span id="local-time">--:--</span></div>
+                <div>🇹🇷 İstanbul: <span id="mina-time">--:--</span></div>
+            </div>
+            <div id="weather-sync" style="margin-top: 10px; font-size: 0.8rem; color: var(--accent-blue); opacity: 0.8;">
+                ☁️ Augsburg: 2°C | ☀️ İstanbul: 12°C
             </div>
         </div>
 
@@ -150,6 +163,8 @@
         const firebaseConfig = { apiKey: "AIzaSyBnCvyBVmQgEs4hl94K-WBYCWVpeJR9PtA", authDomain: "minatyler-b7212.firebaseapp.com", databaseURL: "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app", projectId: "minatyler-b7212", storageBucket: "minatyler-b7212.firebasestorage.app", messagingSenderId: "599344339158", appId: "1:599344339158:web:11e6083e5d56ffae91d177" };
         firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
+        let lastKnownDistance = null; // Son bilinen mesafeyi tutmak için
+
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -165,15 +180,61 @@
             heart.style.left = `${x}px`; heart.style.top = `${y}px`; document.body.appendChild(heart); setTimeout(() => heart.remove(), 1000);
         }
 
-        // ÖPÜCÜK & ÖZLEDİM ENTEGRASYONU
+        // --- AKILLI GPS SİSTEMİ (TYLER) ---
+        function toRad(value) { return value * Math.PI / 180; }
+        function calcDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; const dLat = toRad(lat2 - lat1); const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); return (R * c).toFixed(3);
+        }
+        
+        function initLocation() {
+            if (navigator.geolocation) {
+                // watchPosition ile sürekli takip ediyoruz
+                navigator.geolocation.watchPosition((position) => {
+                    // Konum alındı, hesapla
+                    const dist = calcDistance(position.coords.latitude, position.coords.longitude, 41.0082, 28.9784); // İstanbul Sabit
+                    lastKnownDistance = dist; // Hafızaya al
+                    
+                    document.getElementById('distance-display').innerText = dist.replace('.', ',') + " KM";
+                    document.getElementById('distance-display').style.color = "#2ecc71";
+                    document.getElementById('gps-status').innerText = "✅ Canlı GPS Verisi";
+                }, (error) => { 
+                    // Hata olursa (Sinyal koptu vs.)
+                    runSmartFallback(); 
+                }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+            } else { runSmartFallback(); }
+        }
+
+        function runSmartFallback() {
+            if (lastKnownDistance) {
+                // Eğer daha önce gerçek bir ölçüm yaptıysak onu koru!
+                document.getElementById('gps-status').innerText = "⚠️ Sinyal Zayıf - Son Konum Korunuyor";
+                // Ekrana dokunma, son sayı kalsın.
+            } else {
+                // Hiç konum alınamadıysa simülasyona geç
+                document.getElementById('gps-status').innerText = "⚠️ Simülasyon Modu";
+                const h = new Date().getHours();
+                const val = (2415 + (Math.sin(h) * 0.5)).toFixed(3);
+                document.getElementById('distance-display').innerText = val.replace('.', ',') + " KM";
+            }
+        }
+        
+        // --- SAATLER ---
+        setInterval(() => {
+            const now = new Date();
+            const ops = { hour: '2-digit', minute: '2-digit', hour12: false };
+            document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', ops);
+            const trTime = new Date(now.getTime() + (2 * 60 * 60 * 1000));
+            document.getElementById('mina-time').innerText = trTime.toLocaleTimeString('tr-TR', ops);
+        }, 1000);
+
+        // ÖPÜCÜK & ÖZLEDİM
         function sendMissYou(event) { 
-            // 1. Bildirim Gönder
             db.ref('alerts/minaAlert').set({ msg: "Seni özledim!", time: Date.now() }); 
-            // 2. Tyler'ın Öpücük Sayısını Artır
             db.ref('kisses/Tyler').transaction(c => (c || 0) + 1);
-            // 3. Efekt
             if(event) createHeart(event.clientX, event.clientY);
-            showToast("Öpücük & Bildirim yollandı! 🚀");
+            showToast("Öpücük yollandı! 🚀");
         }
 
         db.ref('kisses').on('value', snap => {
@@ -186,53 +247,35 @@
             if(snap.val() && Date.now() - snap.val().time < 5000) { showToast("❤️ Mina seni çok özledi! ❤️"); try { navigator.vibrate([200, 100, 200]); } catch(e){} }
         });
 
-        // TO-DO LIST (SİLME ÖZELLİĞİ EKLENDİ)
+        // TO-DO
         function addTodo() {
             const input = document.getElementById('todo-input');
             if(input.value.trim() !== "") { db.ref('todos').push({ text: input.value, done: false }); input.value = ""; showToast("Görev eklendi!"); }
         }
-        function deleteTodo(key) {
-            if(confirm("Bu görevi silmek istiyor musun?")) { db.ref('todos/' + key).remove(); }
-        }
+        function deleteTodo(key) { if(confirm("Silmek istiyor musun?")) { db.ref('todos/' + key).remove(); } }
         db.ref('todos').on('value', snap => {
             const list = document.getElementById('todo-list'); list.innerHTML = "";
             snap.forEach(child => {
                 const item = child.val();
-                list.innerHTML += `
-                    <div class="todo-item" style="${item.done ? 'opacity:0.5' : ''}">
-                        <div class="todo-content">
-                            <input type="checkbox" ${item.done ? 'checked' : ''} onclick="db.ref('todos/${child.key}/done').set(${!item.done})">
-                            <span style="${item.done ? 'text-decoration:line-through' : ''}">${item.text}</span>
-                        </div>
-                        <button class="delete-btn" onclick="deleteTodo('${child.key}')">🗑️</button>
-                    </div>`;
+                list.innerHTML += `<div class="todo-item" style="${item.done ? 'opacity:0.5' : ''}"><div class="todo-content"><input type="checkbox" ${item.done ? 'checked' : ''} onclick="db.ref('todos/${child.key}/done').set(${!item.done})"><span style="${item.done ? 'text-decoration:line-through' : ''}">${item.text}</span></div><button class="delete-btn" onclick="deleteTodo('${child.key}')">🗑️</button></div>`;
             });
         });
 
-        // VERİ AKIŞI
         db.ref('status').on('value', snap => {
             const d = snap.val(); if(!d) return;
-            if(d.Mina) {
-                document.getElementById('mina-bat').innerText = d.Mina.battery || "--%";
-                // Batarya zaman kontrolü
-                if(d.Mina.lastUpdate) document.getElementById('mina-bat-time').innerText = "Son: " + d.Mina.lastUpdate;
-            }
+            if(d.Mina) { document.getElementById('mina-bat').innerText = d.Mina.battery || "--%"; if(d.Mina.lastUpdate) document.getElementById('mina-bat-time').innerText = "Son: " + d.Mina.lastUpdate; }
             if(d.meinNote) document.getElementById('mina-note').innerText = d.meinNote;
             if(d.meinMood) document.getElementById('mina-mood-display').innerText = d.meinMood;
         });
 
-        // TYLER MOD SEÇİCİ
         const moods = ['😎', '😴', '💻', '🍺', '🎮', '❤️'];
-        document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => 
-            `<span style="font-size:2rem; cursor:pointer;" onclick="db.ref('status').update({böcekMood:'${m}'}); showToast('Mod: ${m}')">${m}</span>`
-        ).join('');
+        document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => `<span style="font-size:2rem; cursor:pointer;" onclick="db.ref('status').update({böcekMood:'${m}'}); showToast('Mod: ${m}')">${m}</span>`).join('');
 
         function updateTylerStatus() {
             const n = document.getElementById('tylerNote').value;
             db.ref('status').update({ böcekNote: n }); showToast("Not güncellendi!"); document.getElementById('tylerNote').value = "";
         }
 
-        // KAVUŞMA (6 ŞUBAT 2026)
         const target = new Date("2026-02-06T00:00:00").getTime();
         setInterval(() => {
             const diff = target - Date.now();
@@ -240,6 +283,8 @@
             const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
             document.getElementById('countdown').innerText = `${d}g ${h}s`;
         }, 1000);
+        
+        initLocation(); // GPS Başlat
     </script>
 </body>
 </html>
