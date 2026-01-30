@@ -50,7 +50,7 @@
         }
         #love-notification.show { visibility: visible; opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        /* SENT NOTIFICATION (YENİ) */
+        /* SENT NOTIFICATION */
         #sent-notification {
             visibility: hidden; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(46, 204, 113, 0.95); color: white; padding: 15px 30px; border-radius: 50px;
@@ -60,8 +60,6 @@
         #sent-notification.show { visibility: visible; opacity: 1; top: 25%; }
 
         /* QUIZ STYLES */
-        .quiz-option { display: block; width: 100%; padding: 12px; margin: 8px 0; background: var(--input-bg); border: 1px solid rgba(255,154,158,0.3); border-radius: 12px; color: var(--text); cursor: pointer; transition: 0.2s; }
-        .quiz-option:hover { background: rgba(255,154,158,0.1); }
         .champion-badge { background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -131,9 +129,9 @@
     </div>
 
     <div id="quiz-page" class="page">
-        <div class="status-card" style="text-align:center; border: 1px solid pink;">
-            <h2 style="font-family:'Pacifico'; color:var(--dark-pink);">Aşk Ligi 🏆</h2>
-            <div class="grid-container">
+        <div class="status-card" style="text-align:center; border: 1px solid var(--main-pink);">
+            <h2 style="font-family:'Pacifico'; color:var(--dark-pink); margin-bottom:5px;">Aşk Ligi 🏆</h2>
+            <div class="grid-container" style="margin-bottom:10px;">
                 <div class="mini-card">
                     <small>Tyler Skor</small>
                     <div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:var(--text);">0</div>
@@ -145,18 +143,9 @@
             </div>
             <div id="champion-text" class="champion-badge">Hesaplanıyor...</div>
         </div>
-
-        <div class="status-card">
-            <h3>❓ Günün Sorusu</h3>
-            <p id="question-text">Tyler en çok hangi aktiviteyi sever?</p>
-            <div id="quiz-options">
-                <button class="quiz-option" onclick="checkAnswer(true)">Kod Yazmak</button> <button class="quiz-option" onclick="checkAnswer(false)">Alışveriş</button>
-                <button class="quiz-option" onclick="checkAnswer(false)">Yemek Yapmak</button>
-            </div>
-            <p id="quiz-result" style="text-align:center; margin-top:10px; font-weight:bold;"></p>
-        </div>
+        <iframe id="quiz-frame" src="https://kumuterke.github.io/quiz/quiz.html"></iframe>
     </div>
-
+    
     <div id="history" class="page"><iframe src="https://kumuterke.github.io/time/"></iframe></div>
     <div id="coupons" class="page"><iframe src="https://kumuterke.github.io/kupon/"></iframe></div>
     <div id="gift" class="page"><iframe src="https://kumuterke.github.io/hediye/"></iframe></div>
@@ -192,38 +181,34 @@
             }
         });
 
-        // --- GÖNDERME FONKSİYONU (YENİ GÖRSEL GERİ BİLDİRİM) ---
+        // --- QUIZ PUAN KÖPRÜSÜ (MİNA İÇİN) ---
+        window.addEventListener('message', function(event) {
+            if (event.data === 'quizCorrect') {
+                db.ref('scores/Mina').transaction(s => (s || 0) + 10);
+                const sentNotif = document.getElementById("sent-notification");
+                sentNotif.innerText = "✅ +10 Puan Kazandın!";
+                sentNotif.classList.add("show");
+                setTimeout(() => sentNotif.classList.remove("show"), 2000);
+            }
+        });
+
+        // --- GÖNDERME FONKSİYONU ---
         function sendMissYou(e) { 
             db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() }); 
-            db.ref('kisses/Mina').transaction(c => (c || 0) + 1); 
-
-            // Gönderen için bildirim
+            db.ref('kisses/Mina').transaction(c => (c || 0) + 1);
             const sentNotif = document.getElementById("sent-notification");
+            sentNotif.innerText = "❤️ Bildirim Yollandı!";
             sentNotif.classList.add("show");
             setTimeout(() => sentNotif.classList.remove("show"), 2000);
         }
 
-        // --- QUIZ & SKOR SISTEMI ---
-        function checkAnswer(isCorrect) {
-            const res = document.getElementById('quiz-result');
-            if(isCorrect) {
-                res.innerHTML = "✅ Doğru! (+10 Puan)";
-                res.style.color = "#2ecc71";
-                // SADECE MINA PUAN KAZANIR
-                db.ref('scores/Mina').transaction(s => (s || 0) + 10);
-            } else {
-                res.innerHTML = "❌ Yanlış Cevap Böcek...";
-                res.style.color = "red";
-            }
-        }
-
+        // Skorları Dinle ve Şampiyonu Belirle
         db.ref('scores').on('value', snap => {
             const s = snap.val() || {};
             const t = s.Tyler || 0;
             const m = s.Mina || 0;
             document.getElementById('score-tyler').innerText = t;
             document.getElementById('score-mina').innerText = m;
-
             const champ = document.getElementById('champion-text');
             if(t > m) champ.innerText = "👑 En Çok Seven: Tyler";
             else if(m > t) champ.innerText = "👑 En Çok Seven: Mina";
