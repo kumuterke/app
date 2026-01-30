@@ -41,7 +41,6 @@
 
         iframe { width: 100%; height: 78vh; border: none; border-radius: 20px; background: white; margin-top: 10px; }
         
-        /* ÖZEL TYLER BİLDİRİM TASARIMI */
         #love-notification {
             visibility: hidden; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
             background: rgba(255, 71, 87, 0.95); color: white; padding: 30px; border-radius: 30px;
@@ -50,7 +49,6 @@
         }
         #love-notification.show { visibility: visible; opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-        /* SENT NOTIFICATION */
         #sent-notification {
             visibility: hidden; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(46, 204, 113, 0.95); color: white; padding: 15px 30px; border-radius: 50px;
@@ -89,6 +87,7 @@
         <div class="status-card" style="text-align:center;">
             <h3 style="font-family:'Pacifico'; font-size:0.9rem; color:var(--dark-pink); margin:0;">Mesafe (GPS)</h3>
             <div id="distance-display" style="font-size:1.3rem; font-weight:bold; margin:8px 0; color:var(--dark-pink);">Hesaplanıyor...</div>
+            <div id="gps-status" style="font-size:0.6rem; opacity:0.6;">📡 Sinyal bekleniyor...</div>
             <div style="display:flex; justify-content:space-around; font-size:0.7rem; margin-top:8px; opacity:0.8;">
                 <div>🇹🇷 Ank: <span id="local-time">--:--</span></div>
                 <div>🇩🇪 Aug: <span id="tyler-time">--:--</span></div>
@@ -169,49 +168,44 @@
             window.scrollTo(0,0);
         }
 
-        // --- AKILLI BİLDİRİM (ALICI) ---
-        db.ref('alerts/tylerAlert').on('value', snap => {
-            const data = snap.val();
-            if(data && Date.now() - data.time < 5000) {
-                const notif = document.getElementById("love-notification");
-                notif.classList.add("show");
-                setTimeout(() => notif.classList.remove("show"), 4000);
-            }
-        });
-
-        // --- QUIZ PUAN KÖPRÜSÜ (MİNA İÇİN) ---
-        window.addEventListener('message', function(event) {
-            if (event.data === 'quizCorrect') {
-                db.ref('scores/Mina').transaction(s => (s || 0) + 10);
-                const sentNotif = document.getElementById("sent-notification");
-                sentNotif.innerText = "✅ +10 Puan Kazandın!";
-                sentNotif.classList.add("show");
-                setTimeout(() => sentNotif.classList.remove("show"), 2000);
-            }
-        });
-
-        // --- GÖNDERME FONKSİYONU ---
-        function sendMissYou(e) { 
-            db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() }); 
-            db.ref('kisses/Mina').transaction(c => (c || 0) + 1);
-            const sentNotif = document.getElementById("sent-notification");
-            sentNotif.innerText = "❤️ Bildirim Yollandı!";
-            sentNotif.classList.add("show");
-            setTimeout(() => sentNotif.classList.remove("show"), 2000);
-        }
-
-        // Skorları Dinle ve Şampiyonu Belirle
+        // --- SKORLARI CANLI TAKİP ET ---
         db.ref('scores').on('value', snap => {
             const s = snap.val() || {};
             const t = s.Böcek || 0;
             const m = s.Mina || 0;
-            document.getElementById('score-tyler').innerText = t;
-            document.getElementById('score-mina').innerText = m;
-            const champ = document.getElementById('champion-text');
-            if(t > m) champ.innerText = "👑 En Çok Seven: Böcek";
-            else if(m > t) champ.innerText = "👑 En Çok Seven: Mina";
-            else champ.innerText = "💞 Sevgimiz Eşit!";
+            
+            if(document.getElementById('score-tyler')) document.getElementById('score-tyler').innerText = t;
+            if(document.getElementById('score-mina')) document.getElementById('score-mina').innerText = m;
+            
+            const ct = document.getElementById('champion-text');
+            if(ct) {
+                if(t > m) ct.innerText = "👑 En Çok Seven: Böcek";
+                else if(m > t) ct.innerText = "👑 En Çok Seven: Mina";
+                else ct.innerText = "💞 Sevgimiz Eşit!";
+            }
         });
+
+        db.ref('alerts/minaAlert').on('value', snap => {
+            const data = snap.val();
+            if(data && Date.now() - data.time < 5000) {
+                const notif = document.getElementById("love-notification");
+                if(notif) {
+                    notif.classList.add("show");
+                    setTimeout(() => notif.classList.remove("show"), 4000);
+                }
+            }
+        });
+
+        function sendMissYou(e) { 
+            db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() }); 
+            db.ref('kisses/Mina').transaction(c => (c || 0) + 1);
+            const sn = document.getElementById("sent-notification");
+            if(sn) {
+                sn.innerText = "❤️ Bildirim Yollandı!";
+                sn.classList.add("show");
+                setTimeout(() => sn.classList.remove("show"), 2000);
+            }
+        }
 
         function toRad(v) { return v * Math.PI / 180; }
         function calcDist(la1, lo1, la2, lo2) {
@@ -222,7 +216,7 @@
         function initLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition((p) => {
-                    const d = calcDist(p.coords.latitude, p.coords.longitude, 48.3705, 10.8978); // Augsburg
+                    const d = calcDist(p.coords.latitude, p.coords.longitude, 48.3705, 10.8978);
                     lastKnownDistance = d;
                     document.getElementById('distance-display').innerText = d.replace('.', ',') + " KM";
                     document.getElementById('distance-display').style.color = "#d63384";
