@@ -23,7 +23,7 @@
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
         .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(255,154,158,0.2); text-align: center; }
         
-        .btn { background: var(--main-pink); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; box-shadow: 0 5px 15px rgba(255,154,158,0.3); }
+        .btn { background: var(--main-pink); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; }
         .btn:active { transform: scale(0.98); }
 
         textarea, input[type="text"] { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid #ffe3e3; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
@@ -59,7 +59,6 @@
         }
         #sent-notification.show { visibility: visible; opacity: 1; top: 25%; }
 
-        /* QUIZ STYLES */
         .champion-badge { background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -90,7 +89,6 @@
         <div class="status-card" style="text-align:center;">
             <h3 style="font-family:'Pacifico'; font-size:0.9rem; color:var(--dark-pink); margin:0;">Mesafe (GPS)</h3>
             <div id="distance-display" style="font-size:1.3rem; font-weight:bold; margin:8px 0; color:var(--dark-pink);">Hesaplanıyor...</div>
-            <div id="gps-status" style="font-size:0.6rem; opacity:0.6;">📡 Sinyal bekleniyor...</div>
             <div style="display:flex; justify-content:space-around; font-size:0.7rem; margin-top:8px; opacity:0.8;">
                 <div>🇹🇷 Ank: <span id="local-time">--:--</span></div>
                 <div>🇩🇪 Aug: <span id="tyler-time">--:--</span></div>
@@ -104,7 +102,7 @@
 
         <div class="grid-container">
             <div class="mini-card" style="background:var(--main-pink); color:white; border:none;">😘 Mina<div id="kiss-mina" style="font-size:1.2rem; font-weight:bold;">0</div></div>
-            <div class="mini-card">😘 Tyler<div id="kiss-tyler" style="font-size:1.2rem; font-weight:bold;">0</div></div>
+            <div class="mini-card">😘 Böcek<div id="kiss-tyler" style="font-size:1.2rem; font-weight:bold;">0</div></div>
         </div>
 
         <div style="padding: 0 12px;">
@@ -133,7 +131,7 @@
             <h2 style="font-family:'Pacifico'; color:var(--dark-pink); margin-bottom:5px;">Aşk Ligi 🏆</h2>
             <div class="grid-container" style="margin-bottom:10px;">
                 <div class="mini-card">
-                    <small>Tyler Skor</small>
+                    <small>Böcek Skor</small>
                     <div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:var(--text);">0</div>
                 </div>
                 <div class="mini-card">
@@ -172,7 +170,7 @@
         }
 
         // --- AKILLI BİLDİRİM (ALICI) ---
-        db.ref('alerts/minaAlert').on('value', snap => {
+        db.ref('alerts/tylerAlert').on('value', snap => {
             const data = snap.val();
             if(data && Date.now() - data.time < 5000) {
                 const notif = document.getElementById("love-notification");
@@ -194,7 +192,7 @@
 
         // --- GÖNDERME FONKSİYONU ---
         function sendMissYou(e) { 
-            db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() }); 
+            db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() }); 
             db.ref('kisses/Mina').transaction(c => (c || 0) + 1);
             const sentNotif = document.getElementById("sent-notification");
             sentNotif.innerText = "❤️ Bildirim Yollandı!";
@@ -205,12 +203,12 @@
         // Skorları Dinle ve Şampiyonu Belirle
         db.ref('scores').on('value', snap => {
             const s = snap.val() || {};
-            const t = s.Tyler || 0;
+            const t = s.Böcek || 0;
             const m = s.Mina || 0;
             document.getElementById('score-tyler').innerText = t;
             document.getElementById('score-mina').innerText = m;
             const champ = document.getElementById('champion-text');
-            if(t > m) champ.innerText = "👑 En Çok Seven: Tyler";
+            if(t > m) champ.innerText = "👑 En Çok Seven: Böcek";
             else if(m > t) champ.innerText = "👑 En Çok Seven: Mina";
             else champ.innerText = "💞 Sevgimiz Eşit!";
         });
