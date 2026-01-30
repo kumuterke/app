@@ -113,7 +113,7 @@
 
         db.ref('scores').on('value', snap => {
             const s = snap.val() || {};
-            const t = s.Böcek || 0;
+            const t = s.Tyler || 0;
             const m = s.Mina || 0;
             document.getElementById('score-tyler').innerText = t;
             document.getElementById('score-mina').innerText = m;
