@@ -11,16 +11,14 @@
         :root { --accent-blue: #00d2ff; --bg: #0f0f0f; --card: #1a1a1a; --text: #ffffff; --nav: #151515; --toast-bg: #333; --input-bg: rgba(255,255,255,0.1); }
         body.light-mode { --bg: #f0f2f5; --card: #ffffff; --text: #333333; --nav: #ffffff; --toast-bg: #222; --input-bg: rgba(0,0,0,0.05); }
         
-        /* Mobil Uyum Düzenlemeleri */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; min-height: 100vh; overflow-x: hidden; padding-bottom: 100px; width: 100%; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; min-height: 100vh; overflow-x: hidden; padding-bottom: 120px; width: 100%; }
         
         .header-container { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px; }
         h1 { font-family: 'Pacifico'; color: var(--accent-blue); margin: 0; font-size: 1.6rem; }
         
         .theme-toggle { background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: white; }
         
-        /* Kartların Mobilde Taşmasını Engeller */
         .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); word-wrap: break-word; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
         .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(128,128,128,0.1); text-align: center; }
@@ -28,23 +26,40 @@
         .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; }
         .btn:active { transform: scale(0.98); }
 
-        textarea, input[type="date"], input[type="text"] { width: 100%; padding: 12px; border-radius: 12px; background: var(--input-bg); color: var(--text); border: 1px solid transparent; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
+        /* Modern Input Tasarımı */
+        textarea, input[type="date"], input[type="text"] { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid transparent; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
         
-        /* To-Do Tasarımı Fix */
         .todo-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; }
-        .todo-input-container { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border-radius: 50px; padding: 5px 5px 5px 15px; margin-top: 10px; border: 1px solid rgba(0,210,255,0.2); }
-        .todo-input-container input { margin-top: 0; background: transparent; padding: 5px 0; }
-        .todo-add-btn { background: var(--accent-blue); border: none; width: 38px; height: 38px; border-radius: 50%; color: white; font-size: 1.2rem; flex-shrink: 0; cursor: pointer; }
+        
+        /* Aşk Görevleri Giriş Alanı - Modern Oval Yapı */
+        .todo-input-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            background: var(--input-bg); 
+            border-radius: 50px; 
+            padding: 5px 5px 5px 15px; 
+            margin-top: 15px; 
+            border: 1px solid rgba(0,210,255,0.2); 
+        }
+        .todo-input-container input { 
+            margin-top: 0; 
+            background: transparent; 
+            padding: 8px 0; 
+            border: none !important; 
+            flex: 1;
+            color: var(--text);
+            outline: none;
+        }
+        .todo-add-btn { background: var(--accent-blue); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* Navigasyon Mobilde Daha İnce */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-around; padding: 15px 0; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.05); border-radius: 20px 20px 0 0; }
         .nav-item { cursor: pointer; font-size: 1.4rem; opacity: 0.5; filter: grayscale(1); transition: 0.3s; }
         .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); }
 
-        /* Iframe mobilde tam boy */
         iframe { width: 100%; height: 78vh; border: none; border-radius: 20px; background: white; margin-top: 10px; }
         
-        #toast { visibility: hidden; min-width: 180px; background: var(--toast-bg); color: #fff; text-align: center; border-radius: 50px; padding: 14px; position: fixed; left: 50%; bottom: 85px; transform: translateX(-50%); z-index: 2000; transition: 0.3s; font-size: 0.85rem; }
+        #toast { visibility: hidden; min-width: 180px; background: var(--toast-bg); color: #fff; text-align: center; border-radius: 50px; padding: 14px; position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 2000; transition: 0.3s; font-size: 0.85rem; }
         #toast.show { visibility: visible; opacity: 1; }
 
         .floating-heart { position: absolute; pointer-events: none; animation: floatHeart 1s ease-out forwards; font-size: 1.5rem; }
@@ -89,7 +104,7 @@
         </div>
 
         <div style="padding: 0 12px;">
-            <button class="btn" style="background:linear-gradient(135deg, #ff4757, #ff6b81); padding:16px;" onclick="sendMissYou(event)">MINA'YI ÖZLEDİM ❤️</button>
+            <button class="btn" onclick="sendMissYou(event)">MINA'YI ÖZLEDİM ❤️</button>
         </div>
 
         <div class="status-card" style="margin-top:15px;">
@@ -172,7 +187,7 @@
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
         db.ref('alerts/tylerAlert').on('value', s => { if(s.val() && Date.now() - s.val().time < 5000) showToast("❤️ Mina seni çok özledi! ❤️"); });
         function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
-        db.ref('todos').on('value', s => { const l = document.getElementById('todo-list'); l.innerHTML = ""; s.forEach(c => { const i = c.val(); l.innerHTML += `<div class="todo-item"><div><input type="checkbox" ${i.done?'checked':''} onclick="db.ref('todos/${c.key}/done').set(${!item.done})"> <span style="${i.done?'text-decoration:line-through;opacity:0.5':''}">${i.text}</span></div><span onclick="db.ref('todos/${c.key}').remove()">🗑️</span></div>`; }); });
+        db.ref('todos').on('value', s => { const l = document.getElementById('todo-list'); l.innerHTML = ""; s.forEach(c => { const i = c.val(); l.innerHTML += `<div class="todo-item"><span>${i.text}</span><span onclick="db.ref('todos/${c.key}').remove()">🗑️</span></div>`; }); });
         db.ref('status').on('value', s => { const d = s.val(); if(!d) return; if(d.Mina){ document.getElementById('mina-bat').innerText = d.Mina.battery||"--%"; document.getElementById('mina-bat-time').innerText = "Son: "+(d.Mina.lastUpdate||"--"); } if(d.meinNote) document.getElementById('mina-note').innerText = d.meinNote; if(d.meinMood) document.getElementById('mina-mood-display').innerText = d.meinMood; });
         const ms = ['😎', '😴', '💻', '🍺', '🎮', '❤️']; document.getElementById('tyler-mood-selector').innerHTML = ms.map(m => `<span style="font-size:1.8rem; cursor:pointer;" onclick="db.ref('status').update({böcekMood:'${m}'}); showToast('Mod: ${m}')">${m}</span>`).join('');
         function updateTylerStatus() { db.ref('status').update({ böcekNote: document.getElementById('tylerNote').value }); showToast("İletildi!"); document.getElementById('tylerNote').value = ""; }
