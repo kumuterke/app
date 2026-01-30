@@ -25,13 +25,11 @@
             --toast-bg: #222;
         }
 
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: background 0.3s ease, color 0.3s ease; min-height: 100vh; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: background 0.3s ease; min-height: 100vh; overflow-x: hidden; -webkit-tap-highlight-color: transparent; padding-bottom: 120px; }
         
-        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 20px 20px 0 20px; }
         h1 { font-family: 'Pacifico'; color: var(--accent-blue); margin: 0; font-size: 1.8rem; }
-        .connection-dot { width: 10px; height: 10px; background: #e74c3c; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #e74c3c; transition: 0.3s; }
-        .connection-dot.online { background: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
-
+        
         .theme-toggle {
             background: rgba(255,255,255,0.1); border: none; border-radius: 50%;
             width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
@@ -41,31 +39,31 @@
         .nav-item { cursor: pointer; font-size: 1.6rem; filter: grayscale(1); opacity: 0.6; transition: 0.3s; transform: scale(0.9); }
         .nav-item.active { filter: grayscale(0); opacity: 1; transform: scale(1.1); }
         
-        .page { display: none; padding: 20px; padding-bottom: 100px; animation: slideUp 0.4s ease; text-align: center; }
+        .page { display: none; padding: 0 20px; animation: slideUp 0.4s ease; text-align: center; }
         .page.active { display: block; }
         
         .status-card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .mini-card { background: var(--card); border-radius: 18px; padding: 15px; border: 1px solid rgba(128,128,128,0.1); position: relative; overflow: hidden; transition: transform 0.1s; }
-        .mini-card:active { transform: scale(0.96); }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; margin-bottom: 20px; }
+        .mini-card { background: var(--card); border-radius: 18px; padding: 15px; border: 1px solid rgba(128,128,128,0.1); position: relative; }
         
         .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 14px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; width: 100%; font-size: 1rem; box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3); transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
         
-        textarea { width: 100%; padding: 15px; border: none; border-radius: 15px; background: rgba(0,0,0,0.2); color: var(--text); font-family: inherit; resize: none; box-sizing: border-box; outline: none; border: 1px solid transparent; transition: 0.3s; }
+        textarea { width: 100%; padding: 15px; border: none; border-radius: 15px; background: rgba(0,0,0,0.2); color: var(--text); font-family: inherit; resize: none; box-sizing: border-box; outline: none; border: 1px solid transparent; transition: 0.3s; margin-top:10px;}
         textarea:focus { border-color: var(--accent-blue); background: rgba(0,0,0,0.3); }
 
         /* To-Do Styles */
-        .todo-item { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 8px; text-align: left; }
+        .todo-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 8px; text-align: left; }
+        .todo-content { display: flex; align-items: center; width: 85%; }
         .todo-item input { margin-right: 15px; accent-color: var(--accent-blue); transform: scale(1.2); }
+        .delete-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.7; }
         .todo-input-container { display: flex; gap: 10px; margin-top: 15px; }
         .todo-input-container input { flex: 1; padding: 12px; border-radius: 50px; border: none; background: rgba(255,255,255,0.1); color: var(--text); outline: none; }
 
-        iframe { width: 100%; height: 75vh; border: none; border-radius: 15px; background: white; }
+        iframe { width: 100%; height: 75vh; border: none; border-radius: 15px; background: white; margin-top: 20px; }
         
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes floatHeart { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-100px) scale(1.5); opacity: 0; } }
-        
         .floating-heart { position: absolute; pointer-events: none; animation: floatHeart 1s ease-out forwards; font-size: 1.5rem; }
         
         #toast {
@@ -80,28 +78,23 @@
 
     <div id="home" class="page active">
         <div class="header-container">
-            <div>
-                <h1>Böcek OS</h1>
-                <small style="opacity: 0.5; font-size: 0.7rem;">SYSTEM ACTIVE <span id="conn-dot" class="connection-dot"></span></small>
-            </div>
+            <h1>Böcek OS</h1>
             <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
         </div>
 
         <div class="grid-container">
-            <div class="mini-card"><small style="opacity:0.7">Mina Batarya</small><div id="mina-bat" style="font-size:1.4rem; font-weight:bold; margin-top:5px;">--%</div></div>
-            <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="font-size:1.1rem; font-weight:bold; margin-top:5px; color: #00d2ff;">--:--</div></div>
-        </div>
-
-        <div class="status-card" style="margin-top: 15px;">
-            <h3>📝 Aşk Görevleri</h3>
-            <div id="todo-list"></div>
-            <div class="todo-input-container">
-                <input type="text" id="todo-input" placeholder="Yeni görev ekle...">
-                <button onclick="addTodo()" style="background: var(--accent-blue); border:none; width: 40px; height: 40px; border-radius: 50%; color: white; font-weight: bold;">+</button>
+            <div class="mini-card">
+                <small style="opacity:0.7">Mina Batarya</small>
+                <div id="mina-bat" style="font-size:1.4rem; font-weight:bold; margin-top:5px;">--%</div>
+                <small id="mina-bat-time" style="font-size:0.6rem; opacity:0.5;">Güncelleme: --:--</small>
+            </div>
+            <div class="mini-card">
+                <small style="opacity:0.7">Kavuşma (6 Şub)</small>
+                <div id="countdown" style="font-size:1.1rem; font-weight:bold; margin-top:5px; color: #00d2ff;">--:--</div>
             </div>
         </div>
 
-        <div class="status-card" style="margin-top:20px;">
+        <div class="status-card">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3 style="margin:0;">Mina'nın Modu</h3>
                 <span id="mina-mood-display" style="font-size: 2.5rem;">⌛</span>
@@ -110,91 +103,77 @@
         </div>
 
         <div class="grid-container">
-            <div class="mini-card" onclick="addKiss('Tyler', event)" style="border-color: rgba(0, 210, 255, 0.3);">
+            <div class="mini-card" style="border-color: rgba(0, 210, 255, 0.3);">
                 😘 Tyler<div id="kiss-tyler" style="font-size: 1.5rem; font-weight:bold;">0</div>
             </div>
-            <div class="mini-card" onclick="addKiss('Mina', event)" style="border-color: rgba(255, 154, 158, 0.3);">
+            <div class="mini-card" style="border-color: rgba(255, 154, 158, 0.3);">
                 😘 Mina<div id="kiss-mina" style="font-size: 1.5rem; font-weight:bold;">0</div>
             </div>
         </div>
 
-        <button class="btn" style="background: linear-gradient(135deg, #ff4757, #ff6b81); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);" onclick="sendMissYou()">MINA'YI ÖZLEDİM ❤️</button>
+        <button class="btn" style="background: linear-gradient(135deg, #ff4757, #ff6b81); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); padding: 20px;" onclick="sendMissYou(event)">
+            MINA'YI ÖZLEDİM ❤️
+            <br><small style="font-size:0.7rem; opacity:0.8">(Basınca Öpücük Yollar)</small>
+        </button>
         
         <div class="status-card" style="margin-top:20px;">
-            <textarea id="tylerNote" rows="3" placeholder="Mina'ya bugün ne söylemek istersin?"></textarea>
-            <button class="btn" onclick="updateTylerStatus()">Notu Güncelle</button>
+            <h3>Durumunu Güncelle</h3>
+            <div id="tyler-mood-selector" style="display:flex; justify-content:center; gap:10px; margin-bottom:10px;"></div>
+            <textarea id="tylerNote" rows="2" placeholder="Mina'ya mesajın..."></textarea>
+            <button class="btn" onclick="updateTylerStatus()">Gönder</button>
+        </div>
+
+        <div class="status-card">
+            <h3>📝 Aşk Görevleri</h3>
+            <div id="todo-list"></div>
+            <div class="todo-input-container">
+                <input type="text" id="todo-input" placeholder="Yeni görev...">
+                <button onclick="addTodo()" style="background: var(--accent-blue); border:none; width: 40px; height: 40px; border-radius: 50%; color: white; font-weight: bold;">+</button>
+            </div>
         </div>
     </div>
 
     <div id="quiz-page" class="page"><iframe src="https://kumuterke.github.io/quiz/quiz.html"></iframe></div>
     <div id="history" class="page"><iframe src="https://kumuterke.github.io/time/"></iframe></div>
     <div id="coupons" class="page"><iframe src="https://kumuterke.github.io/kupon/"></iframe></div>
-    <div id="gift" class="page"><iframe src="https://kumuterke.github.io/hediye/"></iframe></div> <nav class="bottom-nav">
+    <div id="gift" class="page"><iframe src="https://kumuterke.github.io/hediye/"></iframe></div>
+
+    <nav class="bottom-nav">
         <div class="nav-item active" onclick="showPage('home', this)">🏠</div>
         <div class="nav-item" onclick="showPage('quiz-page', this)">📝</div>
         <div class="nav-item" onclick="showPage('history', this)">📜</div>
         <div class="nav-item" onclick="showPage('coupons', this)">🎟️</div>
-        <div class="nav-item" onclick="showPage('gift', this)">🎁</div> </nav>
+        <div class="nav-item" onclick="showPage('gift', this)">🎁</div>
+    </nav>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyBnCvyBVmQgEs4hl94K-WBYCWVpeJR9PtA", authDomain: "minatyler-b7212.firebaseapp.com", databaseURL: "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app", projectId: "minatyler-b7212", storageBucket: "minatyler-b7212.firebasestorage.app", messagingSenderId: "599344339158", appId: "1:599344339158:web:11e6083e5d56ffae91d177" };
         firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
-        // Bağlantı Kontrolü
-        const connectedRef = db.ref(".info/connected");
-        connectedRef.on("value", (snap) => {
-            document.getElementById('conn-dot').classList.toggle('online', snap.val() === true);
-        });
-
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
-        
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active'); el.classList.add('active');
         }
-
         function showToast(msg) {
             const x = document.getElementById("toast");
-            x.innerText = msg; x.className = "show";
-            setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
+            x.innerText = msg; x.className = "show"; setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
         }
-
         function createHeart(x, y) {
-            const heart = document.createElement('div');
-            heart.classList.add('floating-heart');
-            heart.innerHTML = '❤️';
-            heart.style.left = `${x}px`; heart.style.top = `${y}px`;
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 1000);
+            const heart = document.createElement('div'); heart.classList.add('floating-heart'); heart.innerHTML = '❤️';
+            heart.style.left = `${x}px`; heart.style.top = `${y}px`; document.body.appendChild(heart); setTimeout(() => heart.remove(), 1000);
         }
 
-        // --- GÖREVLER (TO-DO) ---
-        function addTodo() {
-            const input = document.getElementById('todo-input');
-            if(input.value.trim() !== "") {
-                db.ref('todos').push({ text: input.value, done: false });
-                input.value = "";
-                showToast("Görev eklendi!");
-            }
-        }
-        db.ref('todos').on('value', snap => {
-            const list = document.getElementById('todo-list');
-            list.innerHTML = "";
-            snap.forEach(child => {
-                const item = child.val();
-                list.innerHTML += `
-                    <div class="todo-item" style="${item.done ? 'opacity:0.5' : ''}">
-                        <input type="checkbox" ${item.done ? 'checked' : ''} onclick="db.ref('todos/${child.key}/done').set(${!item.done})">
-                        <span style="${item.done ? 'text-decoration:line-through' : ''}">${item.text}</span>
-                    </div>`;
-            });
-        });
-
-        // Diğer Fonksiyonlar
-        function addKiss(who, event) { 
-            db.ref('kisses/' + who).transaction(c => (c || 0) + 1); 
-            createHeart(event.clientX, event.clientY);
+        // ÖPÜCÜK & ÖZLEDİM ENTEGRASYONU
+        function sendMissYou(event) { 
+            // 1. Bildirim Gönder
+            db.ref('alerts/minaAlert').set({ msg: "Seni özledim!", time: Date.now() }); 
+            // 2. Tyler'ın Öpücük Sayısını Artır
+            db.ref('kisses/Tyler').transaction(c => (c || 0) + 1);
+            // 3. Efekt
+            if(event) createHeart(event.clientX, event.clientY);
+            showToast("Öpücük & Bildirim yollandı! 🚀");
         }
 
         db.ref('kisses').on('value', snap => {
@@ -203,33 +182,58 @@
             document.getElementById('kiss-mina').innerText = data.Mina || 0;
         });
 
-        function sendMissYou() { 
-            db.ref('alerts/minaAlert').set({ msg: "Seni özledim!", time: Date.now() }); 
-            showToast("Mina'ya iletildi! 🚀");
-        }
-
         db.ref('alerts/tylerAlert').on('value', snap => {
-            if(snap.val() && Date.now() - snap.val().time < 5000) {
-                showToast("❤️ Mina seni çok özledi! ❤️");
-                try { navigator.vibrate([200, 100, 200]); } catch(e){}
-            }
+            if(snap.val() && Date.now() - snap.val().time < 5000) { showToast("❤️ Mina seni çok özledi! ❤️"); try { navigator.vibrate([200, 100, 200]); } catch(e){} }
         });
 
+        // TO-DO LIST (SİLME ÖZELLİĞİ EKLENDİ)
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            if(input.value.trim() !== "") { db.ref('todos').push({ text: input.value, done: false }); input.value = ""; showToast("Görev eklendi!"); }
+        }
+        function deleteTodo(key) {
+            if(confirm("Bu görevi silmek istiyor musun?")) { db.ref('todos/' + key).remove(); }
+        }
+        db.ref('todos').on('value', snap => {
+            const list = document.getElementById('todo-list'); list.innerHTML = "";
+            snap.forEach(child => {
+                const item = child.val();
+                list.innerHTML += `
+                    <div class="todo-item" style="${item.done ? 'opacity:0.5' : ''}">
+                        <div class="todo-content">
+                            <input type="checkbox" ${item.done ? 'checked' : ''} onclick="db.ref('todos/${child.key}/done').set(${!item.done})">
+                            <span style="${item.done ? 'text-decoration:line-through' : ''}">${item.text}</span>
+                        </div>
+                        <button class="delete-btn" onclick="deleteTodo('${child.key}')">🗑️</button>
+                    </div>`;
+            });
+        });
+
+        // VERİ AKIŞI
         db.ref('status').on('value', snap => {
             const d = snap.val(); if(!d) return;
-            if(d.Mina) document.getElementById('mina-bat').innerText = d.Mina.battery || "--%";
+            if(d.Mina) {
+                document.getElementById('mina-bat').innerText = d.Mina.battery || "--%";
+                // Batarya zaman kontrolü
+                if(d.Mina.lastUpdate) document.getElementById('mina-bat-time').innerText = "Son: " + d.Mina.lastUpdate;
+            }
             if(d.meinNote) document.getElementById('mina-note').innerText = d.meinNote;
             if(d.meinMood) document.getElementById('mina-mood-display').innerText = d.meinMood;
         });
 
+        // TYLER MOD SEÇİCİ
+        const moods = ['😎', '😴', '💻', '🍺', '🎮', '❤️'];
+        document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => 
+            `<span style="font-size:2rem; cursor:pointer;" onclick="db.ref('status').update({böcekMood:'${m}'}); showToast('Mod: ${m}')">${m}</span>`
+        ).join('');
+
         function updateTylerStatus() {
             const n = document.getElementById('tylerNote').value;
-            db.ref('status').update({ böcekNote: n }); 
-            showToast("Not güncellendi!");
-            document.getElementById('tylerNote').value = "";
+            db.ref('status').update({ böcekNote: n }); showToast("Not güncellendi!"); document.getElementById('tylerNote').value = "";
         }
 
-        const target = new Date("2026-06-15T00:00:00").getTime();
+        // KAVUŞMA (6 ŞUBAT 2026)
+        const target = new Date("2026-02-06T00:00:00").getTime();
         setInterval(() => {
             const diff = target - Date.now();
             const d = Math.floor(diff / (1000*60*60*24));
