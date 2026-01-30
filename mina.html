@@ -10,133 +10,78 @@
     <style>
         :root { --main-pink: #ff9a9e; --dark-pink: #d63384; --bg: #fff5f7; --card: #ffffff; --text: #444; --nav: #ffffff; --input-bg: #fff; }
         body.dark-mode { --bg: #1a1a1a; --card: #2d2d2d; --text: #fdfbfb; --main-pink: #fb7185; --nav: #2d2d2d; --input-bg: #2d2d2d; }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; min-height: 100vh; overflow-x: hidden; padding-bottom: 120px; width: 100%; }
-        
         .header-container { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px; }
         h1 { font-family: 'Pacifico'; color: var(--dark-pink); margin: 0; font-size: 1.6rem; }
-        
         .theme-toggle { background: var(--main-pink); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: white; }
-        
         .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid rgba(255,154,158,0.2); box-shadow: 0 8px 25px rgba(255,154,158,0.1); word-wrap: break-word; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
         .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(255,154,158,0.2); text-align: center; }
-        
-        .btn { background: var(--main-pink); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; }
+        .btn { background: var(--main-pink); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; box-shadow: 0 5px 15px rgba(255,154,158,0.3); }
         .btn:active { transform: scale(0.98); }
-
         textarea, input[type="text"] { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid #ffe3e3; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
         body.dark-mode textarea, body.dark-mode input { border-color: rgba(255,255,255,0.1); }
-
         .todo-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,154,158,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; }
-        
         .todo-input-container { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border-radius: 50px; padding: 5px 5px 5px 15px; margin-top: 15px; border: 1px solid #ffe3e3; }
         .todo-input-container input { margin-top: 0; background: transparent; padding: 8px 0; border: none !important; flex: 1; color: var(--text); outline: none;}
         .todo-add-btn { background: var(--main-pink); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
         .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-around; padding: 15px 0; z-index: 1000; border-top: 1px solid rgba(255,154,158,0.1); border-radius: 20px 20px 0 0; }
         .nav-item { cursor: pointer; font-size: 1.4rem; opacity: 0.5; filter: grayscale(1); transition: 0.3s; }
         .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); }
-
         iframe { width: 100%; height: 78vh; border: none; border-radius: 20px; background: white; margin-top: 10px; }
-        
-        #love-notification {
-            visibility: hidden; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
-            background: rgba(255, 71, 87, 0.95); color: white; padding: 30px; border-radius: 30px;
-            text-align: center; z-index: 9999; box-shadow: 0 0 50px rgba(255, 71, 87, 0.5);
-            backdrop-filter: blur(10px); transition: 0.4s; opacity: 0; border: 2px solid white;
-        }
+        #love-notification { visibility: hidden; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: rgba(255, 71, 87, 0.95); color: white; padding: 30px; border-radius: 30px; text-align: center; z-index: 9999; box-shadow: 0 0 50px rgba(255, 71, 87, 0.5); backdrop-filter: blur(10px); transition: 0.4s; opacity: 0; border: 2px solid white; }
         #love-notification.show { visibility: visible; opacity: 1; transform: translate(-50%, -50%) scale(1); }
-
-        #sent-notification {
-            visibility: hidden; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(46, 204, 113, 0.95); color: white; padding: 15px 30px; border-radius: 50px;
-            text-align: center; z-index: 9999; box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4);
-            font-weight: bold; opacity: 0; transition: 0.3s;
-        }
+        #sent-notification { visibility: hidden; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(46, 204, 113, 0.95); color: white; padding: 15px 30px; border-radius: 50px; text-align: center; z-index: 9999; box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4); font-weight: bold; opacity: 0; transition: 0.3s; }
         #sent-notification.show { visibility: visible; opacity: 1; top: 25%; }
-
         .champion-badge { background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
-
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .page { display: none; animation: slideUp 0.4s ease; padding-top: 5px; }
         .page.active { display: block; }
     </style>
 </head>
 <body>
-    <div id="love-notification">
-        <div style="font-size: 3rem;">❤️</div>
-        <h2 style="margin: 10px 0;">Böcek Seni Çok Özledi!</h2>
-        <p>Hemen ona bir öpücük gönder.</p>
-    </div>
-
+    <div id="love-notification"><div style="font-size: 3rem;">❤️</div><h2 style="margin: 10px 0;">Böcek Seni Çok Özledi!</h2><p>Hemen ona bir öpücük gönder.</p></div>
     <div id="sent-notification">❤️ Bildirim Yollandı!</div>
 
     <div id="home" class="page active">
-        <div class="header-container">
-            <h1>Selam Mein! ❤️</h1>
-            <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
-        </div>
-
+        <div class="header-container"><h1>Selam Mein! ❤️</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
         <div class="grid-container">
             <div class="mini-card"><small style="opacity:0.7">Böcek 🔋</small><div id="tyler-bat" style="font-size:1.1rem; font-weight:bold; color:var(--dark-pink);">--%</div></div>
             <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="font-size:0.9rem; font-weight:bold; color:var(--dark-pink);">--:--</div></div>
         </div>
-
         <div class="status-card" style="text-align:center;">
             <h3 style="font-family:'Pacifico'; font-size:0.9rem; color:var(--dark-pink); margin:0;">Mesafe (GPS)</h3>
             <div id="distance-display" style="font-size:1.3rem; font-weight:bold; margin:8px 0; color:var(--dark-pink);">Hesaplanıyor...</div>
-            <div id="gps-status" style="font-size:0.6rem; opacity:0.6;">📡 Sinyal bekleniyor...</div>
             <div style="display:flex; justify-content:space-around; font-size:0.7rem; margin-top:8px; opacity:0.8;">
                 <div>🇹🇷 Ank: <span id="local-time">--:--</span></div>
                 <div>🇩🇪 Aug: <span id="tyler-time">--:--</span></div>
             </div>
         </div>
-
         <div class="status-card">
             <div style="display:flex; justify-content:space-between; align-items:center;"><h3 style="margin:0; font-size:1rem;">Böcek'in Modu</h3><span id="tyler-mood-display" style="font-size:1.8rem;">⌛</span></div>
             <p id="tyler-note" style="background:rgba(255,154,158,0.05); padding:12px; border-radius:12px; border-left:4px solid var(--dark-pink); font-style:italic; font-size:0.85rem; margin-top:10px;">Not bekleniyor...</p>
         </div>
-
         <div class="grid-container">
             <div class="mini-card" style="background:var(--main-pink); color:white; border:none;">😘 Mina<div id="kiss-mina" style="font-size:1.2rem; font-weight:bold;">0</div></div>
             <div class="mini-card">😘 Böcek<div id="kiss-tyler" style="font-size:1.2rem; font-weight:bold;">0</div></div>
         </div>
-
-        <div style="padding: 0 12px;">
-            <button class="btn" onclick="sendMissYou(event)">BÖCEK'İ ÖZLEDİM ❤️</button>
-        </div>
-
+        <div style="padding: 0 12px;"><button class="btn" onclick="sendMissYou(event)">BÖCEK'İ ÖZLEDİM ❤️</button></div>
         <div class="status-card" style="margin-top:15px;">
             <h3 style="font-size:1rem; margin-top:0;">Modunu Seç</h3>
             <div id="mina-mood-selector" style="display:flex; justify-content:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;"></div>
             <textarea id="minaNote" rows="2" placeholder="Böcek'e ne söylemek istersin?"></textarea>
             <button class="btn" onclick="updateMinaStatus()">Gönder</button>
         </div>
-
-        <div class="status-card">
-            <h3 style="font-size:1rem; margin-top:0;">📝 Aşk Görevleri</h3>
-            <div id="todo-list"></div>
-            <div class="todo-input-container">
-                <input type="text" id="todo-input" placeholder="Yeni görev...">
-                <button class="todo-add-btn" onclick="addTodo()">+</button>
-            </div>
-        </div>
+        <div class="status-card"><h3>📝 Aşk Görevleri</h3><div id="todo-list"></div><div class="todo-input-container"><input type="text" id="todo-input" placeholder="Yeni görev..."><button class="todo-add-btn" onclick="addTodo()">+</button></div></div>
     </div>
 
     <div id="quiz-page" class="page">
         <div class="status-card" style="text-align:center; border: 1px solid var(--main-pink);">
             <h2 style="font-family:'Pacifico'; color:var(--dark-pink); margin-bottom:5px;">Aşk Ligi 🏆</h2>
             <div class="grid-container" style="margin-bottom:10px;">
-                <div class="mini-card">
-                    <small>Böcek Skor</small>
-                    <div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:var(--text);">0</div>
-                </div>
-                <div class="mini-card">
-                    <small>Mina Skor</small>
-                    <div id="score-mina" style="font-size:1.5rem; font-weight:bold; color:var(--dark-pink);">0</div>
-                </div>
+                <div class="mini-card"><small>Böcek Skor</small><div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:var(--text);">0</div></div>
+                <div class="mini-card"><small>Mina Skor</small><div id="score-mina" style="font-size:1.5rem; font-weight:bold; color:var(--dark-pink);">0</div></div>
             </div>
             <div id="champion-text" class="champion-badge">Hesaplanıyor...</div>
         </div>
@@ -158,7 +103,6 @@
     <script>
         const firebaseConfig = { apiKey: "AIzaSyBnCvyBVmQgEs4hl94K-WBYCWVpeJR9PtA", authDomain: "minatyler-b7212.firebaseapp.com", databaseURL: "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app", projectId: "minatyler-b7212", storageBucket: "minatyler-b7212.firebasestorage.app", messagingSenderId: "599344339158", appId: "1:599344339158:web:11e6083e5d56ffae91d177" };
         firebase.initializeApp(firebaseConfig); const db = firebase.database();
-        let lastKnownDistance = null;
 
         function toggleTheme() { document.body.classList.toggle('dark-mode'); }
         function showPage(id, el) {
@@ -168,62 +112,44 @@
             window.scrollTo(0,0);
         }
 
-        // --- SKORLARI CANLI TAKİP ET ---
         db.ref('scores').on('value', snap => {
             const s = snap.val() || {};
             const t = s.Böcek || 0;
             const m = s.Mina || 0;
-            
-            if(document.getElementById('score-tyler')) document.getElementById('score-tyler').innerText = t;
-            if(document.getElementById('score-mina')) document.getElementById('score-mina').innerText = m;
-            
+            document.getElementById('score-tyler').innerText = t;
+            document.getElementById('score-mina').innerText = m;
             const ct = document.getElementById('champion-text');
-            if(ct) {
-                if(t > m) ct.innerText = "👑 En Çok Seven: Böcek";
-                else if(m > t) ct.innerText = "👑 En Çok Seven: Mina";
-                else ct.innerText = "💞 Sevgimiz Eşit!";
-            }
+            if(t > m) ct.innerText = "👑 En Çok Seven: Böcek";
+            else if(m > t) ct.innerText = "👑 En Çok Seven: Mina";
+            else ct.innerText = "💞 Sevgimiz Eşit!";
         });
 
         db.ref('alerts/minaAlert').on('value', snap => {
-            const data = snap.val();
-            if(data && Date.now() - data.time < 5000) {
+            const data = snap.val(); if(data && Date.now() - data.time < 5000) {
                 const notif = document.getElementById("love-notification");
-                if(notif) {
-                    notif.classList.add("show");
-                    setTimeout(() => notif.classList.remove("show"), 4000);
-                }
+                if(notif) { notif.classList.add("show"); setTimeout(() => notif.classList.remove("show"), 4000); }
             }
         });
 
-        function sendMissYou(e) { 
+        function sendMissYou() { 
             db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() }); 
             db.ref('kisses/Mina').transaction(c => (c || 0) + 1);
             const sn = document.getElementById("sent-notification");
-            if(sn) {
-                sn.innerText = "❤️ Bildirim Yollandı!";
-                sn.classList.add("show");
-                setTimeout(() => sn.classList.remove("show"), 2000);
-            }
+            if(sn) { sn.innerText = "❤️ Bildirim Yollandı!"; sn.classList.add("show"); setTimeout(() => sn.classList.remove("show"), 2000); }
         }
 
         function toRad(v) { return v * Math.PI / 180; }
-        function calcDist(la1, lo1, la2, lo2) {
-            const R = 6371; const dLat = toRad(la2-la1); const dLon = toRad(lo2-lo1);
-            const a = Math.sin(dLat/2)**2 + Math.cos(toRad(la1)) * Math.cos(toRad(la2)) * Math.sin(dLon/2)**2;
-            return (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3);
-        }
         function initLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition((p) => {
-                    const d = calcDist(p.coords.latitude, p.coords.longitude, 48.3705, 10.8978);
-                    lastKnownDistance = d;
+                    const R = 6371; const dLat = toRad(48.3705 - p.coords.latitude); const dLon = toRad(10.8978 - p.coords.longitude);
+                    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(48.3705)) * Math.sin(dLon/2)**2;
+                    const d = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3);
                     document.getElementById('distance-display').innerText = d.replace('.', ',') + " KM";
-                    document.getElementById('distance-display').style.color = "#d63384";
                 }, () => { 
                     const h = new Date().getHours();
                     document.getElementById('distance-display').innerText = (2242 + Math.sin(h)*0.5).toFixed(3).replace('.', ',') + " KM";
-                }, { enableHighAccuracy: true });
+                });
             }
         }
 
@@ -234,16 +160,21 @@
             });
         }
 
+        // --- GERİ SAYIM GÜNCELLEMESİ (6 ŞUBAT 2026) ---
         setInterval(() => {
             const now = new Date(); const ops = { hour:'2-digit', minute:'2-digit', hour12:false };
             document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', ops);
             document.getElementById('tyler-time').innerText = new Date(now.getTime()-(2*60*60*1000)).toLocaleTimeString('tr-TR', ops);
             const diff = new Date("2026-02-06T00:00:00") - now;
-            document.getElementById('countdown').innerText = Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s";
+            if (diff > 0) {
+                document.getElementById('countdown').innerText = Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s";
+            } else {
+                document.getElementById('countdown').innerText = "KAVUŞTUK! ❤️";
+            }
         }, 1000);
 
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-mina').innerText = d.Mina || 0; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; });
-        db.ref('status').on('value', s => { const d = s.val(); if(!d) return; if(d.Tyler){ document.getElementById('tyler-bat').innerText = d.Tyler.battery||"--%"; } document.getElementById('tyler-mood-display').innerText = d.böcekMood||"⌛"; document.getElementById('tyler-note').innerText = d.böcekNote||"Not yok."; });
+        db.ref('status').on('value', s => { const d = s.val(); if(!d) return; if(d.Tyler) document.getElementById('tyler-bat').innerText = d.Tyler.battery||"--%"; document.getElementById('tyler-mood-display').innerText = d.böcekMood||"⌛"; document.getElementById('tyler-note').innerText = d.böcekNote||"Not yok."; });
         const ms = ['😊', '🥰', '😴', '🥺', '😤', '😈', '🔞', '🫦', '🔥', '🍷']; document.getElementById('mina-mood-selector').innerHTML = ms.map(m => `<span style="font-size:2rem; cursor:pointer;" onclick="db.ref('status').update({meinMood:'${m}'})">${m}</span>`).join('');
         function updateMinaStatus() { db.ref('status').update({ meinNote: document.getElementById('minaNote').value }); document.getElementById('minaNote').value = ""; }
         function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
