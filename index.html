@@ -3,72 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Böcek & Mein Hub ❤️</title>
+    <title>Tyler'ın Paneli 🛠️</title>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <style>
-        :root { --main-pink: #ff9a9e; --dark-pink: #d63384; --bg: #fdfbfb; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: #444; overflow-x: hidden; min-height: 100vh; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 1000; }
+        :root { --accent-blue: #00d2ff; --dark-bg: #0f0f0f; --card-bg: #1a1a1a; --text: #ffffff; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--dark-bg); color: var(--text); overflow-x: hidden; min-height: 100vh; }
+        
+        /* Alt Navigasyon */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #151515; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.5); z-index: 1000; border-top: 1px solid #222; }
         .nav-item { cursor: pointer; font-size: 1.5rem; filter: grayscale(1); transition: 0.3s; }
         .nav-item.active { filter: grayscale(0); transform: scale(1.2); }
+        
         .page { display: none; padding: 20px; padding-bottom: 100px; animation: fadeIn 0.4s ease; text-align: center; }
         .page.active { display: block; }
+        
+        /* Kartlar */
+        .status-card { background: var(--card-bg); border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-bottom: 20px; border: 1px solid #222; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .mini-card { background: #222; border-radius: 15px; padding: 15px; border: 1px solid #333; }
+        
+        .mood-bubble { background: #2a2a2a; padding: 15px; border-radius: 15px; display: block; margin: 10px 0; font-style: italic; border-left: 5px solid var(--accent-blue); text-align: left; }
+        textarea { width: 90%; padding: 12px; border: 1px solid #333; border-radius: 10px; background: #222; color: white; margin-top: 10px; }
+        .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; width: 100%; }
+        
+        .todo-item { display: flex; align-items: center; text-align: left; margin-bottom: 8px; background: #252525; padding: 8px; border-radius: 10px; }
+        .todo-item input { margin-right: 10px; accent-color: var(--accent-blue); }
+        
+        iframe { width: 100%; height: 600px; border: none; border-radius: 15px; background: #fff; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .status-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; }
-        .mood-bubble { background: #fff0f5; padding: 15px; border-radius: 15px; display: block; margin: 10px 0; font-style: italic; border-left: 5px solid var(--dark-pink); }
-        textarea { width: 90%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; }
-        .mood-btn { font-size: 1.8rem; cursor: pointer; padding: 5px; display: inline-block; transition: 0.2s; }
-        .mood-btn:hover { transform: scale(1.2); }
-        .btn { background: var(--main-pink); border: none; padding: 12px 25px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        iframe { width: 100%; height: 600px; border: none; border-radius: 15px; }
+        h1 { font-family: 'Pacifico'; color: var(--accent-blue); }
     </style>
 </head>
 <body>
 
     <div id="home" class="page active">
-        <h1 style="font-family: 'Pacifico'; color: var(--dark-pink);">Selam Böcek! ❤️</h1>
-        <div class="status-card">
-            <h3>Mein'ın Modu:</h3>
+        <h1>Selam Tyler! 🛠️</h1>
+
+        <div class="grid-container">
+            <div class="mini-card">
+                <small style="opacity:0.6;">Mina 🔋</small>
+                <div id="mina-bat" style="font-weight: 600; color: #ff9a9e;">--%</div>
+            </div>
+            <div class="mini-card">
+                <small style="opacity:0.6;">Kavuşma ⏳</small>
+                <div id="countdown" style="font-size: 0.8rem; font-weight: 600;">--:--</div>
+            </div>
+        </div>
+
+        <div class="status-card" style="margin-top: 20px;">
+            <h3>Mina'nın Modu:</h3>
             <div id="mina-mood-display" style="font-size: 3.5rem; margin: 10px 0;">⌛</div>
-            <div id="mina-status" class="mood-bubble">Not bekleniyor...</div>
+            <div id="mina-note" class="mood-bubble">Not bekleniyor...</div>
         </div>
+
+        <div class="grid-container">
+            <div class="mini-card" onclick="addKiss()" style="cursor: pointer;">
+                <div style="font-size: 1.5rem;">😘</div>
+                <div id="kiss-display" style="font-weight: bold;">0</div>
+                <small>Öpücük</small>
+            </div>
+            <div class="mini-card" onclick="sendMissYou()" style="cursor: pointer;">
+                <div style="font-size: 1.5rem;">❤️</div>
+                <small>Mina'yı Özledim</small>
+            </div>
+        </div>
+
+        <div class="status-card" style="margin-top: 20px;">
+            <h3>Durumunu Güncelle:</h3>
+            <textarea id="tylerNote" placeholder="Mina'ya ne söylemek istersin?"></textarea>
+            <button class="btn" onclick="updateTylerStatus()">Notu Gönder</button>
+        </div>
+
         <div class="status-card">
-            <h3>Modunu Seç:</h3>
-            <div id="mood-selector">
-                </div>
-            <textarea id="myNote" placeholder="Mein'a ne söylemek istersin?"></textarea>
-            <button class="btn" onclick="updateStatus()">Gönder</button>
+            <h3>📝 Aşk Görevleri</h3>
+            <div id="todo-list"></div>
+            <div style="display: flex; gap: 5px; margin-top: 10px;">
+                <input type="text" id="todo-input" placeholder="Yeni görev..." style="flex: 1; background: #222; border: 1px solid #333; color: white; padding: 10px; border-radius: 10px;">
+                <button onclick="saveTodo()" style="background: var(--accent-blue); color: white; border: none; border-radius: 10px; padding: 0 15px; font-weight: bold;">+</button>
+            </div>
         </div>
     </div>
 
-    <div id="quiz-page" class="page">
-        <h2 style="font-family: 'Pacifico'; color: var(--dark-pink);">Günün Testi ✨</h2>
-        <iframe src="https://kumuterke.github.io/quiz/quiz.html"></iframe>
-    </div>
-
-    <div id="history" class="page">
-        <h2 style="font-family: 'Pacifico'; color: var(--dark-pink);">Zaman Çizelgemiz</h2>
-        <iframe src="https://kumuterke.github.io/time/"></iframe>
-    </div>
-
-    <div id="coupons" class="page">
-        <iframe src="https://kumuterke.github.io/kupon/"></iframe>
-    </div>
-
-    <div id="gift" class="page">
-        <iframe src="https://kumuterke.github.io/hediye/"></iframe>
-    </div>
+    <div id="quiz-page" class="page"><iframe src="https://kumuterke.github.io/quiz/quiz.html"></iframe></div>
+    <div id="history" class="page"><iframe src="https://kumuterke.github.io/time/"></iframe></div>
+    <div id="coupons" class="page"><iframe src="https://kumuterke.github.io/kupon/"></iframe></div>
 
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="showPage('home', this)">🏠</div>
         <div class="nav-item" onclick="showPage('quiz-page', this)">📝</div>
         <div class="nav-item" onclick="showPage('history', this)">📜</div>
         <div class="nav-item" onclick="showPage('coupons', this)">🎟️</div>
-        <div class="nav-item" onclick="showPage('gift', this)">🎁</div>
     </nav>
 
     <script>
-        const dbURL = "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app/status.json";
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnCvyBVmQgEs4hl94K-WBYCWVpeJR9PtA",
+            authDomain: "minatyler-b7212.firebaseapp.com",
+            databaseURL: "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "minatyler-b7212",
+            storageBucket: "minatyler-b7212.firebasestorage.app",
+            messagingSenderId: "599344339158",
+            appId: "1:599344339158:web:11e6083e5d56ffae91d177",
+            measurementId: "G-X0TLHP300V"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -77,36 +119,60 @@
             el.classList.add('active');
         }
 
-        function updateMoodOptions() {
-            const selector = document.getElementById('mood-selector');
-            const hour = new Date().getHours();
-            let moods = ['😊', '🥰', '😴', '😔', '🍕'];
-            if (hour >= 0 && hour < 4) { moods = moods.concat(['😈', '🔞', '🫦', '🔥', '🍷']); }
-            selector.innerHTML = moods.map(e => `<span class="mood-btn" onclick="updateMood('${e}')">${e}</span>`).join('');
+        // 1. Batarya (Tyler'ınkini gönder, Mina'nınkini al)
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(bat => {
+                const sendBat = () => { db.ref('status/Tyler/battery').set(Math.round(bat.level * 100) + "%"); };
+                bat.onlevelchange = sendBat; sendBat();
+            });
         }
 
-        async function updateMood(e) { 
-            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify({ böcekMood: e }) }); 
-            alert("Mod iletildi: " + e); 
-        }
-
-        async function updateStatus() {
-            const n = document.getElementById('myNote').value;
-            await fetch(dbURL, { method: 'PATCH', body: JSON.stringify({ böcekNote: n, lastUpdate: new Date().toLocaleTimeString() }) });
-            alert("Not iletildi!"); document.getElementById('myNote').value = "";
-        }
-
-        async function sync() {
-            const res = await fetch(dbURL); const data = await res.json();
+        db.ref('status').on('value', snap => {
+            const data = snap.val();
             if(data) {
-                if(data.meinNote) document.getElementById('mina-status').innerText = data.meinNote;
+                if(data.Mina) document.getElementById('mina-bat').innerText = data.Mina.battery || "--%";
+                if(data.meinNote) document.getElementById('mina-note').innerText = data.meinNote;
                 if(data.meinMood) document.getElementById('mina-mood-display').innerText = data.meinMood;
             }
+        });
+
+        // 2. Öpücük & Özledim
+        function addKiss() { db.ref('counters/kisses').transaction(c => (c || 0) + 1); }
+        db.ref('counters/kisses').on('value', snap => { document.getElementById('kiss-display').innerText = snap.val() || 0; });
+        
+        function sendMissYou() {
+            db.ref('alerts/missYou').set({ sender: 'Tyler', time: Date.now() });
+            alert("Mina'ya özlemin iletildi! ❤️");
         }
 
-        updateMoodOptions();
-        setInterval(updateMoodOptions, 60000);
-        setInterval(sync, 5000); sync();
+        // 3. Durum Güncelleme
+        async function updateTylerStatus() {
+            const n = document.getElementById('tylerNote').value;
+            db.ref('status').update({ böcekNote: n, lastUpdate: new Date().toLocaleTimeString() });
+            alert("Not Mina'ya iletildi!"); document.getElementById('tylerNote').value = "";
+        }
+
+        // 4. To-Do
+        function saveTodo() {
+            const el = document.getElementById('todo-input');
+            if(el.value) { db.ref('todos').push({ text: el.value, done: false }); el.value = ""; }
+        }
+        db.ref('todos').on('value', snap => {
+            const list = document.getElementById('todo-list'); list.innerHTML = "";
+            snap.forEach(child => {
+                const item = child.val();
+                list.innerHTML += `<div class="todo-item"><input type="checkbox" ${item.done ? 'checked' : ''} onclick="db.ref('todos/${child.key}/done').set(${!item.done})"> <span>${item.text}</span></div>`;
+            });
+        });
+
+        // 5. Geri Sayım
+        const target = new Date("2026-06-15T00:00:00").getTime();
+        setInterval(() => {
+            const diff = target - Date.now();
+            const d = Math.floor(diff / (1000*60*60*24));
+            const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+            document.getElementById('countdown').innerText = `${d}g ${h}sa`;
+        }, 60000);
     </script>
 </body>
 </html>
