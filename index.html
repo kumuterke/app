@@ -173,24 +173,71 @@
             document.getElementById(id).classList.add('active'); el.classList.add('active');
         }
 
-        // --- GALERİ İŞLEMLERİ ---
+        // --- OPTİMİZE EDİLMİŞ GALERİ İŞLEMLERİ (Sıkıştırma, Caching, Sayfalama) ---
+        let galleryLimit = 12; // Başlangıçta 12 resim göster
+
         function uploadPhoto() {
             const file = document.getElementById('photo-upload').files[0];
             if(file) {
                 const reader = new FileReader();
-                reader.onloadend = function() {
-                    // Resmi Base64 string olarak kaydet (Veritabanı boyutu için dikkatli ol)
-                    db.ref('gallery').push({ image: reader.result, time: Date.now() });
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = () => {
+                        // 1. ADIM: Resmi Küçült (Canvas)
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1200; // Hafızada az yer kaplasın ama net olsun
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        // 2. ADIM: Sıkıştır (0.85 kalite)
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+                        // Veritabanına gönder
+                        db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
+                    };
+                    img.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             }
         }
-        db.ref('gallery').limitToLast(20).on('value', snap => {
-            const grid = document.getElementById('gallery-grid'); grid.innerHTML = "";
-            snap.forEach(c => {
-                grid.innerHTML += `<img src="${c.val().image}" class="gallery-item" onclick="window.open(this.src)">`;
+
+        function loadGallery() {
+            // 3. ADIM: Sayfalama (Limitli çekme)
+            db.ref('gallery').orderByChild('time').limitToLast(galleryLimit).on('value', snap => {
+                const grid = document.getElementById('gallery-grid'); grid.innerHTML = "";
+                
+                // Resimleri kronolojik sıraya göre (en yeniden en eskiye) dizmek için diziye alıyoruz
+                const photos = [];
+                snap.forEach(c => photos.push({ key: c.key, val: c.val() }));
+                photos.reverse(); // En yeni en üstte olsun
+
+                photos.forEach(p => {
+                    // 4. ADIM: Caching (Hafızadan okuma)
+                    let displayImage = p.val.image;
+                    const cachedImage = localStorage.getItem('img_' + p.key);
+
+                    if (cachedImage) {
+                        displayImage = cachedImage;
+                    } else {
+                        // Eğer hafızada yoksa, kaydet (Kota dolarsa diye try-catch)
+                        try { localStorage.setItem('img_' + p.key, p.val.image); } catch (e) {}
+                    }
+
+                    grid.innerHTML += `<img src="${displayImage}" class="gallery-item" onclick="window.open(this.src)">`;
+                });
+
+                // "Daha Fazla Gör" Butonu
+                if (photos.length >= galleryLimit) {
+                    grid.innerHTML += `<button class="btn" onclick="galleryLimit += 12; loadGallery();" style="grid-column: span 2; margin-top:10px;">Daha Fazla Gör...</button>`;
+                }
             });
-        });
+        }
+        // Galeriyi Başlat
+        loadGallery();
 
         // --- GPS ---
         function toRad(v) { return v * Math.PI / 180; }
@@ -244,10 +291,11 @@
             }); 
         });
 
-        // --- MÜZİK ---
+        // --- MÜZİK (DEFAULT ŞARKI GÜNCELLENDİ) ---
         function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
         db.ref('shared_music').on('value', snap => {
-            const id = snap.val()?.id || "dQw4w9WgXcQ";
+            // İstenen şarkı ID'si eklendi
+            const id = snap.val()?.id || "qMsEVXrfuvA";
             document.getElementById('music-display').innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${id}?rel=0" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
         });
 
