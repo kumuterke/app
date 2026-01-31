@@ -179,23 +179,31 @@
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
         db.ref('status').on('value', s => { const d = s.val(); if(!d) return; if(d.Mina) document.getElementById('mina-bat').innerText = d.Mina.battery||"--%"; document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = d.meinNote||"Not yok."; });
         
-        // --- GECE MODU EMOJİ KONTROLÜ ---
+        // --- GECE MODU VE MOD GÜNCELLEME ---
         const hour = new Date().getHours();
         let moodList = ['😎', '😴', '💻', '🍺', '🎮', '❤️', '🥺', '😤'];
         if (hour >= 0 && hour < 4) { moodList.push('😈', '🔞', '🫦', '🔥', '🍷'); }
-        document.getElementById('tyler-mood-selector').innerHTML = moodList.map(m => `<span style="font-size:1.8rem; cursor:pointer;" onclick="db.ref('status').update({böcekMood:'${m}'})">${m}</span>`).join('');
         
-        // --- GÜNCELLENEN STATÜS FONKSİYONU ---
+        document.getElementById('tyler-mood-selector').innerHTML = moodList.map(m => `
+            <span style="font-size:1.8rem; cursor:pointer;" onclick="updateTylerMood('${m}')">${m}</span>
+        `).join('');
+
+        function updateTylerMood(emoji) {
+            db.ref('status').update({ böcekMood: emoji });
+            db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek modunu güncelledi!`, time: Date.now() });
+            const pop = document.getElementById('status-popup');
+            pop.innerText = `✅ Modun (${emoji}) Mina'ya iletildi!`;
+            pop.classList.add('show');
+            setTimeout(() => pop.classList.remove('show'), 2000);
+        }
+
         function updateTylerStatus() { 
             const noteBox = document.getElementById('tylerNote');
             db.ref('status').update({ böcekNote: noteBox.value }); 
-            
-            // Pop-up Göster
             const pop = document.getElementById('status-popup');
+            pop.innerText = "✅ Durumun Güncellendi!";
             pop.classList.add('show');
             setTimeout(() => pop.classList.remove('show'), 2000);
-
-            // Kutuyu Temizle
             noteBox.value = ""; 
         }
 
