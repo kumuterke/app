@@ -101,19 +101,16 @@
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyBnCvyBVmQgEs4hl94K-WBYCWVpeJR9PtA", authDomain: "minatyler-b7212.firebaseapp.com", databaseURL: "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app", projectId: "minatyler-b7212", storageBucket: "minatyler-b7212.firebasestorage.app", messagingSenderId: "599344339158", appId: "1:599344339158:web:11e6083e5d56ffae91d177" };
-        firebase.initializeApp(firebaseConfig); 
-        const db = firebase.database();
+        firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active'); 
-            el.classList.add('active');
+            document.getElementById(id).classList.add('active'); el.classList.add('active');
             window.scrollTo(0,0);
         }
 
-        // Skorlar
         db.ref('scores').on('value', snap => {
             const s = snap.val() || {};
             const t = s.Tyler || 0;
@@ -126,59 +123,34 @@
             else ct.innerText = "💞 Sevgimiz Eşit!";
         });
 
-        // Bildirimler
         db.ref('alerts/tylerAlert').on('value', snap => {
-            const data = snap.val(); 
-            if(data && Date.now() - data.time < 5000) {
-                const n = document.getElementById("love-notification"); 
-                n.classList.add("show"); 
-                setTimeout(() => n.classList.remove("show"), 4000);
+            const data = snap.val(); if(data && Date.now() - data.time < 5000) {
+                const n = document.getElementById("love-notification"); n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000);
             }
         });
 
-        // Achievement Fonksiyonu
-        function showAchievement(title, message) {
-            const achDiv = document.createElement("div");
-            achDiv.style = `
-                position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
-                background: linear-gradient(135deg, #FFD700, #FFA500);
-                color: #000; padding: 25px; border-radius: 20px; z-index: 10000;
-                text-align: center; box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
-                border: 3px solid white; animation: slideUp 0.5s ease;
-                min-width: 280px; font-weight: bold;
-            `;
-            achDiv.innerHTML = `<div style="font-size: 2rem;">🏆</div><h2 style="margin:5px 0;">${title}</h2><p>${message}</p>`;
-            document.body.appendChild(achDiv);
-            
-            setTimeout(() => {
-                achDiv.style.opacity = "0";
-                achDiv.style.transition = "1s";
-                setTimeout(() => achDiv.remove(), 1000);
-            }, 5000);
-        }
-
-        // Öpücük ve Özlem Gönderme
         function sendMissYou() { 
             db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() });
-            
             db.ref('kisses/Tyler').transaction(c => {
                 const newCount = (c || 0) + 1;
-                if (newCount === 100) {
-                    showAchievement("💯 Yüzlük Paket!", "Tam 100 öpücük! Dudakların yorulmadı mı Böcek? ❤️");
-                } else if (newCount === 250) {
-                    showAchievement("🥉 Bronz Sevgili", "250 Öpücük! Mesafeler bizden korksun. ✨");
-                } else if (newCount === 500) {
-                    showAchievement("🥈 Gümüş Sevgili", "500 Öpücük! Bu aşk artık bir efsane... 💍");
-                } else if (newCount === 1000) {
-                    showAchievement("🥇 KRAL SEVGİLİ", "1000 Öpücük! Sen gerçek bir şampiyonsun Böcek! 🏆");
-                }
+                if (newCount === 100) showAchievement("💯 Yüzlük Paket!", "Tam 100 öpücük! Dudakların yorulmadı mı Böcek? ❤️");
+                else if (newCount === 250) showAchievement("🥉 Bronz Sevgili", "250 Öpücük! Mesafeler bizden korksun. ✨");
+                else if (newCount === 500) showAchievement("🥈 Gümüş Sevgili", "500 Öpücük! Bu aşk artık bir efsane... 💍");
+                else if (newCount === 1000) showAchievement("🥇 KRAL SEVGİLİ", "1000 Öpücük! Sen gerçek bir şampiyonsun Böcek! 🏆");
                 return newCount;
             });
-
             const sn = document.getElementById("sent-notification");
             sn.innerText = "❤️ Özlemin ve Öpücüğün Yollandı!";
             sn.classList.add("show");
             setTimeout(() => sn.classList.remove("show"), 2000);
+        }
+
+        function showAchievement(title, message) {
+            const achDiv = document.createElement("div");
+            achDiv.style = `position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; padding: 25px; border-radius: 20px; z-index: 10000; text-align: center; box-shadow: 0 0 50px rgba(255, 215, 0, 0.6); border: 3px solid white; animation: slideUp 0.5s ease; min-width: 280px; font-weight: bold;`;
+            achDiv.innerHTML = `<div style="font-size: 2rem;">🏆</div><h2 style="margin:5px 0;">${title}</h2><p>${message}</p>`;
+            document.body.appendChild(achDiv);
+            setTimeout(() => { achDiv.style.opacity = "0"; achDiv.style.transition = "1s"; setTimeout(() => achDiv.remove(), 1000); }, 5000);
         }
 
         function toRad(v) { return v * Math.PI / 180; }
@@ -196,40 +168,22 @@
             document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
             document.getElementById('mina-time').innerText = new Date(now.getTime()+(2*60*60*1000)).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
             const diff = new Date("2026-02-06T00:00:00") - now;
-            if (diff > 0) {
-                document.getElementById('countdown').innerText = Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s";
-            } else {
-                document.getElementById('countdown').innerText = "KAVUŞTUK! ❤️";
-            }
+            if (diff > 0) { document.getElementById('countdown').innerText = Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s"; }
+            else { document.getElementById('countdown').innerText = "KAVUŞTUK! ❤️"; }
         }, 1000);
 
-        db.ref('kisses').on('value', s => { 
-            const d = s.val() || {}; 
-            document.getElementById('kiss-tyler').innerText = d.Tyler || 0; 
-            document.getElementById('kiss-mina').innerText = d.Mina || 0; 
-        });
+        db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
+        db.ref('status').on('value', s => { const d = s.val(); if(!d) return; if(d.Mina) document.getElementById('mina-bat').innerText = d.Mina.battery||"--%"; document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = d.meinNote||"Not yok."; });
         
-        db.ref('status').on('value', s => { 
-            const d = s.val(); 
-            if(!d) return; 
-            if(d.Mina) document.getElementById('mina-bat').innerText = d.Mina.battery||"--%"; 
-            document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; 
-            document.getElementById('mina-note').innerText = d.meinNote||"Not yok."; 
-        });
-
-        const ms = ['😎', '😴', '💻', '🍺', '🎮', '❤️']; 
-        document.getElementById('tyler-mood-selector').innerHTML = ms.map(m => `<span style="font-size:1.8rem; cursor:pointer;" onclick="db.ref('status').update({böcekMood:'${m}'})">${m}</span>`).join('');
+        // --- GECE MODU EMOJİ KONTROLÜ ---
+        const hour = new Date().getHours();
+        let moodList = ['😎', '😴', '💻', '🍺', '🎮', '❤️', '🥺', '😤'];
+        if (hour >= 0 && hour < 4) { moodList.push('😈', '🔞', '🫦', '🔥', '🍷'); }
+        document.getElementById('tyler-mood-selector').innerHTML = moodList.map(m => `<span style="font-size:1.8rem; cursor:pointer;" onclick="db.ref('status').update({böcekMood:'${m}'})">${m}</span>`).join('');
         
         function updateTylerStatus() { db.ref('status').update({ böcekNote: document.getElementById('tylerNote').value }); }
-        function addTodo() { 
-            const i = document.getElementById('todo-input'); 
-            if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } 
-        }
-        db.ref('todos').on('value', s => { 
-            const l = document.getElementById('todo-list'); 
-            l.innerHTML = ""; 
-            s.forEach(c => { const i = c.val(); l.innerHTML += `<div class="todo-item"><span>${i.text}</span><span onclick="db.ref('todos/${c.key}').remove()">🗑️</span></div>`; }); 
-        });
+        function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
+        db.ref('todos').on('value', s => { const l = document.getElementById('todo-list'); l.innerHTML = ""; s.forEach(c => { const i = c.val(); l.innerHTML += `<div class="todo-item"><span>${i.text}</span><span onclick="db.ref('todos/${c.key}').remove()">🗑️</span></div>`; }); });
         initLocation();
     </script>
 </body>
