@@ -27,7 +27,7 @@
         /* TO-DO LIST */
         .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; transition: 0.3s; }
         .todo-item.done span.todo-text { text-decoration: line-through; opacity: 0.5; }
-        .todo-check { width: 22px; height: 22px; border: 2px solid var(--accent-blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
+        .todo-check { width: 22px; height: 22px; border: 2px solid var(--accent-blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; color: transparent; }
         .todo-check.checked { background: var(--accent-blue); color: #000; font-weight: bold; }
         .todo-text { flex: 1; }
         .todo-delete { cursor: pointer; opacity: 0.7; font-size: 1.1rem; }
@@ -174,7 +174,7 @@
         }
 
         // --- OPTİMİZE EDİLMİŞ GALERİ İŞLEMLERİ (Sıkıştırma, Caching, Sayfalama) ---
-        let galleryLimit = 12; // Başlangıçta 12 resim göster
+        let galleryLimit = 12; // Başlangıçta 12 resim
 
         function uploadPhoto() {
             const file = document.getElementById('photo-upload').files[0];
@@ -206,25 +206,28 @@
         }
 
         function loadGallery() {
-            // 3. ADIM: Sayfalama (Limitli çekme)
-            db.ref('gallery').orderByChild('time').limitToLast(galleryLimit).on('value', snap => {
+            // "limitToLast" ile çok fazla veri çekmeyi engelliyoruz (100 resme kadar gösterir, sorun çıkarmaz)
+            db.ref('gallery').orderByChild('time').limitToLast(100).on('value', snap => {
                 const grid = document.getElementById('gallery-grid'); grid.innerHTML = "";
                 
-                // Resimleri kronolojik sıraya göre (en yeniden en eskiye) dizmek için diziye alıyoruz
                 const photos = [];
                 snap.forEach(c => photos.push({ key: c.key, val: c.val() }));
                 photos.reverse(); // En yeni en üstte olsun
 
                 photos.forEach(p => {
-                    // 4. ADIM: Caching (Hafızadan okuma)
+                    // Caching (Hafıza) Kontrolü
                     let displayImage = p.val.image;
-                    const cachedImage = localStorage.getItem('img_' + p.key);
-
-                    if (cachedImage) {
-                        displayImage = cachedImage;
-                    } else {
-                        // Eğer hafızada yoksa, kaydet (Kota dolarsa diye try-catch)
-                        try { localStorage.setItem('img_' + p.key, p.val.image); } catch (e) {}
+                    
+                    try {
+                        const cachedImage = localStorage.getItem('img_' + p.key);
+                        if (cachedImage) {
+                            displayImage = cachedImage;
+                        } else {
+                            // Hafıza doluysa hata vermez, sadece kaydetmez
+                            localStorage.setItem('img_' + p.key, p.val.image);
+                        }
+                    } catch (e) {
+                        console.log("Hafıza dolu, internetten yükleniyor...");
                     }
 
                     grid.innerHTML += `<img src="${displayImage}" class="gallery-item" onclick="window.open(this.src)">`;
@@ -232,7 +235,8 @@
 
                 // "Daha Fazla Gör" Butonu
                 if (photos.length >= galleryLimit) {
-                    grid.innerHTML += `<button class="btn" onclick="galleryLimit += 12; loadGallery();" style="grid-column: span 2; margin-top:10px;">Daha Fazla Gör...</button>`;
+                     // Basit bir load more yerine şimdilik 100 limit yeterli
+                     // grid.innerHTML += `<button class="btn" onclick="galleryLimit += 12; loadGallery();" style="grid-column: span 2; margin-top:10px;">Daha Fazla Gör...</button>`;
                 }
             });
         }
@@ -294,7 +298,6 @@
         // --- MÜZİK (DEFAULT ŞARKI GÜNCELLENDİ) ---
         function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
         db.ref('shared_music').on('value', snap => {
-            // İstenen şarkı ID'si eklendi
             const id = snap.val()?.id || "qMsEVXrfuvA";
             document.getElementById('music-display').innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${id}?rel=0" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
         });
