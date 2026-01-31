@@ -129,20 +129,56 @@
             }
         });
 
-        // --- ENTEGRE EDİLEN ÖZLEME/ÖPÜCÜK FONKSİYONU ---
-function sendMissYou() { 
+        function sendMissYou() { 
     // 1. Mina'ya bildirim gönder
     db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() });
     
-    // 2. Senin (Böcek/Tyler) gönderdiğin öpücük sayısını +1 artır
-    // DÜZELTME: Burası 'Tyler' olmalı çünkü okurken 'kiss-tyler' ve 'd.Tyler' kullanıyorsun.
-    db.ref('kisses/Tyler').transaction(c => (c || 0) + 1);
+    // 2. Öpücük sayısını artır ve kontrol et
+    db.ref('kisses/Tyler').transaction(c => {
+        const newCount = (c || 0) + 1;
+        
+        // --- BAŞARI (ACHIEVEMENT) KONTROLLERİ ---
+        if (newCount === 100) {
+            showAchievement("💯 Yüzlük Paket!", "Tam 100 öpücük! Dudakların yorulmadı mı Böcek? ❤️");
+        } else if (newCount === 250) {
+            showAchievement("🥉 Bronz Sevgili", "250 Öpücük! Mesafeler bizden korksun. ✨");
+        } else if (newCount === 500) {
+            showAchievement("🥈 Gümüş Sevgili", "500 Öpücük! Bu aşk artık bir efsane... 💍");
+        } else if (newCount === 1000) {
+            showAchievement("🥇 KRAL SEVGİLİ", "1000 Öpücük! Sen gerçek bir şampiyonsun Böcek! 🏆");
+        }
+        
+        return newCount;
+    });
 
-    // 3. Ekrana bildirim çıkar
+    // 3. Standart bildirim
     const sn = document.getElementById("sent-notification");
     sn.innerText = "❤️ Özlemin ve Öpücüğün Yollandı!";
     sn.classList.add("show");
     setTimeout(() => sn.classList.remove("show"), 2000);
+}
+
+// Ekranın ortasında güzelce parlayacak Achievement kutusu fonksiyonu
+function showAchievement(title, message) {
+    const achDiv = document.createElement("div");
+    achDiv.style = `
+        position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #FFD700, #FFA500);
+        color: #000; padding: 25px; border-radius: 20px; z-index: 10000;
+        text-align: center; box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+        border: 3px solid white; animation: slideUp 0.5s ease;
+        min-width: 280px; font-weight: bold;
+    `;
+    achDiv.innerHTML = `<div style="font-size: 2rem;">🏆</div><h2 style="margin:5px 0;">${title}</h2><p>${message}</p>`;
+    document.body.appendChild(achDiv);
+    
+    // 5 saniye sonra ekrandan silinsin
+    setTimeout(() => {
+        achDiv.style.opacity = "0";
+        achDiv.style.transition = "1s";
+        setTimeout(() => achDiv.remove(), 1000);
+    }, 5000);
+}
 }
 
         function toRad(v) { return v * Math.PI / 180; }
