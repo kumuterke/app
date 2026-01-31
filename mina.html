@@ -176,7 +176,7 @@
             window.scrollTo(0,0);
         }
 
-        // --- OPTİMİZE GALERİ İŞLEMLERİ (Sıkıştırma + Caching + Sayfalama) ---
+        // --- OPTİMİZE EDİLMİŞ GALERİ İŞLEMLERİ (Sıkıştırma + Güvenli Mod) ---
         let galleryLimit = 12;
 
         function uploadPhoto() {
@@ -188,7 +188,7 @@
                     img.onload = () => {
                         // 1. ADIM: Küçült (Canvas)
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1200; 
+                        const MAX_WIDTH = 1200; // Genişlik Sınırı
                         const scaleSize = MAX_WIDTH / img.width;
                         canvas.width = MAX_WIDTH;
                         canvas.height = img.height * scaleSize;
@@ -208,31 +208,32 @@
         }
 
         function loadGallery() {
-            // 3. ADIM: Limitli Yükleme
-            db.ref('gallery').orderByChild('time').limitToLast(galleryLimit).on('value', snap => {
+            // Güvenli ve Limitli Yükleme (Hata vermez)
+            db.ref('gallery').orderByChild('time').limitToLast(100).on('value', snap => {
                 const grid = document.getElementById('gallery-grid'); grid.innerHTML = "";
                 
                 const photos = [];
                 snap.forEach(c => photos.push({ key: c.key, val: c.val() }));
-                photos.reverse(); 
+                photos.reverse(); // En yeni en üstte olsun
 
                 photos.forEach(p => {
-                    // 4. ADIM: Caching
+                    // Caching (Hafıza) Kontrolü
                     let displayImage = p.val.image;
-                    const cachedImage = localStorage.getItem('img_' + p.key);
-
-                    if (cachedImage) {
-                        displayImage = cachedImage;
-                    } else {
-                        try { localStorage.setItem('img_' + p.key, p.val.image); } catch (e) {}
+                    
+                    try {
+                        const cachedImage = localStorage.getItem('img_' + p.key);
+                        if (cachedImage) {
+                            displayImage = cachedImage;
+                        } else {
+                            // Hafıza dolarsa hata vermez, sadece cache'e yazmaz
+                            localStorage.setItem('img_' + p.key, p.val.image);
+                        }
+                    } catch (e) {
+                        console.log("Hafıza dolu, internetten yükleniyor...");
                     }
 
                     grid.innerHTML += `<img src="${displayImage}" class="gallery-item" onclick="window.open(this.src)">`;
                 });
-
-                if (photos.length >= galleryLimit) {
-                    grid.innerHTML += `<button class="btn" onclick="galleryLimit += 12; loadGallery();" style="grid-column: span 2; margin-top:10px;">Daha Fazla Gör...</button>`;
-                }
             });
         }
         loadGallery();
@@ -263,7 +264,6 @@
         // Batarya Fix (Böcek'i İzle)
         db.ref('status').on('value', s => { 
             const d = s.val(); if(!d) return; 
-            // Mina, Tyler'ın bataryasını görür
             const batVal = (d.Tyler && d.Tyler.battery) ? (typeof d.Tyler.battery === 'object' ? d.Tyler.battery.battery : d.Tyler.battery) : "--%";
             document.getElementById('tyler-bat').innerText = batVal;
             document.getElementById('tyler-mood-display').innerText = d.böcekMood||"⌛"; 
