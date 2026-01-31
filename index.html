@@ -133,6 +133,7 @@
                 <button class="btn">📸 Fotoğraf Ekle</button>
                 <input type="file" id="photo-upload" accept="image/*" onchange="uploadPhoto()">
             </div>
+            <button class="btn" id="sort-btn" onclick="toggleSort()" style="margin-top:10px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);">🔄 Sırala: Yeniler Altta</button>
             <div id="gallery-grid" class="gallery-grid"></div>
         </div>
     </div>
@@ -173,11 +174,14 @@
             document.getElementById(id).classList.add('active'); el.classList.add('active');
         }
 
-       // --- OPTİMİZE GALERİ (GIF Destekli + Sıkıştırma + Toplu Yükleme) ---
+        // --- GELİŞMİŞ GALERİ SİSTEMİ (GIF, Sıkıştırma, Sıralama, Toplu Yükleme) ---
+        let isNewestAtBottom = true; // Varsayılan: Eskiden Yeniye (Yeniler altta)
+        let galleryData = []; 
+
         function uploadPhoto() {
             const file = document.getElementById('photo-upload').files[0];
             if(file) {
-                // EĞER DOSYA GIF İSE: İşlemeden direkt yükle (Animasyon bozulmasın)
+                // GIF Kontrolü: GIF ise sıkıştırma yapma
                 if (file.type === "image/gif") {
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -185,7 +189,7 @@
                     };
                     reader.readAsDataURL(file);
                 } 
-                // EĞER NORMAL RESİM İSE: Sıkıştır ve küçült (Hız ve Alan Tasarrufu)
+                // Diğerleri: Sıkıştır ve küçült
                 else {
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -194,11 +198,9 @@
                             const canvas = document.createElement('canvas');
                             const MAX_WIDTH = 1200; 
                             const scaleSize = MAX_WIDTH / img.width;
-                            canvas.width = MAX_WIDTH;
-                            canvas.height = img.height * scaleSize;
+                            canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            // Resmi JPEG formatına çevir ve sıkıştır
                             const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
                             db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
                         };
@@ -208,23 +210,40 @@
                 }
             }
         }
-        
-        // Galeri Gösterim (Aynen korundu)
-        db.ref('gallery').orderByChild('time').limitToLast(50).on('value', snap => {
+
+        // Galeri Verisini Çek
+        db.ref('gallery').orderByChild('time').limitToLast(100).on('value', snap => {
+            galleryData = []; 
+            snap.forEach(c => { galleryData.push(c.val().image); });
+            renderGallery(); 
+        });
+
+        // Galeriyi Ekrana Bas
+        function renderGallery() {
             const grid = document.getElementById('gallery-grid');
+            const btn = document.getElementById('sort-btn');
             let htmlContent = "";
-            const photos = [];
-            
-            snap.forEach(c => {
-                photos.push(c.val().image);
-            });
-            
-            photos.reverse().forEach(src => {
+            let photosToShow = [...galleryData]; 
+
+            if (isNewestAtBottom) {
+                // Varsayılan: Firebase zaten eskiden yeniye verir (Kronolojik)
+                btn.innerText = "⬇️ Sırala: Yeniler Altta (Varsayılan)";
+            } else {
+                // Tersine çevir: Yeniler en üste gelir
+                photosToShow.reverse();
+                btn.innerText = "⬆️ Sırala: Yeniler Üstte";
+            }
+
+            photosToShow.forEach(src => {
                 htmlContent += `<img src="${src}" class="gallery-item" onclick="window.open(this.src)">`;
             });
-            
             grid.innerHTML = htmlContent;
-        });
+        }
+
+        function toggleSort() {
+            isNewestAtBottom = !isNewestAtBottom; 
+            renderGallery(); 
+        }
 
         // --- GPS ---
         function toRad(v) { return v * Math.PI / 180; }
@@ -278,7 +297,7 @@
             }); 
         });
 
-        // --- MÜZİK (VARSAYILAN ŞARKI GÜNCELLEMESİ) ---
+        // --- MÜZİK (DEFAULT ŞARKI GÜNCELLENDİ) ---
         function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
         db.ref('shared_music').on('value', snap => {
             const id = snap.val()?.id || "qMsEVXrfuvA";
@@ -295,4 +314,3 @@
     </script>
 </body>
 </html>
-
