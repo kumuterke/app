@@ -30,10 +30,10 @@
         .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
         .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
 
-        /* TO-DO */
+        /* TO-DO (Boş Kutucuklu) */
         .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,154,158,0.1); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; }
         .todo-item.done span.todo-text { text-decoration: line-through; opacity: 0.5; }
-        .todo-check { width: 22px; height: 22px; border: 2px solid var(--main-pink); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
+        .todo-check { width: 22px; height: 22px; border: 2px solid var(--main-pink); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; color: transparent; }
         .todo-check.checked { background: var(--main-pink); color: white; font-weight: bold; }
         .todo-text { flex: 1; }
         .todo-delete { cursor: pointer; opacity: 0.7; }
@@ -123,7 +123,7 @@
         <div class="status-card" style="text-align: center;">
             <p style="opacity: 0.7; margin-bottom: 10px;">Birlikte dinlemek için ID girin.</p>
             <div id="music-display" style="border-radius: 15px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.3); min-height: 200px; display: flex; align-items: center; justify-content: center;">Yükleniyor...</div>
-            <input type="text" id="music-input" placeholder="YouTube Video ID">
+            <input type="text" id="music-input" placeholder="YouTube Video ID (örn: qMsEVXrfuvA)">
             <button class="btn" onclick="changeMusic()">Şarkıyı Değiştir</button>
         </div>
     </div>
@@ -176,23 +176,66 @@
             window.scrollTo(0,0);
         }
 
-        // --- GALERİ İŞLEMLERİ ---
+        // --- OPTİMİZE GALERİ İŞLEMLERİ (Sıkıştırma + Caching + Sayfalama) ---
+        let galleryLimit = 12;
+
         function uploadPhoto() {
             const file = document.getElementById('photo-upload').files[0];
             if(file) {
                 const reader = new FileReader();
-                reader.onloadend = function() {
-                    db.ref('gallery').push({ image: reader.result, time: Date.now() });
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = () => {
+                        // 1. ADIM: Küçült (Canvas)
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 1200; 
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        // 2. ADIM: Sıkıştır (0.85 kalite)
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+                        db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
+                    };
+                    img.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             }
         }
-        db.ref('gallery').limitToLast(20).on('value', snap => {
-            const grid = document.getElementById('gallery-grid'); grid.innerHTML = "";
-            snap.forEach(c => {
-                grid.innerHTML += `<img src="${c.val().image}" class="gallery-item" onclick="window.open(this.src)">`;
+
+        function loadGallery() {
+            // 3. ADIM: Limitli Yükleme
+            db.ref('gallery').orderByChild('time').limitToLast(galleryLimit).on('value', snap => {
+                const grid = document.getElementById('gallery-grid'); grid.innerHTML = "";
+                
+                const photos = [];
+                snap.forEach(c => photos.push({ key: c.key, val: c.val() }));
+                photos.reverse(); 
+
+                photos.forEach(p => {
+                    // 4. ADIM: Caching
+                    let displayImage = p.val.image;
+                    const cachedImage = localStorage.getItem('img_' + p.key);
+
+                    if (cachedImage) {
+                        displayImage = cachedImage;
+                    } else {
+                        try { localStorage.setItem('img_' + p.key, p.val.image); } catch (e) {}
+                    }
+
+                    grid.innerHTML += `<img src="${displayImage}" class="gallery-item" onclick="window.open(this.src)">`;
+                });
+
+                if (photos.length >= galleryLimit) {
+                    grid.innerHTML += `<button class="btn" onclick="galleryLimit += 12; loadGallery();" style="grid-column: span 2; margin-top:10px;">Daha Fazla Gör...</button>`;
+                }
             });
-        });
+        }
+        loadGallery();
 
         // --- GPS ---
         function toRad(v) { return v * Math.PI / 180; }
@@ -217,9 +260,10 @@
             if(t > m) ct.innerText = "👑 En Çok Seven: Böcek"; else if(m > t) ct.innerText = "👑 En Çok Seven: Mina"; else ct.innerText = "💞 Sevgimiz Eşit!";
         });
         
-        // Batarya Fix
+        // Batarya Fix (Böcek'i İzle)
         db.ref('status').on('value', s => { 
             const d = s.val(); if(!d) return; 
+            // Mina, Tyler'ın bataryasını görür
             const batVal = (d.Tyler && d.Tyler.battery) ? (typeof d.Tyler.battery === 'object' ? d.Tyler.battery.battery : d.Tyler.battery) : "--%";
             document.getElementById('tyler-bat').innerText = batVal;
             document.getElementById('tyler-mood-display').innerText = d.böcekMood||"⌛"; 
@@ -244,16 +288,16 @@
             list.innerHTML = "";
             snap.forEach(child => {
                 const data = child.val();
-                const side = data.sender === 'Mina' ? 'arch-mina' : 'arch-tyler';
+                const side = data.sender === 'Mina' ? 'msg-me' : 'msg-other';
                 list.innerHTML += `<div class="archive-msg ${side}">${data.msg}<span class="msg-time">${new Date(data.time).toLocaleTimeString()}</span></div>`;
             });
             list.scrollTop = list.scrollHeight;
         });
 
-        // --- MÜZİK ---
+        // --- MÜZİK (DEFAULT ŞARKI EKLENDİ) ---
         function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
         db.ref('shared_music').on('value', snap => {
-            const id = snap.val()?.id || "dQw4w9WgXcQ";
+            const id = snap.val()?.id || "qMsEVXrfuvA";
             document.getElementById('music-display').innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${id}?rel=0" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
         });
 
@@ -280,7 +324,7 @@
             }
         });
 
-        // TODO LIST
+        // --- TO-DO (Boş Kutucuklu) ---
         function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
         function toggleTodo(key, currentDone) { db.ref('todos/' + key).update({ done: !currentDone }); }
         function deleteTodo(key) { db.ref('todos/' + key).remove(); }
@@ -293,7 +337,7 @@
             }); 
         });
 
-        // Pil
+        // Kendi Bataryasını Gönder
         if ('getBattery' in navigator) {
             navigator.getBattery().then(bat => {
                 const send = () => db.ref('status/Mina/battery').set({ battery: Math.round(bat.level * 100) + "%", lastUpdate: new Date().toLocaleTimeString() });
