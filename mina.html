@@ -34,6 +34,9 @@
         #love-notification.show { visibility: visible; opacity: 1; transform: translate(-50%, -50%) scale(1); }
         #sent-notification { visibility: hidden; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(46, 204, 113, 0.95); color: white; padding: 15px 30px; border-radius: 50px; text-align: center; z-index: 9999; box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4); font-weight: bold; opacity: 0; transition: 0.3s; }
         #sent-notification.show { visibility: visible; opacity: 1; top: 25%; }
+        /* Pop-up Stil */
+        #status-popup { visibility: hidden; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--main-pink); color: white; padding: 12px 25px; border-radius: 50px; font-weight: bold; z-index: 10001; opacity: 0; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,154,158,0.3); }
+        #status-popup.show { visibility: visible; opacity: 1; bottom: 120px; }
         .champion-badge { background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .page { display: none; animation: slideUp 0.4s ease; padding-top: 5px; }
@@ -43,6 +46,7 @@
 <body>
     <div id="love-notification"><div style="font-size: 3rem;">❤️</div><h2 style="margin: 10px 0;">Böcek Seni Çok Özledi!</h2><p>Hemen ona bir öpücük gönder.</p></div>
     <div id="sent-notification">❤️ Bildirim Yollandı!</div>
+    <div id="status-popup">✅ Durumun Böcek'e İletildi!</div>
 
     <div id="home" class="page active">
         <div class="header-container"><h1>Selam Mein! ❤️</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
@@ -131,52 +135,27 @@
             }
         });
 
-        // MINA İÇİN BAŞARI SİSTEMLİ ÖZLEME FONKSİYONU
         function sendMissYou() { 
             db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() }); 
-            
             db.ref('kisses/Mina').transaction(c => {
                 const newCount = (c || 0) + 1;
-                
-                // Achievement Kontrolleri
-                if (newCount === 100) {
-                    showAchievement("💯 Yüzlük Aşk!", "Tam 100 öpücük! Böcek şu an Augsburg'da havalara uçuyor! ❤️");
-                } else if (newCount === 102) {
-                    showAchievement("📞 Rekor Hatırası", "102 Öpücük! Tıpkı o unutulmaz görüntülü konuşmanız gibi... ✨");
-                } else if (newCount === 250) {
-                    showAchievement("🥉 Bronz Sevgili", "250 Öpücük! Bu sevgi Ankara-Augsburg hattını eritir. 🔥");
-                } else if (newCount === 500) {
-                    showAchievement("🥈 Gümüş Sevgili", "500 Öpücük! Böcek'e olan özlemin arşa çıktı... 💍");
-                } else if (newCount === 1000) {
-                    showAchievement("🥇 KRALİÇE SEVGİLİ", "1000 Öpücük! Sen gerçek bir şampiyonsun Mein! 🏆");
-                }
-                
+                if (newCount === 100) showAchievement("💯 Yüzlük Aşk!", "Tam 100 öpücük! Böcek şu an Augsburg'da havalara uçuyor! ❤️");
+                else if (newCount === 102) showAchievement("📞 Rekor Hatırası", "102 Öpücük! Tıpkı o unutulmaz görüntülü konuşmanız gibi... ✨");
+                else if (newCount === 250) showAchievement("🥉 Bronz Sevgili", "250 Öpücük! Bu sevgi Ankara-Augsburg hattını eritir. 🔥");
+                else if (newCount === 500) showAchievement("🥈 Gümüş Sevgili", "500 Öpücük! Böcek'e olan özlemin arşa çıktı... 💍");
+                else if (newCount === 1000) showAchievement("🥇 KRALİÇE SEVGİLİ", "1000 Öpücük! Sen gerçek bir şampiyonsun Mein! 🏆");
                 return newCount;
             });
-
             const sn = document.getElementById("sent-notification");
             if(sn) { sn.innerText = "❤️ Bildirim Yollandı!"; sn.classList.add("show"); setTimeout(() => sn.classList.remove("show"), 2000); }
         }
 
-        // BAŞARI KUTUSU GÖSTERME
         function showAchievement(title, message) {
             const achDiv = document.createElement("div");
-            achDiv.style = `
-                position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
-                background: linear-gradient(135deg, #FFD700, #FF69B4);
-                color: #fff; padding: 25px; border-radius: 25px; z-index: 10000;
-                text-align: center; box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
-                border: 3px solid white; animation: slideUp 0.5s ease;
-                min-width: 280px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            `;
+            achDiv.style = `position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #FFD700, #FF69B4); color: #fff; padding: 25px; border-radius: 25px; z-index: 10000; text-align: center; box-shadow: 0 0 50px rgba(255, 105, 180, 0.5); border: 3px solid white; animation: slideUp 0.5s ease; min-width: 280px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);`;
             achDiv.innerHTML = `<div style="font-size: 2.5rem;">👑</div><h2 style="margin:5px 0; font-family:'Pacifico';">${title}</h2><p>${message}</p>`;
             document.body.appendChild(achDiv);
-            
-            setTimeout(() => {
-                achDiv.style.opacity = "0";
-                achDiv.style.transition = "1s";
-                setTimeout(() => achDiv.remove(), 1000);
-            }, 5000);
+            setTimeout(() => { achDiv.style.opacity = "0"; achDiv.style.transition = "1s"; setTimeout(() => achDiv.remove(), 1000); }, 5000);
         }
 
         function toRad(v) { return v * Math.PI / 180; }
@@ -206,17 +185,29 @@
             document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', ops);
             document.getElementById('tyler-time').innerText = new Date(now.getTime()-(2*60*60*1000)).toLocaleTimeString('tr-TR', ops);
             const diff = new Date("2026-02-06T00:00:00") - now;
-            if (diff > 0) {
-                document.getElementById('countdown').innerText = Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s";
-            } else {
-                document.getElementById('countdown').innerText = "KAVUŞTUK! ❤️";
-            }
+            if (diff > 0) { document.getElementById('countdown').innerText = Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s"; }
+            else { document.getElementById('countdown').innerText = "KAVUŞTUK! ❤️"; }
         }, 1000);
 
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-mina').innerText = d.Mina || 0; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; });
         db.ref('status').on('value', s => { const d = s.val(); if(!d) return; if(d.Tyler) document.getElementById('tyler-bat').innerText = d.Tyler.battery||"--%"; document.getElementById('tyler-mood-display').innerText = d.böcekMood||"⌛"; document.getElementById('tyler-note').innerText = d.böcekNote||"Not yok."; });
-        const ms = ['😊', '🥰', '😴', '🥺', '😤', '😈', '🔞', '🫦', '🔥', '🍷']; document.getElementById('mina-mood-selector').innerHTML = ms.map(m => `<span style="font-size:2rem; cursor:pointer;" onclick="db.ref('status').update({meinMood:'${m}'})">${m}</span>`).join('');
-        function updateMinaStatus() { db.ref('status').update({ meinNote: document.getElementById('minaNote').value }); document.getElementById('minaNote').value = ""; }
+        
+        const ms = ['😊', '🥰', '😴', '🥺', '😤', '😈', '🔞', '🫦', '🔥', '🍷']; 
+        document.getElementById('mina-mood-selector').innerHTML = ms.map(m => `<span style="font-size:2rem; cursor:pointer;" onclick="db.ref('status').update({meinMood:'${m}'})">${m}</span>`).join('');
+        
+        function updateMinaStatus() { 
+            const noteBox = document.getElementById('minaNote');
+            db.ref('status').update({ meinNote: noteBox.value }); 
+            
+            // Pop-up Göster
+            const pop = document.getElementById('status-popup');
+            pop.classList.add('show');
+            setTimeout(() => pop.classList.remove('show'), 2000);
+
+            // Kutuyu Temizle
+            noteBox.value = ""; 
+        }
+
         function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
         db.ref('todos').on('value', s => { const l = document.getElementById('todo-list'); l.innerHTML = ""; s.forEach(c => { const i = c.val(); l.innerHTML += `<div class="todo-item"><span>${i.text}</span><span onclick="db.ref('todos/${c.key}').remove()">🗑️</span></div>`; }); });
         initLocation();
