@@ -176,9 +176,7 @@
             window.scrollTo(0,0);
         }
 
-        // --- OPTİMİZE EDİLMİŞ GALERİ İŞLEMLERİ (Sıkıştırma + Güvenli Mod) ---
-        let galleryLimit = 12;
-
+        // --- GÜÇLENDİRİLMİŞ GALERİ SİSTEMİ ---
         function uploadPhoto() {
             const file = document.getElementById('photo-upload').files[0];
             if(file) {
@@ -186,19 +184,14 @@
                 reader.onload = function(e) {
                     const img = new Image();
                     img.onload = () => {
-                        // 1. ADIM: Küçült (Canvas)
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1200; // Genişlik Sınırı
+                        const MAX_WIDTH = 1200; 
                         const scaleSize = MAX_WIDTH / img.width;
                         canvas.width = MAX_WIDTH;
                         canvas.height = img.height * scaleSize;
-
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-                        // 2. ADIM: Sıkıştır (0.85 kalite)
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
-
                         db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
                     };
                     img.src = e.target.result;
@@ -208,32 +201,37 @@
         }
 
         function loadGallery() {
-            // Güvenli ve Limitli Yükleme (Hata vermez)
+            // "on" dinleyicisi ile içeriği tek seferde toplayıp basıyoruz (Hata önleyici yapı)
             db.ref('gallery').orderByChild('time').limitToLast(100).on('value', snap => {
-                const grid = document.getElementById('gallery-grid'); grid.innerHTML = "";
-                
+                const grid = document.getElementById('gallery-grid');
+                let htmlContent = ""; 
                 const photos = [];
-                snap.forEach(c => photos.push({ key: c.key, val: c.val() }));
-                photos.reverse(); // En yeni en üstte olsun
-
-                photos.forEach(p => {
-                    // Caching (Hafıza) Kontrolü
-                    let displayImage = p.val.image;
+                
+                snap.forEach(c => {
+                    const key = c.key;
+                    const val = c.val();
+                    let displayImage = val.image;
                     
+                    // Caching kontrolü
                     try {
-                        const cachedImage = localStorage.getItem('img_' + p.key);
+                        const cachedImage = localStorage.getItem('img_' + key);
                         if (cachedImage) {
                             displayImage = cachedImage;
                         } else {
-                            // Hafıza dolarsa hata vermez, sadece cache'e yazmaz
-                            localStorage.setItem('img_' + p.key, p.val.image);
+                            localStorage.setItem('img_' + key, val.image);
                         }
                     } catch (e) {
-                        console.log("Hafıza dolu, internetten yükleniyor...");
+                        console.log("Hafıza dolu...");
                     }
-
-                    grid.innerHTML += `<img src="${displayImage}" class="gallery-item" onclick="window.open(this.src)">`;
+                    
+                    photos.push(displayImage);
                 });
+
+                photos.reverse().forEach(src => {
+                    htmlContent += `<img src="${src}" class="gallery-item" onclick="window.open(this.src)">`;
+                });
+
+                grid.innerHTML = htmlContent; 
             });
         }
         loadGallery();
@@ -243,7 +241,6 @@
         function initLocation() {
             navigator.geolocation.watchPosition((p) => {
                 const R = 6371; 
-                // Mina (Augsburg) -> Böcek (Ankara)
                 const dLat = toRad(39.9334 - p.coords.latitude); const dLon = toRad(32.8597 - p.coords.longitude);
                 const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(39.9334)) * Math.sin(dLon/2)**2;
                 const d = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3);
@@ -261,7 +258,6 @@
             if(t > m) ct.innerText = "👑 En Çok Seven: Böcek"; else if(m > t) ct.innerText = "👑 En Çok Seven: Mina"; else ct.innerText = "💞 Sevgimiz Eşit!";
         });
         
-        // Batarya Fix (Böcek'i İzle)
         db.ref('status').on('value', s => { 
             const d = s.val(); if(!d) return; 
             const batVal = (d.Tyler && d.Tyler.battery) ? (typeof d.Tyler.battery === 'object' ? d.Tyler.battery.battery : d.Tyler.battery) : "--%";
@@ -275,10 +271,8 @@
             const noteBox = document.getElementById('minaNote');
             const noteText = noteBox.value;
             if(!noteText.trim()) return;
-
             db.ref('status').update({ meinNote: noteText }); 
             db.ref('love_archive').push({ sender: 'Mina', msg: noteText, time: Date.now() });
-
             document.getElementById('status-popup').classList.add('show'); setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
             noteBox.value = ""; 
         }
@@ -294,7 +288,7 @@
             list.scrollTop = list.scrollHeight;
         });
 
-        // --- MÜZİK (DEFAULT ŞARKI EKLENDİ) ---
+        // --- MÜZİK ---
         function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
         db.ref('shared_music').on('value', snap => {
             const id = snap.val()?.id || "qMsEVXrfuvA";
@@ -324,7 +318,6 @@
             }
         });
 
-        // --- TO-DO (Boş Kutucuklu) ---
         function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
         function toggleTodo(key, currentDone) { db.ref('todos/' + key).update({ done: !currentDone }); }
         function deleteTodo(key) { db.ref('todos/' + key).remove(); }
@@ -337,7 +330,6 @@
             }); 
         });
 
-        // Kendi Bataryasını Gönder
         if ('getBattery' in navigator) {
             navigator.getBattery().then(bat => {
                 const send = () => db.ref('status/Mina/battery').set({ battery: Math.round(bat.level * 100) + "%", lastUpdate: new Date().toLocaleTimeString() });
@@ -354,4 +346,4 @@
         }, 1000);
     </script>
 </body>
-</html>
+</html> bocege de ayni sekild eyap
