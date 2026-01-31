@@ -131,11 +131,52 @@
             }
         });
 
+        // MINA İÇİN BAŞARI SİSTEMLİ ÖZLEME FONKSİYONU
         function sendMissYou() { 
             db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() }); 
-            db.ref('kisses/Mina').transaction(c => (c || 0) + 1);
+            
+            db.ref('kisses/Mina').transaction(c => {
+                const newCount = (c || 0) + 1;
+                
+                // Achievement Kontrolleri
+                if (newCount === 100) {
+                    showAchievement("💯 Yüzlük Aşk!", "Tam 100 öpücük! Böcek şu an Augsburg'da havalara uçuyor! ❤️");
+                } else if (newCount === 102) {
+                    showAchievement("📞 Rekor Hatırası", "102 Öpücük! Tıpkı o unutulmaz görüntülü konuşmanız gibi... ✨");
+                } else if (newCount === 250) {
+                    showAchievement("🥉 Bronz Sevgili", "250 Öpücük! Bu sevgi Ankara-Augsburg hattını eritir. 🔥");
+                } else if (newCount === 500) {
+                    showAchievement("🥈 Gümüş Sevgili", "500 Öpücük! Böcek'e olan özlemin arşa çıktı... 💍");
+                } else if (newCount === 1000) {
+                    showAchievement("🥇 KRALİÇE SEVGİLİ", "1000 Öpücük! Sen gerçek bir şampiyonsun Mein! 🏆");
+                }
+                
+                return newCount;
+            });
+
             const sn = document.getElementById("sent-notification");
             if(sn) { sn.innerText = "❤️ Bildirim Yollandı!"; sn.classList.add("show"); setTimeout(() => sn.classList.remove("show"), 2000); }
+        }
+
+        // BAŞARI KUTUSU GÖSTERME
+        function showAchievement(title, message) {
+            const achDiv = document.createElement("div");
+            achDiv.style = `
+                position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #FFD700, #FF69B4);
+                color: #fff; padding: 25px; border-radius: 25px; z-index: 10000;
+                text-align: center; box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
+                border: 3px solid white; animation: slideUp 0.5s ease;
+                min-width: 280px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            `;
+            achDiv.innerHTML = `<div style="font-size: 2.5rem;">👑</div><h2 style="margin:5px 0; font-family:'Pacifico';">${title}</h2><p>${message}</p>`;
+            document.body.appendChild(achDiv);
+            
+            setTimeout(() => {
+                achDiv.style.opacity = "0";
+                achDiv.style.transition = "1s";
+                setTimeout(() => achDiv.remove(), 1000);
+            }, 5000);
         }
 
         function toRad(v) { return v * Math.PI / 180; }
@@ -160,7 +201,6 @@
             });
         }
 
-        // --- GERİ SAYIM GÜNCELLEMESİ (6 ŞUBAT 2026) ---
         setInterval(() => {
             const now = new Date(); const ops = { hour:'2-digit', minute:'2-digit', hour12:false };
             document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', ops);
