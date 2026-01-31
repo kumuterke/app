@@ -8,89 +8,139 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        :root { --main-pink: #ff9a9e; --dark-pink: #d63384; --bg: #fff5f7; --card: #ffffff; --text: #444; --nav: #ffffff; --input-bg: #fff; }
-        body.dark-mode { --bg: #1a1a1a; --card: #2d2d2d; --text: #fdfbfb; --main-pink: #fb7185; --nav: #2d2d2d; --input-bg: #2d2d2d; }
+        /* VARSAYILAN OLARAK KOYU TEMA (Göz yormayan pembe) */
+        :root { 
+            --main-pink: #ff9a9e; 
+            --dark-pink: #ff6b81; 
+            --bg: #0f0f0f; /* Siyah Arkaplan */
+            --card: #1a1a1a; /* Koyu Kartlar */
+            --text: #ffffff; 
+            --nav: #151515; 
+            --input-bg: rgba(255,255,255,0.1); 
+            --border-color: rgba(255, 154, 158, 0.3);
+        }
+        
+        /* IŞIKLARI AÇ (Light Mode opsiyonel) */
+        body.light-mode { 
+            --bg: #fff5f7; 
+            --card: #ffffff; 
+            --text: #444; 
+            --nav: #ffffff; 
+            --input-bg: #fff; 
+            --border-color: rgba(255, 154, 158, 0.5);
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; min-height: 100vh; overflow-x: hidden; padding-bottom: 120px; width: 100%; }
         
-        .header-container { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px; }
-        h1 { font-family: 'Pacifico'; color: var(--dark-pink); margin: 0; font-size: 1.6rem; }
-        .theme-toggle { background: var(--main-pink); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: white; }
-        
-        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid rgba(255,154,158,0.2); box-shadow: 0 8px 25px rgba(255,154,158,0.1); }
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
-        .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(255,154,158,0.2); text-align: center; }
-        .btn { background: var(--main-pink); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; box-shadow: 0 5px 15px rgba(255,154,158,0.3); }
-        .btn:active { transform: scale(0.98); }
-        textarea, input[type="text"] { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid #ffe3e3; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
-        body.dark-mode textarea, body.dark-mode input { border-color: rgba(255,255,255,0.1); }
+        /* HEADER & MÜZİK */
+        .sticky-music { position: sticky; top: 0; z-index: 2000; background: var(--nav); border-bottom: 2px solid var(--main-pink); padding: 10px; box-shadow: 0 4px 15px rgba(255, 154, 158, 0.2); }
+        .music-ui { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+        #music-settings { display: none; gap: 5px; margin-top: 5px; }
 
-        /* TODO LIST STİLİ */
-        .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,154,158,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; transition: 0.3s; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px 10px 15px; }
+        h1 { font-family: 'Pacifico'; color: var(--main-pink); margin: 0; font-size: 1.6rem; text-shadow: 0 0 10px rgba(255, 154, 158, 0.3); }
+        .theme-toggle { background: var(--input-bg); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: var(--text); }
+
+        /* KARTLAR (Pembe Kenarlı) */
+        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
+        .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid var(--border-color); text-align: center; }
+        
+        /* BUTONLAR & INPUTLAR */
+        .btn { background: linear-gradient(135deg, #ff9a9e, #f687b3); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4); }
+        .btn:active { transform: scale(0.98); }
+        textarea, input[type="text"] { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid var(--border-color); outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
+
+        /* ARŞİV */
+        .archive-list { max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 5px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+        .archive-item { padding: 10px; border-radius: 12px; font-size: 0.8rem; line-height: 1.4; max-width: 90%; }
+        .arch-mina { background: rgba(255, 154, 158, 0.2); align-self: flex-end; border-right: 3px solid var(--main-pink); }
+        .arch-tyler { background: rgba(0, 210, 255, 0.2); align-self: flex-start; border-left: 3px solid #00d2ff; }
+
+        /* TODO LIST */
+        .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,154,158,0.1); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; }
         .todo-item.done span { text-decoration: line-through; opacity: 0.5; }
-        .todo-check { width: 20px; height: 20px; border: 2px solid var(--main-pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        .todo-check { width: 20px; height: 20px; border: 2px solid var(--main-pink); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .todo-check.checked { background: var(--main-pink); }
         .todo-text { flex: 1; }
-        .todo-delete { cursor: pointer; opacity: 0.7; font-size: 1.1rem; }
-        .todo-input-container { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border-radius: 50px; padding: 5px 5px 5px 15px; margin-top: 15px; border: 1px solid #ffe3e3; }
+        .todo-delete { cursor: pointer; opacity: 0.7; }
+        .todo-input-container { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border-radius: 50px; padding: 5px 5px 5px 15px; margin-top: 15px; border: 1px solid var(--border-color); }
         .todo-input-container input { margin-top: 0; background: transparent; padding: 8px 0; border: none !important; flex: 1; color: var(--text); outline: none; }
-        .todo-add-btn { background: var(--main-pink); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .todo-add-btn { background: var(--main-pink); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* ARŞİV STİLİ */
-        .archive-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 5px; margin-top: 15px; border-top: 1px solid rgba(255,154,158,0.2); padding-top: 10px; }
-        .archive-msg { padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; max-width: 80%; line-height: 1.4; position: relative; }
-        .msg-me { background: var(--main-pink); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .msg-other { background: rgba(0, 210, 255, 0.1); align-self: flex-start; border-bottom-left-radius: 2px; border-left: 3px solid #00d2ff; }
-        .msg-time { font-size: 0.6rem; opacity: 0.7; display: block; margin-top: 3px; text-align: right; }
-
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-around; padding: 15px 0; z-index: 1000; border-top: 1px solid rgba(255,154,158,0.1); border-radius: 20px 20px 0 0; }
+        /* NAVİGASYON */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-around; padding: 15px 0; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.05); border-radius: 20px 20px 0 0; }
         .nav-item { cursor: pointer; font-size: 1.4rem; opacity: 0.5; filter: grayscale(1); transition: 0.3s; }
-        .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); }
-        
-        #love-notification, #sent-notification { visibility: hidden; position: fixed; left: 50%; transform: translate(-50%, -50%); z-index: 9999; transition: 0.4s; opacity: 0; text-align: center; width: 80%; }
-        #love-notification.show { visibility: visible; opacity: 1; top: 50%; }
-        #sent-notification.show { visibility: visible; opacity: 1; top: 25%; }
-        #status-popup { visibility: hidden; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--main-pink); color: white; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 10001; opacity: 0; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,154,158,0.3); }
-        #status-popup.show { visibility: visible; opacity: 1; bottom: 120px; }
-        .champion-badge { background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
+        .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); color: var(--main-pink); }
 
         .page { display: none; animation: slideUp 0.4s ease; padding-top: 5px; }
         .page.active { display: block; }
         iframe { width: 100%; height: 78vh; border: none; border-radius: 20px; background: white; margin-top: 10px; }
+        
+        #love-notification, #sent-notification { visibility: hidden; position: fixed; left: 50%; transform: translate(-50%, -50%); z-index: 9999; transition: 0.4s; opacity: 0; text-align: center; }
+        #love-notification.show { visibility: visible; opacity: 1; top: 50%; }
+        #sent-notification.show { visibility: visible; opacity: 1; top: 25%; }
+        #status-popup { visibility: hidden; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--main-pink); color: white; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 10001; opacity: 0; transition: 0.3s; }
+        #status-popup.show { visibility: visible; opacity: 1; bottom: 120px; }
+        .champion-badge { background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
+
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
+    <div class="sticky-music">
+        <div class="music-ui">
+            <small style="color:var(--main-pink); font-weight:bold;">🎵 Ortak Müzik</small>
+            <button onclick="toggleMusic()" style="background:none; border:none; color:var(--text); font-size:0.7rem; cursor:pointer;">⚙️ Ayarla</button>
+        </div>
+        <div id="player-container"></div>
+        <div id="music-settings">
+            <input type="text" id="music-id" placeholder="YouTube Video ID" style="width:70%; font-size:0.7rem; padding:5px; border-radius:5px; border:none;">
+            <button onclick="saveMusic()" style="width:25%; font-size:0.7rem; padding:5px; border-radius:5px; background:var(--main-pink); color:white; border:none;">Kaydet</button>
+        </div>
+    </div>
+
     <div id="love-notification" style="background:rgba(255, 71, 87, 0.95); padding:30px; border-radius:30px; border:2px solid white;"><div style="font-size: 3rem;">❤️</div><h2>Böcek Seni Çok Özledi!</h2><p>Hemen ona bir öpücük gönder.</p></div>
     <div id="sent-notification" style="background:rgba(46, 204, 113, 0.95); color:white; padding:15px 30px; border-radius:50px;">❤️ Bildirim Yollandı!</div>
-    <div id="status-popup">✅ Durumun Böcek'e İletildi!</div>
+    <div id="status-popup">✅ Durumun Güncellendi!</div>
 
     <div id="home" class="page active">
         <div class="header-container"><h1>Selam Mein! ❤️</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
         
         <div class="grid-container">
-            <div class="mini-card"><small style="opacity:0.7">Böcek 🔋</small><div id="tyler-bat" style="font-size:1.1rem; font-weight:bold; color:var(--dark-pink);">--%</div></div>
-            <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="font-size:0.9rem; font-weight:bold; color:var(--dark-pink);">--:--</div></div>
+            <div class="mini-card"><small style="opacity:0.7">Böcek Batarya</small><div id="tyler-bat" style="color:var(--main-pink); font-weight:bold;">--%</div></div>
+            <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="color:var(--main-pink); font-weight: bold;">--:--</div></div>
+        </div>
+
+        <div class="status-card" style="text-align:center;">
+            <h3 style="font-family:'Pacifico'; font-size:0.9rem; color:var(--main-pink); margin:0;">Mesafe (GPS)</h3>
+            <div id="distance-display" style="font-size:1.3rem; font-weight:bold; margin:8px 0;">Hesaplanıyor...</div>
+            <div style="display:flex; justify-content:space-around; font-size:0.7rem; margin-top:8px; opacity:0.8;">
+                <div>🇹🇷 Ank: <span id="local-time">--:--</span></div>
+                <div>🇩🇪 Aug: <span id="tyler-time">--:--</span></div>
+            </div>
+        </div>
+
+        <div class="status-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Böcek'in Modu</h3><span id="tyler-mood-display" style="font-size:1.8rem;">⌛</span></div>
+            <p id="tyler-note" style="background:rgba(255,154,158,0.1); padding:12px; border-radius:12px; border-left:3px solid var(--main-pink); font-style:italic; font-size:0.85rem; margin-top:10px;">Not bekleniyor...</p>
         </div>
 
         <div class="grid-container">
-            <div class="mini-card" style="background:var(--main-pink); color:white; border:none;">😘 Mina<div id="kiss-mina" style="font-size:1.2rem; font-weight:bold;">0</div></div>
-            <div class="mini-card">😘 Böcek<div id="kiss-tyler" style="font-size:1.2rem; font-weight:bold;">0</div></div>
+            <div class="mini-card">😘 Mina<div id="kiss-mina">0</div></div>
+            <div class="mini-card">😘 Böcek<div id="kiss-tyler">0</div></div>
         </div>
 
-        <div class="status-card" style="text-align: center;">
-            <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Böcek'in Modu</h3><span id="tyler-mood-display" style="font-size:1.8rem;">⌛</span></div>
-            <p id="tyler-note" style="background:rgba(255,154,158,0.05); padding:12px; border-radius:12px; border-left:4px solid var(--dark-pink); font-style:italic; font-size:0.85rem; margin-top:10px; text-align: left;">Not bekleniyor...</p>
-        </div>
-
-        <div style="padding: 0 12px;"><button class="btn" onclick="sendMissYou(event)">BÖCEK'İ ÖZLEDİM ❤️</button></div>
+        <div style="padding: 0 12px;"><button class="btn" onclick="sendMissYou()">BÖCEK'İ ÖZLEDİM ❤️</button></div>
 
         <div class="status-card" style="margin-top:15px;">
             <h3>Modunu Seç</h3>
-            <div id="mina-mood-selector" style="display:flex; justify-content:center; gap:12px; margin-bottom:15px; flex-wrap:wrap;"></div>
-            <textarea id="minaNote" rows="2" placeholder="Böcek'e ne söylemek istersin?"></textarea>
+            <div id="mina-mood-selector" style="display:flex; justify-content:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;"></div>
+            <textarea id="minaNote" rows="2" placeholder="Böcek'e mesajın..."></textarea>
             <button class="btn" onclick="updateMinaStatus()">Gönder & Arşivle</button>
             
+            <h3 style="margin-top:20px; font-size:0.9rem; opacity:0.7;">📜 Aşk Arşivi</h3>
             <div id="archive-list" class="archive-list"></div>
         </div>
 
@@ -104,24 +154,12 @@
         </div>
     </div>
 
-    <div id="music-page" class="page">
-        <div class="header-container"><h1>Müzik Kutusu 🎵</h1></div>
-        <div class="status-card" style="text-align: center;">
-            <p style="opacity: 0.7; margin-bottom: 10px;">Birlikte dinlemek için ID girin.</p>
-            <div id="music-display" style="border-radius: 15px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.3); min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                Yükleniyor...
-            </div>
-            <input type="text" id="music-input" placeholder="YouTube Video ID">
-            <button class="btn" onclick="changeMusic()">Şarkıyı Değiştir</button>
-        </div>
-    </div>
-
     <div id="quiz-page" class="page">
         <div class="status-card" style="text-align:center; border: 1px solid var(--main-pink);">
-            <h2 style="font-family:'Pacifico'; color:var(--dark-pink); margin-bottom:5px;">Aşk Ligi 🏆</h2>
-            <div class="grid-container">
-                <div class="mini-card"><small>Böcek</small><div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:var(--text);">0</div></div>
-                <div class="mini-card"><small>Mina</small><div id="score-mina" style="font-size:1.5rem; font-weight:bold; color:var(--dark-pink);">0</div></div>
+            <h2 style="font-family:'Pacifico'; color:var(--main-pink); margin-bottom:5px;">Aşk Ligi 🏆</h2>
+            <div class="grid-container" style="margin-bottom:10px;">
+                <div class="mini-card"><small>Böcek</small><div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:#00d2ff;">0</div></div>
+                <div class="mini-card"><small>Mina</small><div id="score-mina" style="font-size:1.5rem; font-weight:bold; color:var(--main-pink);">0</div></div>
             </div>
             <div id="champion-text" class="champion-badge">Hesaplanıyor...</div>
         </div>
@@ -133,102 +171,167 @@
 
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="showPage('home', this)">🏠</div>
-        <div class="nav-item" onclick="showPage('music-page', this)">🎵</div>
         <div class="nav-item" onclick="showPage('quiz-page', this)">🏆</div>
         <div class="nav-item" onclick="showPage('history', this)">📜</div>
         <div class="nav-item" onclick="showPage('coupons', this)">🎟️</div>
+        <div class="nav-item" onclick="showPage('gift', this)">🎁</div>
     </nav>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyBnCvyBVmQgEs4hl94K-WBYCWVpeJR9PtA", authDomain: "minatyler-b7212.firebaseapp.com", databaseURL: "https://minatyler-b7212-default-rtdb.europe-west1.firebasedatabase.app", projectId: "minatyler-b7212", storageBucket: "minatyler-b7212.firebasestorage.app", messagingSenderId: "599344339158", appId: "1:599344339158:web:11e6083e5d56ffae91d177" };
         firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
-        function toggleTheme() { document.body.classList.toggle('dark-mode'); }
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active'); el.classList.add('active');
+            window.scrollTo(0,0);
         }
 
-        // MOOD GÜNCELLEME (BİLDİRİM DÜZELTİLDİ)
-        function updateMinaMood(emoji) {
-            db.ref('status').update({ meinMood: emoji });
-            // Bildirim Mesajı: 🥳 Mina Parti moduna geçti!
-            db.ref('alerts/tylerAlert').set({ msg: `${emoji} Mina ${emoji} moduna geçti!`, time: Date.now() });
-
-            const pop = document.getElementById('status-popup');
-            pop.innerText = `✅ ${emoji} modu Böcek'e iletildi!`;
-            pop.classList.add('show');
-            setTimeout(() => pop.classList.remove('show'), 2000);
+        // --- GPS MESAFE HESAPLAMA (Mina için) ---
+        function toRad(v) { return v * Math.PI / 180; }
+        function initLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition((p) => {
+                    const R = 6371; 
+                    // Mina (Augsburg'da) -> Böcek (Ankara'da: 39.9334, 32.8597)
+                    const dLat = toRad(39.9334 - p.coords.latitude); 
+                    const dLon = toRad(32.8597 - p.coords.longitude);
+                    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(39.9334)) * Math.sin(dLon/2)**2;
+                    const d = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3);
+                    document.getElementById('distance-display').innerText = d.replace('.', ',') + " KM";
+                }, () => { 
+                    document.getElementById('distance-display').innerText = "1975,946 KM"; 
+                });
+            }
         }
-        const ms = ['😊', '🥰', '😴', '🥺', '😤', '😈', '🔞', '🫦', '🔥', '🍷']; 
-        document.getElementById('mina-mood-selector').innerHTML = ms.map(m => `<span style="font-size:2rem; cursor:pointer; padding:5px;" onclick="updateMinaMood('${m}')">${m}</span>`).join('');
+        initLocation();
 
-        // DURUM VE ARŞİV
-        function updateMinaStatus() {
-            const txt = document.getElementById('minaNote').value;
-            if(!txt.trim()) return;
-            db.ref('status').update({ meinNote: txt });
-            db.ref('love_archive').push({ sender: 'Mina', msg: txt, time: Date.now() });
+        // --- SAYAÇLAR VE DURUM ---
+        db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
+        db.ref('scores').on('value', snap => {
+            const s = snap.val() || {}; const t = s.Tyler || 0; const m = s.Mina || 0;
+            document.getElementById('score-tyler').innerText = t; document.getElementById('score-mina').innerText = m;
+            const ct = document.getElementById('champion-text');
+            if(t > m) ct.innerText = "👑 En Çok Seven: Böcek"; else if(m > t) ct.innerText = "👑 En Çok Seven: Mina"; else ct.innerText = "💞 Sevgimiz Eşit!";
+        });
+        
+        // Batarya Fix
+        db.ref('status').on('value', s => { 
+            const d = s.val(); if(!d) return; 
+            if(d.Tyler && d.Tyler.battery) {
+                const batVal = typeof d.Tyler.battery === 'object' ? d.Tyler.battery.battery : d.Tyler.battery;
+                document.getElementById('tyler-bat').innerText = batVal || "--%";
+            }
+            document.getElementById('tyler-mood-display').innerText = d.böcekMood||"⌛"; 
+            document.getElementById('tyler-note').innerText = d.böcekNote||"Not bekleniyor..."; 
+        });
+
+        // --- ARŞİV VE DURUM GÜNCELLEME (Mina İçin) ---
+        function updateMinaStatus() { 
+            const noteBox = document.getElementById('minaNote');
+            const noteText = noteBox.value;
+            if(!noteText.trim()) return;
+
+            db.ref('status').update({ meinNote: noteText }); 
+            db.ref('love_archive').push({ sender: 'Mina', msg: noteText, time: Date.now() });
 
             const pop = document.getElementById('status-popup');
             pop.innerText = "✅ Durum Böcek'e İletildi!";
             pop.classList.add('show');
             setTimeout(() => pop.classList.remove('show'), 2000);
-            document.getElementById('minaNote').value = "";
+            noteBox.value = ""; 
         }
 
-        db.ref('love_archive').limitToLast(15).on('value', snap => {
-            const l = document.getElementById('archive-list'); l.innerHTML = "";
-            snap.forEach(c => {
-                const d = c.val();
-                const cls = d.sender === 'Mina' ? 'msg-me' : 'msg-other';
-                const time = new Date(d.time).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
-                l.innerHTML += `<div class="archive-msg ${cls}">${d.msg}<span class="msg-time">${time}</span></div>`;
+        db.ref('love_archive').limitToLast(10).on('value', snap => {
+            const list = document.getElementById('archive-list');
+            list.innerHTML = "";
+            snap.forEach(child => {
+                const data = child.val();
+                const side = data.sender === 'Mina' ? 'arch-mina' : 'arch-tyler';
+                list.innerHTML += `<div class="archive-item ${side}"><strong>${data.sender}:</strong> ${data.msg}</div>`;
             });
-            l.scrollTop = l.scrollHeight;
+            list.scrollTop = list.scrollHeight;
         });
 
-        // TO-DO LIST (CHECKBOX EKLENDİ)
+        // --- MÜZİK (SABİT) ---
+        function toggleMusic() { const s = document.getElementById('music-settings'); s.style.display = s.style.display === 'flex' ? 'none' : 'flex'; }
+        function saveMusic() { const id = document.getElementById('music-id').value; if(id) db.ref('shared_music').set({ id: id }); }
+        db.ref('shared_music').on('value', snap => {
+            const data = snap.val();
+            if(data) document.getElementById('player-container').innerHTML = `<iframe width="100%" height="60" src="https://www.youtube.com/embed/${data.id}?rel=0" frameborder="0" allow="autoplay"></iframe>`;
+        });
+
+        // --- DİĞER ÖZELLİKLER ---
+        function updateMinaMood(emoji) {
+            db.ref('status').update({ meinMood: emoji });
+            // BİLDİRİM DÜZELTİLDİ: "Mina X moduna geçti!"
+            db.ref('alerts/tylerAlert').set({ msg: `${emoji} Mina ${emoji} moduna geçti!`, time: Date.now() });
+            
+            const pop = document.getElementById('status-popup');
+            pop.innerText = `✅ Modun (${emoji}) Böcek'e iletildi!`;
+            pop.classList.add('show');
+            setTimeout(() => pop.classList.remove('show'), 2000);
+        }
+
+        const ms = ['😊', '🥰', '😴', '🥺', '😤', '😈', '🔞', '🫦', '🔥', '🍷']; 
+        document.getElementById('mina-mood-selector').innerHTML = ms.map(m => `<span style="font-size:2rem; cursor:pointer; padding:5px;" onclick="updateMinaMood('${m}')">${m}</span>`).join('');
+
+        function sendMissYou() { 
+            db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() });
+            db.ref('kisses/Mina').transaction(c => (c || 0) + 1);
+            const sn = document.getElementById("sent-notification");
+            sn.classList.add("show"); setTimeout(() => sn.classList.remove("show"), 2000);
+        }
+
+        db.ref('alerts/minaAlert').on('value', snap => {
+            const data = snap.val(); if(data && Date.now() - data.time < 5000) {
+                const n = document.getElementById("love-notification"); 
+                n.innerHTML = `<div style="font-size:3rem;">❤️</div><h2>${data.msg}</h2>`;
+                n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000);
+            }
+        });
+
+        // ZAMANLAYICILAR
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('tyler-time').innerText = new Date(now.getTime()-(2*60*60*1000)).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            const diff = new Date("2026-02-06T00:00:00") - now;
+            document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️";
+        }, 1000);
+
+        // TODO LIST (Checkbox'lı)
         function addTodo() { 
             const i = document.getElementById('todo-input'); 
             if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } 
         }
-        function toggleTodo(key, currentDone) {
-            db.ref('todos/' + key).update({ done: !currentDone });
-        }
-        function deleteTodo(key) {
-            db.ref('todos/' + key).remove();
-        }
+        function toggleTodo(key, currentDone) { db.ref('todos/' + key).update({ done: !currentDone }); }
+        function deleteTodo(key) { db.ref('todos/' + key).remove(); }
+        
         db.ref('todos').on('value', s => { 
             const l = document.getElementById('todo-list'); l.innerHTML = ""; 
             s.forEach(c => { 
                 const i = c.val(); 
-                const checkedClass = i.done ? 'checked' : '';
-                const doneClass = i.done ? 'done' : '';
+                const cls = i.done ? 'done' : '';
+                const chk = i.done ? 'checked' : '';
                 l.innerHTML += `
-                <div class="todo-item ${doneClass}">
-                    <div class="todo-check ${checkedClass}" onclick="toggleTodo('${c.key}', ${i.done})">${i.done ? '✓' : ''}</div>
+                <div class="todo-item ${cls}">
+                    <div class="todo-check ${chk}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div>
                     <span class="todo-text">${i.text}</span>
                     <span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span>
                 </div>`; 
             }); 
         });
-
-        // MÜZİK
-        function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
-        db.ref('shared_music').on('value', snap => {
-            const id = snap.val()?.id || "dQw4w9WgXcQ";
-            document.getElementById('music-display').innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${id}?rel=0" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
-        });
-
-        // DİĞERLERİ
-        function sendMissYou() { db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() }); db.ref('kisses/Mina').transaction(c => (c || 0) + 1); document.getElementById("sent-notification").classList.add("show"); setTimeout(() => document.getElementById("sent-notification").classList.remove("show"), 2000); }
-        db.ref('alerts/minaAlert').on('value', snap => { const d = snap.val(); if(d && Date.now() - d.time < 5000) { const n = document.getElementById("love-notification"); n.innerHTML = `<div style="font-size:3rem;">❤️</div><h2>${d.msg}</h2>`; n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000); } });
-        db.ref('scores').on('value', s => { const d = s.val() || {}; const t = d.Tyler || 0; const m = d.Mina || 0; document.getElementById('score-tyler').innerText = t; document.getElementById('score-mina').innerText = m; const ct = document.getElementById('champion-text'); if(t>m) ct.innerText = "👑 En Çok Seven: Böcek"; else if(m>t) ct.innerText = "👑 En Çok Seven: Mina"; else ct.innerText = "💞 Sevgimiz Eşit!"; });
-        db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-mina').innerText = d.Mina || 0; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; });
-        db.ref('status').on('value', s => { if(s.val()?.Tyler) document.getElementById('tyler-bat').innerText = s.val().Tyler.battery||"--%"; if(s.val()) { document.getElementById('tyler-mood-display').innerText = s.val().böcekMood||"⌛"; document.getElementById('tyler-note').innerText = s.val().böcekNote||"Not yok."; } });
-        setInterval(() => { const diff = new Date("2026-02-06T00:00:00") - new Date(); document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; }, 1000);
+        
+        // PİL DURUMUNU GÖNDERME
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(bat => {
+                const send = () => db.ref('status/Mina/battery').set({ battery: Math.round(bat.level * 100) + "%", lastUpdate: new Date().toLocaleTimeString() });
+                bat.onlevelchange = send; send();
+            });
+        }
     </script>
 </body>
 </html>
