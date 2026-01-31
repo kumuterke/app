@@ -33,6 +33,9 @@
         #love-notification.show { visibility: visible; opacity: 1; transform: translate(-50%, -50%) scale(1); }
         #sent-notification { visibility: hidden; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%); background: rgba(46, 204, 113, 0.95); color: white; padding: 15px 30px; border-radius: 50px; text-align: center; z-index: 9999; box-shadow: 0 5px 20px rgba(46, 204, 113, 0.4); font-weight: bold; opacity: 0; transition: 0.3s; }
         #sent-notification.show { visibility: visible; opacity: 1; top: 25%; }
+        /* Pop-up Stil */
+        #status-popup { visibility: hidden; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0, 210, 255, 0.9); color: white; padding: 12px 25px; border-radius: 50px; font-weight: bold; z-index: 10001; opacity: 0; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        #status-popup.show { visibility: visible; opacity: 1; bottom: 120px; }
         .champion-badge { background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .page { display: none; animation: slideUp 0.4s ease; padding-top: 5px; }
@@ -42,6 +45,7 @@
 <body>
     <div id="love-notification"><div style="font-size: 3rem;">❤️</div><h2 style="margin: 10px 0;">Mina Seni Çok Özledi!</h2><p>Hemen ona bir öpücük gönder.</p></div>
     <div id="sent-notification">❤️ Bildirim Yollandı!</div>
+    <div id="status-popup">✅ Durumun Güncellendi!</div>
 
     <div id="home" class="page active">
         <div class="header-container"><h1>Böcek OS</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
@@ -181,7 +185,20 @@
         if (hour >= 0 && hour < 4) { moodList.push('😈', '🔞', '🫦', '🔥', '🍷'); }
         document.getElementById('tyler-mood-selector').innerHTML = moodList.map(m => `<span style="font-size:1.8rem; cursor:pointer;" onclick="db.ref('status').update({böcekMood:'${m}'})">${m}</span>`).join('');
         
-        function updateTylerStatus() { db.ref('status').update({ böcekNote: document.getElementById('tylerNote').value }); }
+        // --- GÜNCELLENEN STATÜS FONKSİYONU ---
+        function updateTylerStatus() { 
+            const noteBox = document.getElementById('tylerNote');
+            db.ref('status').update({ böcekNote: noteBox.value }); 
+            
+            // Pop-up Göster
+            const pop = document.getElementById('status-popup');
+            pop.classList.add('show');
+            setTimeout(() => pop.classList.remove('show'), 2000);
+
+            // Kutuyu Temizle
+            noteBox.value = ""; 
+        }
+
         function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
         db.ref('todos').on('value', s => { const l = document.getElementById('todo-list'); l.innerHTML = ""; s.forEach(c => { const i = c.val(); l.innerHTML += `<div class="todo-item"><span>${i.text}</span><span onclick="db.ref('todos/${c.key}').remove()">🗑️</span></div>`; }); });
         initLocation();
