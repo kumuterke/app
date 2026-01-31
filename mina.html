@@ -193,18 +193,36 @@
         db.ref('status').on('value', s => { const d = s.val(); if(!d) return; if(d.Tyler) document.getElementById('tyler-bat').innerText = d.Tyler.battery||"--%"; document.getElementById('tyler-mood-display').innerText = d.böcekMood||"⌛"; document.getElementById('tyler-note').innerText = d.böcekNote||"Not yok."; });
         
         const ms = ['😊', '🥰', '😴', '🥺', '😤', '😈', '🔞', '🫦', '🔥', '🍷']; 
-        document.getElementById('mina-mood-selector').innerHTML = ms.map(m => `<span style="font-size:2rem; cursor:pointer;" onclick="db.ref('status').update({meinMood:'${m}'})">${m}</span>`).join('');
         
+        // --- MINA'NIN PANELİ (GÜNCELLENDİ) ---
+        document.getElementById('mina-mood-selector').innerHTML = ms.map(m => `
+            <span style="font-size:2rem; cursor:pointer;" onclick="updateMinaMood('${m}')">${m}</span>
+        `).join('');
+
+        function updateMinaMood(emoji) {
+            // 1. Kendi modunu güncelle
+            db.ref('status').update({ meinMood: emoji });
+            
+            // 2. Sana (Böcek'e) bildirim gönder
+            db.ref('alerts/tylerAlert').set({ 
+                msg: `${emoji} Mina modunu güncelledi!`, 
+                time: Date.now() 
+            });
+
+            // 3. Mina'nın ekranında onay göster
+            const pop = document.getElementById('status-popup');
+            pop.innerText = `✅ Modun (${emoji}) Böcek'e iletildi!`;
+            pop.classList.add('show');
+            setTimeout(() => pop.classList.remove('show'), 2000);
+        }
+
         function updateMinaStatus() { 
             const noteBox = document.getElementById('minaNote');
             db.ref('status').update({ meinNote: noteBox.value }); 
-            
-            // Pop-up Göster
             const pop = document.getElementById('status-popup');
+            pop.innerText = "✅ Durumun Böcek'e İletildi!";
             pop.classList.add('show');
             setTimeout(() => pop.classList.remove('show'), 2000);
-
-            // Kutuyu Temizle
             noteBox.value = ""; 
         }
 
