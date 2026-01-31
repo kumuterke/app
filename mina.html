@@ -173,30 +173,43 @@
             document.getElementById(id).classList.add('active'); el.classList.add('active');
         }
 
-        // --- OPTİMİZE GALERİ (Sıkıştırma + Toplu Yükleme Fix) ---
+        // --- OPTİMİZE GALERİ (GIF Destekli + Sıkıştırma + Toplu Yükleme) ---
         function uploadPhoto() {
             const file = document.getElementById('photo-upload').files[0];
             if(file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1200; 
-                        const scaleSize = MAX_WIDTH / img.width;
-                        canvas.width = MAX_WIDTH;
-                        canvas.height = img.height * scaleSize;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
-                        db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
+                // EĞER DOSYA GIF İSE: İşlemeden direkt yükle (Animasyon bozulmasın)
+                if (file.type === "image/gif") {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        db.ref('gallery').push({ image: e.target.result, time: Date.now() });
                     };
-                    img.src = e.target.result;
+                    reader.readAsDataURL(file);
+                } 
+                // EĞER NORMAL RESİM İSE: Sıkıştır ve küçült (Hız ve Alan Tasarrufu)
+                else {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 1200; 
+                            const scaleSize = MAX_WIDTH / img.width;
+                            canvas.width = MAX_WIDTH;
+                            canvas.height = img.height * scaleSize;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            // Resmi JPEG formatına çevir ve sıkıştır
+                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+                            db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
+                        };
+                        img.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
                 }
-                reader.readAsDataURL(file);
             }
         }
         
+        // Galeri Gösterim (Aynen korundu)
         db.ref('gallery').orderByChild('time').limitToLast(50).on('value', snap => {
             const grid = document.getElementById('gallery-grid');
             let htmlContent = "";
@@ -282,3 +295,4 @@
     </script>
 </body>
 </html>
+
