@@ -232,41 +232,17 @@
             l.scrollTop = l.scrollHeight;
         });
 
-        <script>
-    // ... (Firebase init ve diğer fonksiyonlar) ...
-
-    // TODO LIST FONKSİYONU - Kutucuklar boş başlar
-    function addTodo() { 
-        const i = document.getElementById('todo-input'); 
-        if(i.value.trim()){ 
-            db.ref('todos').push({ 
-                text: i.value, 
-                done: false // Yeni görevler her zaman 'false' (boş) olarak eklenir
+        // --- TODO LIST (Checkbox) ---
+        function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
+        function toggleTodo(key, currentDone) { db.ref('todos/' + key).update({ done: !currentDone }); }
+        function deleteTodo(key) { db.ref('todos/' + key).remove(); }
+        db.ref('todos').on('value', s => { 
+            const l = document.getElementById('todo-list'); l.innerHTML = ""; 
+            s.forEach(c => { 
+                const i = c.val(); const chk = i.done ? 'checked' : ''; const cls = i.done ? 'done' : '';
+                l.innerHTML += `<div class="todo-item ${cls}"><div class="todo-check ${chk}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div><span class="todo-text">${i.text}</span><span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span></div>`; 
             }); 
-            i.value = ""; 
-        } 
-    }
-
-    db.ref('todos').on('value', s => { 
-        const l = document.getElementById('todo-list'); 
-        l.innerHTML = ""; 
-        s.forEach(c => { 
-            const i = c.val(); 
-            const cls = i.done ? 'done' : '';
-            const chk = i.done ? 'checked' : '';
-            l.innerHTML += `
-            <div class="todo-item ${cls}">
-                <div class="todo-check ${chk}" onclick="toggleTodo('${c.key}', ${i.done})">
-                    ${i.done ? '✓' : ''} 
-                </div>
-                <span class="todo-text">${i.text}</span>
-                <span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span>
-            </div>`; 
-        }); 
-    });
-    // Not: 'todo-check' stiline 'color: transparent' ekleyip 'checked' olduğunda renk verirsen 
-    // veya yukarıdaki gibi koşullu ('✓' karakteri) yaparsan kutucuk boş görünecektir.
-</script>
+        });
 
         // --- MÜZİK ---
         function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
@@ -285,4 +261,3 @@
     </script>
 </body>
 </html>
-
