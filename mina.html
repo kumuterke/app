@@ -209,11 +209,78 @@ db.ref('active_coupon_Tyler').on('value', snap => {
 });
 
         // --- DİĞER ORİJİNAL SİSTEMLER ---
-        let isNewestAtBottom = true; let galleryData = [];
-        function uploadPhoto() { const f = document.getElementById('photo-upload').files[0]; if(f) { const r = new FileReader(); r.onload = e => db.ref('gallery').push({image: e.target.result, time: Date.now()}); r.readAsDataURL(f); } }
-        db.ref('gallery').limitToLast(100).on('value', s => { galleryData=[]; s.forEach(c=>galleryData.push(c.val().image)); renderGallery(); });
-        function renderGallery() { const g = document.getElementById('gallery-grid'); g.innerHTML = (isNewestAtBottom ? galleryData : [...galleryData].reverse()).map(src => `<img src="${src}" class="gallery-item" onclick="window.open(this.src)">`).join(''); document.getElementById('sort-btn').innerText = isNewestAtBottom ? "⬇️ Sırala: Yeniler Altta" : "⬆️ Sırala: Yeniler Üstte"; }
-        function toggleSort() { isNewestAtBottom = !isNewestAtBottom; renderGallery(); }
+        // --- GELİŞMİŞ GALERİ SİSTEMİ (Mina İçin Optimize Edildi) ---
+let isNewestAtBottom = true; 
+let galleryData = []; 
+
+function uploadPhoto() {
+    const file = document.getElementById('photo-upload').files[0];
+    if(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (file.type === "image/gif") {
+                // GIF ise direkt yükle (Animasyon bozulmasın)
+                db.ref('gallery').push({ image: e.target.result, time: Date.now() });
+            } else {
+                // Değilse SIKIŞTIR (Kota dostu mod)
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 1000; // Mina için ideal boyut
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Kaliteyi %80 yaparak hem netlik korundu hem kota kurtarıldı
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.80);
+                    db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
+                };
+                img.src = e.target.result;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Resimleri anlık dinle ve listele
+db.ref('gallery').orderByChild('time').limitToLast(50).on('value', snap => {
+    galleryData = []; 
+    snap.forEach(c => { 
+        galleryData.push({ id: c.key, src: c.val().image }); 
+    });
+    renderGallery(); 
+});
+
+function renderGallery() {
+    const grid = document.getElementById('gallery-grid');
+    const btn = document.getElementById('sort-btn');
+    if(!grid) return;
+    
+    let htmlContent = "";
+    let photosToShow = isNewestAtBottom ? galleryData : [...galleryData].reverse();
+
+    if(btn) btn.innerText = isNewestAtBottom ? "⬇️ Sırala: Yeniler Altta" : "⬆️ Sırala: Yeniler Üstte";
+
+    photosToShow.forEach(item => {
+        htmlContent += `<img src="${item.src}" class="gallery-item" onclick="window.open(this.src)" style="cursor:pointer;" loading="lazy">`;
+    });
+
+    grid.innerHTML = htmlContent || "<p style='width:100%; text-align:center; opacity:0.5;'>Henüz anı eklenmemiş...</p>";
+}
+
+function toggleSort() {
+    isNewestAtBottom = !isNewestAtBottom; 
+    renderGallery(); 
+}
 
         function toRad(v) { return v * Math.PI / 180; }
         navigator.geolocation.watchPosition(p => { const R = 6371; const dLat = toRad(39.9334 - p.coords.latitude); const dLon = toRad(32.8597 - p.coords.longitude); const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(39.9334)) * Math.sin(dLon/2)**2; document.getElementById('distance-display').innerText = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3).replace('.', ',') + " KM"; });
@@ -244,5 +311,6 @@ db.ref('active_coupon_Tyler').on('value', snap => {
     </script>
 </body>
 </html>
+
 
 
