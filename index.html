@@ -1,297 +1,309 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Böcek'in Paneli 🛠️</title>
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <style>
-        :root { --accent-blue: #00d2ff; --bg: #0f0f0f; --card: #1a1a1a; --text: #ffffff; --nav: #151515; --input-bg: rgba(255,255,255,0.1); }
-        body.light-mode { --bg: #f0f2f5; --card: #ffffff; --text: #333333; --nav: #ffffff; --input-bg: rgba(0,0,0,0.05); }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; min-height: 100vh; overflow-x: hidden; padding-bottom: 120px; width: 100%; }
-        
-        .header-container { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px; }
-        h1 { font-family: 'Pacifico'; color: var(--accent-blue); margin: 0; font-size: 1.6rem; }
-        .theme-toggle { background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: white; }
-        
-        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
-        .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(128,128,128,0.1); text-align: center; }
-        .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; }
-        .btn:active { transform: scale(0.98); }
-        textarea, input[type="text"] { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid transparent; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
-        
-        /* TO-DO LIST */
-        .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; transition: 0.3s; }
-        .todo-item.done span.todo-text { text-decoration: line-through; opacity: 0.5; }
-        .todo-check { width: 22px; height: 22px; border: 2px solid var(--accent-blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
-        .todo-check.checked { background: var(--accent-blue); color: #000; font-weight: bold; }
-        .todo-text { flex: 1; }
-        .todo-delete { cursor: pointer; opacity: 0.7; font-size: 1.1rem; }
-        .todo-input-container { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border-radius: 50px; padding: 5px 5px 5px 15px; margin-top: 15px; border: 1px solid rgba(0,210,255,0.2); }
-        .todo-input-container input { margin-top: 0; background: transparent; padding: 8px 0; border: none !important; flex: 1; color: var(--text); outline: none; }
-        .todo-add-btn { background: var(--accent-blue); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Böcek'in Paneli 🛠️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        :root { --accent-blue: #00d2ff; --bg: #0f0f0f; --card: #1a1a1a; --text: #ffffff; --nav: #151515; --input-bg: rgba(255,255,255,0.1); }
+        body.light-mode { --bg: #f0f2f5; --card: #ffffff; --text: #333333; --nav: #ffffff; --input-bg: rgba(0,0,0,0.05); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; min-height: 100vh; overflow-x: hidden; padding-bottom: 120px; width: 100%; }
+        
+        .header-container { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px; }
+        h1 { font-family: 'Pacifico'; color: var(--accent-blue); margin: 0; font-size: 1.6rem; }
+        .theme-toggle { background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: white; }
+        
+        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
+        .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(128,128,128,0.1); text-align: center; }
+        .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; }
+        .btn:active { transform: scale(0.98); }
+        textarea, input[type="text"] { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid transparent; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
+        
+        /* TO-DO LIST */
+        .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; transition: 0.3s; }
+        .todo-item.done span.todo-text { text-decoration: line-through; opacity: 0.5; }
+        .todo-check { width: 22px; height: 22px; border: 2px solid var(--accent-blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
+        .todo-check.checked { background: var(--accent-blue); color: #000; font-weight: bold; }
+        .todo-text { flex: 1; }
+        .todo-delete { cursor: pointer; opacity: 0.7; font-size: 1.1rem; }
+        .todo-input-container { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border-radius: 50px; padding: 5px 5px 5px 15px; margin-top: 15px; border: 1px solid rgba(0,210,255,0.2); }
+        .todo-input-container input { margin-top: 0; background: transparent; padding: 8px 0; border: none !important; flex: 1; color: var(--text); outline: none; }
+        .todo-add-btn { background: var(--accent-blue); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* GALERİ */
-        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-        .gallery-item { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 15px; border: 2px solid rgba(255,255,255,0.1); }
-        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
-        .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+        /* GALERİ */
+        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .gallery-item { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 15px; border: 2px solid rgba(255,255,255,0.1); }
+        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
 
-        /* ARŞİV */
-        .archive-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 5px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
-        .archive-msg { padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; max-width: 80%; line-height: 1.4; position: relative; }
-        .msg-me { background: rgba(0, 210, 255, 0.2); align-self: flex-end; border-bottom-right-radius: 2px; border-right: 3px solid var(--accent-blue); }
-        .msg-other { background: rgba(255, 154, 158, 0.2); align-self: flex-start; border-bottom-left-radius: 2px; border-left: 3px solid #ff9a9e; }
-        .msg-time { font-size: 0.6rem; opacity: 0.6; display: block; margin-top: 3px; text-align: right; }
+        /* ARŞİV */
+        .archive-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 5px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+        .archive-msg { padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; max-width: 80%; line-height: 1.4; position: relative; }
+        .msg-me { background: rgba(0, 210, 255, 0.2); align-self: flex-end; border-bottom-right-radius: 2px; border-right: 3px solid var(--accent-blue); }
+        .msg-other { background: rgba(255, 154, 158, 0.2); align-self: flex-start; border-bottom-left-radius: 2px; border-left: 3px solid #ff9a9e; }
+        .msg-time { font-size: 0.6rem; opacity: 0.6; display: block; margin-top: 3px; text-align: right; }
 
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-between; padding: 15px 15px; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.05); border-radius: 20px 20px 0 0; overflow-x: auto; }
-        .nav-item { cursor: pointer; font-size: 1.3rem; opacity: 0.5; filter: grayscale(1); transition: 0.3s; padding: 0 5px; }
-        .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); }
-        
-        #love-notification, #sent-notification { visibility: hidden; position: fixed; left: 50%; transform: translate(-50%, -50%); z-index: 9999; transition: 0.4s; opacity: 0; text-align: center; width: 85%; }
-        #love-notification.show { visibility: visible; opacity: 1; top: 50%; }
-        #sent-notification.show { visibility: visible; opacity: 1; top: 25%; }
-        #status-popup { visibility: hidden; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--accent-blue); color: #000; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 10001; opacity: 0; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        #status-popup.show { visibility: visible; opacity: 1; bottom: 120px; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-between; padding: 15px 15px; z-index: 1000; border-top: 1px solid rgba(255,255,255,0.05); border-radius: 20px 20px 0 0; overflow-x: auto; }
+        .nav-item { cursor: pointer; font-size: 1.3rem; opacity: 0.5; filter: grayscale(1); transition: 0.3s; padding: 0 5px; }
+        .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); }
+        
+        #love-notification, #sent-notification { visibility: hidden; position: fixed; left: 50%; transform: translate(-50%, -50%); z-index: 9999; transition: 0.4s; opacity: 0; text-align: center; width: 85%; }
+        #love-notification.show { visibility: visible; opacity: 1; top: 50%; }
+        #sent-notification.show { visibility: visible; opacity: 1; top: 25%; }
+        #status-popup { visibility: hidden; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--accent-blue); color: #000; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 10001; opacity: 0; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        #status-popup.show { visibility: visible; opacity: 1; bottom: 120px; }
 
-        .page { display: none; animation: slideUp 0.4s ease; padding-top: 5px; }
-        .page.active { display: block; }
-        iframe { width: 100%; height: 75vh; border: none; border-radius: 20px; background: white; margin-top: 10px; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+        .page { display: none; animation: slideUp 0.4s ease; padding-top: 5px; }
+        .page.active { display: block; }
+        iframe { width: 100%; height: 75vh; border: none; border-radius: 20px; background: white; margin-top: 10px; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
-    <div id="love-notification" style="background:rgba(255, 71, 87, 0.95); padding:30px; border-radius:30px; border:2px solid white;"><div style="font-size: 3rem;">❤️</div><h2>Mina Seni Çok Özledi!</h2><p>Hemen ona bir öpücük gönder.</p></div>
-    <div id="sent-notification" style="background:rgba(46, 204, 113, 0.95); color:white; padding:15px 30px; border-radius:50px;">❤️ Bildirim Yollandı!</div>
-    <div id="status-popup">✅ Durum Güncellendi!</div>
+    <div id="love-notification" style="background:rgba(255, 71, 87, 0.95); padding:30px; border-radius:30px; border:2px solid white;"><div style="font-size: 3rem;">❤️</div><h2>Mina Seni Çok Özledi!</h2><p>Hemen ona bir öpücük gönder.</p></div>
+    <div id="sent-notification" style="background:rgba(46, 204, 113, 0.95); color:white; padding:15px 30px; border-radius:50px;">❤️ Bildirim Yollandı!</div>
+    <div id="status-popup">✅ Durum Güncellendi!</div>
 
-    <div id="home" class="page active">
-        <div class="header-container"><h1>Böcek OS</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
-        
-        <div class="grid-container">
-            <div class="mini-card"><small style="opacity:0.7">Mina Batarya</small><div id="mina-bat">--%</div></div>
-            <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="color:var(--accent-blue); font-weight: bold;">--:--</div></div>
-        </div>
+    <div id="home" class="page active">
+        <div class="header-container"><h1>Böcek OS</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
+        
+        <div class="grid-container">
+            <div class="mini-card"><small style="opacity:0.7">Mina Batarya</small><div id="mina-bat">--%</div></div>
+            <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="color:var(--accent-blue); font-weight: bold;">--:--</div></div>
+        </div>
 
-        <div class="status-card" style="text-align:center;">
-            <h3 style="font-family:'Pacifico'; font-size:0.9rem; color:var(--accent-blue); margin:0;">Mesafe (GPS)</h3>
-            <div id="distance-display" style="font-size:1.3rem; font-weight:bold; margin:8px 0;">Hesaplanıyor...</div>
-            <div style="display:flex; justify-content:space-around; font-size:0.7rem; margin-top:8px; opacity:0.8;">
-                <div>🇩🇪 Aug: <span id="local-time">--:--</span></div>
-                <div>🇹🇷 Ank: <span id="mina-time">--:--</span></div>
-            </div>
-        </div>
+        <div class="status-card" style="text-align:center;">
+            <h3 style="font-family:'Pacifico'; font-size:0.9rem; color:var(--accent-blue); margin:0;">Mesafe (GPS)</h3>
+            <div id="distance-display" style="font-size:1.3rem; font-weight:bold; margin:8px 0;">Hesaplanıyor...</div>
+            <div style="display:flex; justify-content:space-around; font-size:0.7rem; margin-top:8px; opacity:0.8;">
+                <div>🇩🇪 Aug: <span id="local-time">--:--</span></div>
+                <div>🇹🇷 Ank: <span id="mina-time">--:--</span></div>
+            </div>
+        </div>
 
-        <div class="status-card">
-            <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Mina'nın Modu</h3><span id="mina-mood-display" style="font-size:1.8rem;">⌛</span></div>
-            <p id="mina-note" style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; border-left:3px solid #ff9a9e; font-style:italic; font-size:0.85rem; margin-top:10px;">Not bekleniyor...</p>
-        </div>
+        <div class="status-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Mina'nın Modu</h3><span id="mina-mood-display" style="font-size:1.8rem;">⌛</span></div>
+            <p id="mina-note" style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; border-left:3px solid #ff9a9e; font-style:italic; font-size:0.85rem; margin-top:10px;">Not bekleniyor...</p>
+        </div>
 
-        <div class="grid-container">
-            <div class="mini-card">😘 Böcek<div id="kiss-tyler">0</div></div>
-            <div class="mini-card">😘 Mina<div id="kiss-mina">0</div></div>
-        </div>
+        <div class="grid-container">
+            <div class="mini-card">😘 Böcek<div id="kiss-tyler">0</div></div>
+            <div class="mini-card">😘 Mina<div id="kiss-mina">0</div></div>
+        </div>
 
-        <div style="padding: 0 12px;"><button class="btn" style="background:linear-gradient(135deg, #ff4757, #ff6b81);" onclick="sendMissYou()">MINA'YI ÖZLEDİM ❤️</button></div>
+        <div style="padding: 0 12px;"><button class="btn" style="background:linear-gradient(135deg, #ff4757, #ff6b81);" onclick="sendMissYou()">MINA'YI ÖZLEDİM ❤️</button></div>
 
-        <div class="status-card" style="margin-top:15px;">
-            <h3>Durumunu Güncelle</h3>
-            <div id="tyler-mood-selector" style="display:flex; justify-content:center; gap:12px; margin-bottom:15px; flex-wrap: wrap;"></div>
-            <textarea id="tylerNote" rows="2" placeholder="Mina'ya mesajın..."></textarea>
-            <button class="btn" onclick="updateTylerStatus()">Güncelle & Arşivle</button>
-            <div id="archive-list" class="archive-list"></div>
-        </div>
+        <div class="status-card" style="margin-top:15px;">
+            <h3>Durumunu Güncelle</h3>
+            <div id="tyler-mood-selector" style="display:flex; justify-content:center; gap:12px; margin-bottom:15px; flex-wrap: wrap;"></div>
+            <textarea id="tylerNote" rows="2" placeholder="Mina'ya mesajın..."></textarea>
+            <button class="btn" onclick="updateTylerStatus()">Güncelle & Arşivle</button>
+            <div id="archive-list" class="archive-list"></div>
+        </div>
 
-        <div class="status-card">
-            <h3>📝 Aşk Görevleri</h3>
-            <div id="todo-list"></div>
-            <div class="todo-input-container">
-                <input type="text" id="todo-input" placeholder="Yeni görev...">
-                <button class="todo-add-btn" onclick="addTodo()">+</button>
-            </div>
-        </div>
-    </div>
+        <div class="status-card">
+            <h3>📝 Aşk Görevleri</h3>
+            <div id="todo-list"></div>
+            <div class="todo-input-container">
+                <input type="text" id="todo-input" placeholder="Yeni görev...">
+                <button class="todo-add-btn" onclick="addTodo()">+</button>
+            </div>
+        </div>
+    </div>
 
-    <div id="music-page" class="page">
-        <div class="header-container"><h1>Müzik Kutusu 🎵</h1></div>
-        <div class="status-card" style="text-align: center;">
-            <p style="opacity: 0.7; margin-bottom: 10px;">Birlikte dinlemek için ID girin.</p>
-            <div id="music-display" style="border-radius: 15px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.3); min-height: 200px; display: flex; align-items: center; justify-content: center;">Yükleniyor...</div>
-            <input type="text" id="music-input" placeholder="YouTube Video ID (örn: dQw4w9WgXcQ)">
-            <button class="btn" onclick="changeMusic()">Şarkıyı Değiştir</button>
-        </div>
-    </div>
+    <div id="music-page" class="page">
+        <div class="header-container"><h1>Müzik Kutusu 🎵</h1></div>
+        <div class="status-card" style="text-align: center;">
+            <p style="opacity: 0.7; margin-bottom: 10px;">Birlikte dinlemek için ID girin.</p>
+            <div id="music-display" style="border-radius: 15px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.3); min-height: 200px; display: flex; align-items: center; justify-content: center;">Yükleniyor...</div>
+            <input type="text" id="music-input" placeholder="YouTube Video ID (örn: dQw4w9WgXcQ)">
+            <button class="btn" onclick="changeMusic()">Şarkıyı Değiştir</button>
+        </div>
+    </div>
 
-    <div id="gallery-page" class="page">
-        <div class="header-container"><h1>Aşk Galerisi 🖼️</h1></div>
-        <div class="status-card">
-            <div class="upload-btn-wrapper">
-                <button class="btn">📸 Fotoğraf Ekle</button>
-                <input type="file" id="photo-upload" accept="image/*" onchange="uploadPhoto()">
-            </div>
-            <div id="gallery-grid" class="gallery-grid"></div>
-        </div>
-    </div>
+    <div id="gallery-page" class="page">
+        <div class="header-container"><h1>Aşk Galerisi 🖼️</h1></div>
+        <div class="status-card">
+            <div class="upload-btn-wrapper">
+                <button class="btn">📸 Fotoğraf Ekle</button>
+                <input type="file" id="photo-upload" accept="image/*" onchange="uploadPhoto()">
+            </div>
+            <div id="gallery-grid" class="gallery-grid"></div>
+        </div>
+    </div>
 
-    <div id="quiz-page" class="page">
-        <div class="status-card" style="text-align:center; border: 1px solid gold;">
-            <h2 style="font-family:'Pacifico'; color:gold; margin-bottom:5px;">Aşk Ligi 🏆</h2>
-            <div class="grid-container">
-                <div class="mini-card"><small>Böcek</small><div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:var(--accent-blue);">0</div></div>
-                <div class="mini-card"><small>Mina</small><div id="score-mina" style="font-size:1.5rem; font-weight:bold; color:#ff9a9e;">0</div></div>
-            </div>
-            <div id="champion-text" class="champion-badge">Hesaplanıyor...</div>
-        </div>
-        <iframe src="https://kumuterke.github.io/quiz/quiz.html"></iframe>
-    </div>
-    <div id="history" class="page"><iframe src="https://kumuterke.github.io/time/"></iframe></div>
-    <div id="coupons" class="page"><iframe src="https://kumuterke.github.io/kupon/"></iframe></div>
-    <div id="gift" class="page"><iframe src="https://kumuterke.github.io/hediye/"></iframe></div>
+    <div id="quiz-page" class="page">
+        <div class="status-card" style="text-align:center; border: 1px solid gold;">
+            <h2 style="font-family:'Pacifico'; color:gold; margin-bottom:5px;">Aşk Ligi 🏆</h2>
+            <div class="grid-container">
+                <div class="mini-card"><small>Böcek</small><div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:var(--accent-blue);">0</div></div>
+                <div class="mini-card"><small>Mina</small><div id="score-mina" style="font-size:1.5rem; font-weight:bold; color:#ff9a9e;">0</div></div>
+            </div>
+            <div id="champion-text" class="champion-badge">Hesaplanıyor...</div>
+        </div>
+        <iframe src="https://kumuterke.github.io/quiz/quiz.html"></iframe>
+    </div>
+    <div id="history" class="page"><iframe src="https://kumuterke.github.io/time/"></iframe></div>
+    <div id="coupons" class="page"><iframe src="https://kumuterke.github.io/kupon/"></iframe></div>
+    <div id="gift" class="page"><iframe src="https://kumuterke.github.io/hediye/"></iframe></div>
 
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="showPage('home', this)">🏠</div>
-        <div class="nav-item" onclick="showPage('music-page', this)">🎵</div>
-        <div class="nav-item" onclick="showPage('gallery-page', this)">🖼️</div>
-        <div class="nav-item" onclick="showPage('quiz-page', this)">🏆</div>
-        <div class="nav-item" onclick="showPage('history', this)">📜</div>
-        <div class="nav-item" onclick="showPage('coupons', this)">🎟️</div>
-        <div class="nav-item" onclick="showPage('gift', this)">🎁</div>
-    </nav>
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="showPage('home', this)">🏠</div>
+        <div class="nav-item" onclick="showPage('music-page', this)">🎵</div>
+        <div class="nav-item" onclick="showPage('gallery-page', this)">🖼️</div>
+        <div class="nav-item" onclick="showPage('quiz-page', this)">🏆</div>
+        <div class="nav-item" onclick="showPage('history', this)">📜</div>
+        <div class="nav-item" onclick="showPage('coupons', this)">🎟️</div>
+        <div class="nav-item" onclick="showPage('gift', this)">🎁</div>
+    </nav>
 
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyDzhUgqGWffaHilyO8vFzcIez9HyzMK6r4", authDomain: "tylermina-61718.firebaseapp.com", databaseURL: "https://tylermina-61718-default-rtdb.europe-west1.firebasedatabase.app", projectId: "tylermina-61718", storageBucket: "tylermina-61718.firebasestorage.app", messagingSenderId: "494227494785", appId: "1:494227494785:web:65cd8a4a50bc0b7531fa80", measurementId: "G-X7BVRSXWWD" };
-        firebase.initializeApp(firebaseConfig); const db = firebase.database();
+    <script>
+        // --- SADECE BURAYI GÜNCELLEDİM (YENİ PROJE AYARLARI) ---
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDzhUgqGWffaHilyO8vFzcIez9HyzMK6r4", 
+            authDomain: "tylermina-61718.firebaseapp.com", 
+            databaseURL: "https://tylermina-61718-default-rtdb.europe-west1.firebasedatabase.app", 
+            projectId: "tylermina-61718", 
+            storageBucket: "tylermina-61718.firebasestorage.app", 
+            messagingSenderId: "494227494785", 
+            appId: "1:494227494785:web:65cd8a4a50bc0b7531fa80", 
+            measurementId: "G-X7BVRSXWWD" 
+        };
+        // -----------------------------------------------------
 
-        function toggleTheme() { document.body.classList.toggle('light-mode'); }
-        function showPage(id, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active'); el.classList.add('active');
-        }
+        firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
-       // --- OPTİMİZE GALERİ (GIF Destekli + Sıkıştırma + Toplu Yükleme) ---
-        function uploadPhoto() {
-            const file = document.getElementById('photo-upload').files[0];
-            if(file) {
-                // EĞER DOSYA GIF İSE: İşlemeden direkt yükle (Animasyon bozulmasın)
-                if (file.type === "image/gif") {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        db.ref('gallery').push({ image: e.target.result, time: Date.now() });
-                    };
-                    reader.readAsDataURL(file);
-                } 
-                // EĞER NORMAL RESİM İSE: Sıkıştır ve küçült (Hız ve Alan Tasarrufu)
-                else {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const MAX_WIDTH = 1200; 
-                            const scaleSize = MAX_WIDTH / img.width;
-                            canvas.width = MAX_WIDTH;
-                            canvas.height = img.height * scaleSize;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            // Resmi JPEG formatına çevir ve sıkıştır
-                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
-                            db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
-                        };
-                        img.src = e.target.result;
-                    }
-                    reader.readAsDataURL(file);
-                }
-            }
-        }
-        
-        // Galeri Gösterim (Aynen korundu)
-        db.ref('gallery').orderByChild('time').limitToLast(50).on('value', snap => {
-            const grid = document.getElementById('gallery-grid');
-            let htmlContent = "";
-            const photos = [];
-            
-            snap.forEach(c => {
-                photos.push(c.val().image);
-            });
-            
-            photos.reverse().forEach(src => {
-                htmlContent += `<img src="${src}" class="gallery-item" onclick="window.open(this.src)">`;
-            });
-            
-            grid.innerHTML = htmlContent;
-        });
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
+        function showPage(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active'); el.classList.add('active');
+        }
 
-        // --- GPS ---
-        function toRad(v) { return v * Math.PI / 180; }
-        function initLocation() {
-            navigator.geolocation.watchPosition((p) => {
-                const R = 6371; 
-                const dLat = toRad(39.9334 - p.coords.latitude); const dLon = toRad(32.8597 - p.coords.longitude);
-                const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(39.9334)) * Math.sin(dLon/2)**2;
-                const d = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3);
-                document.getElementById('distance-display').innerText = d.replace('.', ',') + " KM";
-            });
-        }
-        initLocation();
+        // --- OPTİMİZE GALERİ (GIF Destekli + Sıkıştırma + Toplu Yükleme) ---
+        function uploadPhoto() {
+            const file = document.getElementById('photo-upload').files[0];
+            if(file) {
+                // EĞER DOSYA GIF İSE: İşlemeden direkt yükle (Animasyon bozulmasın)
+                if (file.type === "image/gif") {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        db.ref('gallery').push({ image: e.target.result, time: Date.now() });
+                    };
+                    reader.readAsDataURL(file);
+                } 
+                // EĞER NORMAL RESİM İSE: Sıkıştır ve küçült (Hız ve Alan Tasarrufu)
+                else {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 1200; 
+                            const scaleSize = MAX_WIDTH / img.width;
+                            canvas.width = MAX_WIDTH;
+                            canvas.height = img.height * scaleSize;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            // Resmi JPEG formatına çevir ve sıkıştır
+                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+                            db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
+                        };
+                        img.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+        
+        // Galeri Gösterim (Aynen korundu)
+        db.ref('gallery').orderByChild('time').limitToLast(50).on('value', snap => {
+            const grid = document.getElementById('gallery-grid');
+            let htmlContent = "";
+            const photos = [];
+            
+            snap.forEach(c => {
+                photos.push(c.val().image);
+            });
+            
+            photos.reverse().forEach(src => {
+                htmlContent += `<img src="${src}" class="gallery-item" onclick="window.open(this.src)">`;
+            });
+            
+            grid.innerHTML = htmlContent;
+        });
 
-        // --- MOOD & STATUS ---
-        function updateTylerMood(emoji) {
-            db.ref('status').update({ böcekMood: emoji });
-            db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek ${emoji} moduna geçti!`, time: Date.now() });
-            document.getElementById('status-popup').classList.add('show'); setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
-        }
-        const moods = ['😎', '😴', '💻', '🍺', '🎮', '❤️', '🥺', '😤', '😈', '🔥'];
-        document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => `<span style="font-size:1.8rem; cursor:pointer; padding:5px;" onclick="updateTylerMood('${m}')">${m}</span>`).join('');
+        // --- GPS ---
+        function toRad(v) { return v * Math.PI / 180; }
+        function initLocation() {
+            navigator.geolocation.watchPosition((p) => {
+                const R = 6371; 
+                const dLat = toRad(39.9334 - p.coords.latitude); const dLon = toRad(32.8597 - p.coords.longitude);
+                const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(39.9334)) * Math.sin(dLon/2)**2;
+                const d = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3);
+                document.getElementById('distance-display').innerText = d.replace('.', ',') + " KM";
+            });
+        }
+        initLocation();
 
-        function updateTylerStatus() {
-            const txt = document.getElementById('tylerNote').value;
-            if(!txt.trim()) return;
-            db.ref('status').update({ böcekNote: txt });
-            db.ref('love_archive').push({ sender: 'Böcek', msg: txt, time: Date.now() });
-            document.getElementById('tylerNote').value = "";
-            document.getElementById('status-popup').classList.add('show'); setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
-        }
+        // --- MOOD & STATUS ---
+        function updateTylerMood(emoji) {
+            db.ref('status').update({ böcekMood: emoji });
+            db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek ${emoji} moduna geçti!`, time: Date.now() });
+            document.getElementById('status-popup').classList.add('show'); setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
+        }
+        const moods = ['😎', '😴', '💻', '🍺', '🎮', '❤️', '🥺', '😤', '😈', '🔥'];
+        document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => `<span style="font-size:1.8rem; cursor:pointer; padding:5px;" onclick="updateTylerMood('${m}')">${m}</span>`).join('');
 
-        db.ref('love_archive').limitToLast(15).on('value', snap => {
-            const l = document.getElementById('archive-list'); l.innerHTML = "";
-            snap.forEach(c => {
-                const d = c.val(); const cls = d.sender === 'Böcek' ? 'msg-me' : 'msg-other';
-                l.innerHTML += `<div class="archive-msg ${cls}">${d.msg}<span class="msg-time">${new Date(d.time).toLocaleTimeString()}</span></div>`;
-            });
-            l.scrollTop = l.scrollHeight;
-        });
+        function updateTylerStatus() {
+            const txt = document.getElementById('tylerNote').value;
+            if(!txt.trim()) return;
+            db.ref('status').update({ böcekNote: txt });
+            db.ref('love_archive').push({ sender: 'Böcek', msg: txt, time: Date.now() });
+            document.getElementById('tylerNote').value = "";
+            document.getElementById('status-popup').classList.add('show'); setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
+        }
 
-        // --- TODO LIST ---
-        function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
-        function toggleTodo(key, currentDone) { db.ref('todos/' + key).update({ done: !currentDone }); }
-        function deleteTodo(key) { db.ref('todos/' + key).remove(); }
-        db.ref('todos').on('value', s => { 
-            const l = document.getElementById('todo-list'); l.innerHTML = ""; 
-            s.forEach(c => { 
-                const i = c.val(); const chk = i.done ? 'checked' : ''; const cls = i.done ? 'done' : '';
-                l.innerHTML += `<div class="todo-item ${cls}"><div class="todo-check ${chk}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div><span class="todo-text">${i.text}</span><span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span></div>`; 
-            }); 
-        });
+        db.ref('love_archive').limitToLast(15).on('value', snap => {
+            const l = document.getElementById('archive-list'); l.innerHTML = "";
+            snap.forEach(c => {
+                const d = c.val(); const cls = d.sender === 'Böcek' ? 'msg-me' : 'msg-other';
+                l.innerHTML += `<div class="archive-msg ${cls}">${d.msg}<span class="msg-time">${new Date(d.time).toLocaleTimeString()}</span></div>`;
+            });
+            l.scrollTop = l.scrollHeight;
+        });
 
-        // --- MÜZİK (VARSAYILAN ŞARKI GÜNCELLEMESİ) ---
-        function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
-        db.ref('shared_music').on('value', snap => {
-            const id = snap.val()?.id || "qMsEVXrfuvA";
-            document.getElementById('music-display').innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${id}?rel=0" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
-        });
+        // --- TODO LIST ---
+        function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
+        function toggleTodo(key, currentDone) { db.ref('todos/' + key).update({ done: !currentDone }); }
+        function deleteTodo(key) { db.ref('todos/' + key).remove(); }
+        db.ref('todos').on('value', s => { 
+            const l = document.getElementById('todo-list'); l.innerHTML = ""; 
+            s.forEach(c => { 
+                const i = c.val(); const chk = i.done ? 'checked' : ''; const cls = i.done ? 'done' : '';
+                l.innerHTML += `<div class="todo-item ${cls}"><div class="todo-check ${chk}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div><span class="todo-text">${i.text}</span><span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span></div>`; 
+            }); 
+        });
 
-        // --- DİĞER ---
-        function sendMissYou() { db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() }); db.ref('kisses/Tyler').transaction(c => (c || 0) + 1); document.getElementById("sent-notification").classList.add("show"); setTimeout(() => document.getElementById("sent-notification").classList.remove("show"), 2000); }
-        db.ref('alerts/tylerAlert').on('value', snap => { const d = snap.val(); if(d && Date.now() - d.time < 5000) { const n = document.getElementById("love-notification"); n.innerHTML = `<div style="font-size:3rem;">❤️</div><h2>${d.msg}</h2>`; n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000); } });
-        db.ref('scores').on('value', s => { const d = s.val() || {}; const t = d.Tyler || 0; const m = d.Mina || 0; document.getElementById('score-tyler').innerText = t; document.getElementById('score-mina').innerText = m; const ct = document.getElementById('champion-text'); if(t>m) ct.innerText = "👑 Lider: Böcek"; else if(m>t) ct.innerText = "👑 Lider: Mina"; else ct.innerText = "💞 Eşitlik!"; });
-        db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
-        db.ref('status').on('value', s => { const d = s.val(); if(!d) return; const batVal = (d.Mina && d.Mina.battery) ? (typeof d.Mina.battery === 'object' ? d.Mina.battery.battery : d.Mina.battery) : "--%"; document.getElementById('mina-bat').innerText = batVal; document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = d.meinNote||"Not bekleniyor..."; });
-        setInterval(() => { const diff = new Date("2026-02-06T00:00:00") - new Date(); document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; }, 1000);
-    </script>
+        // --- MÜZİK (VARSAYILAN ŞARKI GÜNCELLEMESİ) ---
+        function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
+        db.ref('shared_music').on('value', snap => {
+            const id = snap.val()?.id || "qMsEVXrfuvA";
+            document.getElementById('music-display').innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${id}?rel=0" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
+        });
+
+        // --- DİĞER ---
+        function sendMissYou() { db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() }); db.ref('kisses/Tyler').transaction(c => (c || 0) + 1); document.getElementById("sent-notification").classList.add("show"); setTimeout(() => document.getElementById("sent-notification").classList.remove("show"), 2000); }
+        db.ref('alerts/tylerAlert').on('value', snap => { const d = snap.val(); if(d && Date.now() - d.time < 5000) { const n = document.getElementById("love-notification"); n.innerHTML = `<div style="font-size:3rem;">❤️</div><h2>${d.msg}</h2>`; n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000); } });
+        db.ref('scores').on('value', s => { const d = s.val() || {}; const t = d.Tyler || 0; const m = d.Mina || 0; document.getElementById('score-tyler').innerText = t; document.getElementById('score-mina').innerText = m; const ct = document.getElementById('champion-text'); if(t>m) ct.innerText = "👑 Lider: Böcek"; else if(m>t) ct.innerText = "👑 Lider: Mina"; else ct.innerText = "💞 Eşitlik!"; });
+        db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
+        db.ref('status').on('value', s => { const d = s.val(); if(!d) return; const batVal = (d.Mina && d.Mina.battery) ? (typeof d.Mina.battery === 'object' ? d.Mina.battery.battery : d.Mina.battery) : "--%"; document.getElementById('mina-bat').innerText = batVal; document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = d.meinNote||"Not bekleniyor..."; });
+        setInterval(() => { const diff = new Date("2026-02-06T00:00:00") - new Date(); document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; }, 1000);
+    </script>
 </body>
 </html>
