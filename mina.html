@@ -165,7 +165,7 @@
         }
 
         // --- MINA OS: SADECE BÖCEK'TEN GELENLERİ GÖSTER ---
-db.ref('active_coupon').on('value', snap => {
+db.ref('active_coupon_Tyler').on('value', snap => {
     const val = snap.val();
     const widget = document.getElementById('coupon-widget');
     const display = document.getElementById('coupon-display');
@@ -244,4 +244,5 @@ db.ref('active_coupon').on('value', snap => {
     </script>
 </body>
 </html>
+
 
