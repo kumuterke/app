@@ -19,7 +19,7 @@
         
         .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
-        .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(128,128,128,0.1); text-align: center; }
+        .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(128,128,128,0.1); text-align: center; transition: all 0.3s ease; }
         .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; }
         .btn:active { transform: scale(0.98); }
         textarea, input[type="text"] { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid transparent; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
@@ -73,7 +73,11 @@
         <div class="header-container"><h1>Böcek OS</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
         
         <div class="grid-container">
-            <div class="mini-card"><small style="opacity:0.7">Mina Batarya</small><div id="mina-bat">--%</div></div>
+            <div class="mini-card" id="coupon-widget" onclick="showPage('coupons', document.querySelector('.nav-item:nth-child(6)'))" style="cursor:pointer; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                <small style="opacity:0.7" id="coupon-label">Durum</small>
+                <div id="coupon-display" style="font-weight:bold; margin-top:5px;">Yükleniyor...</div>
+            </div>
+            
             <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="color:var(--accent-blue); font-weight: bold;">--:--</div></div>
         </div>
 
@@ -185,6 +189,41 @@
             window.scrollTo(0,0);
         }
 
+        // --- AKTİF KUPON WIDGET (BATARYA YERİNE) ---
+        db.ref('active_coupon').on('value', snap => {
+            const val = snap.val();
+            const widget = document.getElementById('coupon-widget');
+            const display = document.getElementById('coupon-display');
+            const label = document.getElementById('coupon-label');
+
+            // Varsayılan Stiller
+            widget.style.border = "1px solid rgba(128,128,128,0.1)";
+            widget.style.boxShadow = "none";
+            display.style.color = "var(--text)";
+
+            if(val && val.status === "Aktif") {
+                display.innerText = val.name;
+                label.innerText = "🎫 Aktif Kupon";
+                
+                // Rarity Renkleri
+                if(val.rarity === "legendary") {
+                    widget.style.border = "2px solid gold";
+                    widget.style.boxShadow = "0 0 15px rgba(255,215,0,0.3)";
+                    display.style.color = "gold";
+                } else if (val.rarity === "rare") {
+                    widget.style.border = "1px solid #a29bfe";
+                    display.style.color = "#a29bfe";
+                } else {
+                    // Common
+                    display.style.color = "#ff9a9e";
+                }
+            } else {
+                display.innerText = "Kupon Yok";
+                label.innerText = "🎫 Durum";
+                display.style.color = "var(--text)";
+            }
+        });
+
         // --- GELİŞMİŞ GALERİ SİSTEMİ (GIF, Sıkıştırma, SIRALAMA ÖZELLİĞİ) ---
         let isNewestAtBottom = true; 
         let galleryData = []; 
@@ -264,55 +303,49 @@
         initLocation();
 
         // --- MOOD & STATUS (SAAT AYARLI GÜNCELLEME) ---
-function updateTylerMood(emoji) {
-    db.ref('status').update({ böcekMood: emoji });
-    db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek ${emoji} moduna geçti!`, time: Date.now() });
-    document.getElementById('status-popup').classList.add('show'); 
-    setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
-}
+        function updateTylerMood(emoji) {
+            db.ref('status').update({ böcekMood: emoji });
+            db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek ${emoji} moduna geçti!`, time: Date.now() });
+            document.getElementById('status-popup').classList.add('show'); 
+            setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
+        }
 
-// Saat kontrolü yapan ve emojileri listeleyen fonksiyon
-function renderMoods() {
-    const now = new Date();
-    const hour = now.getHours();
-    
-    // Orijinal listene dokunmadım
-    let currentMoods = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍'];
-    
-    // Gece 12 (0) ile sabah 4 arası kontrolü
-    if (hour >= 0 && hour < 4) {
-        // Senin listene ek olarak geceye özel emojiler
-        currentMoods = [...currentMoods, '🔞', '🫦', '💦', '🍑', '🍆', '⛓️', '🍷', '😈', '🔥'];
-    }
-    
-    document.getElementById('tyler-mood-selector').innerHTML = currentMoods.map(m => 
-        `<span style="font-size:1.8rem; cursor:pointer; padding:5px;" onclick="updateTylerMood('${m}')">${m}</span>`
-    ).join('');
-}
+        function renderMoods() {
+            const now = new Date();
+            const hour = now.getHours();
+            
+            let currentMoods = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍'];
+            
+            if (hour >= 0 && hour < 4) {
+                currentMoods = [...currentMoods, '🔞', '🫦', '💦', '🍑', '🍆', '⛓️', '🍷', '😈', '🔥'];
+            }
+            
+            document.getElementById('tyler-mood-selector').innerHTML = currentMoods.map(m => 
+                `<span style="font-size:1.8rem; cursor:pointer; padding:5px;" onclick="updateTylerMood('${m}')">${m}</span>`
+            ).join('');
+        }
 
-// Sayfa açıldığında çalıştır
-renderMoods();
-// Saat değişirse liste güncellensin diye her dakikada bir kontrol et
-setInterval(renderMoods, 60000);
+        renderMoods();
+        setInterval(renderMoods, 60000);
 
-function updateTylerStatus() {
-    const txt = document.getElementById('tylerNote').value;
-    if(!txt.trim()) return;
-    db.ref('status').update({ böcekNote: txt });
-    db.ref('love_archive').push({ sender: 'Böcek', msg: txt, time: Date.now() });
-    document.getElementById('tylerNote').value = "";
-    document.getElementById('status-popup').classList.add('show'); 
-    setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
-}
+        function updateTylerStatus() {
+            const txt = document.getElementById('tylerNote').value;
+            if(!txt.trim()) return;
+            db.ref('status').update({ böcekNote: txt });
+            db.ref('love_archive').push({ sender: 'Böcek', msg: txt, time: Date.now() });
+            document.getElementById('tylerNote').value = "";
+            document.getElementById('status-popup').classList.add('show'); 
+            setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
+        }
 
-db.ref('love_archive').limitToLast(15).on('value', snap => {
-    const l = document.getElementById('archive-list'); l.innerHTML = "";
-    snap.forEach(c => {
-        const d = c.val(); const cls = d.sender === 'Böcek' ? 'msg-me' : 'msg-other';
-        l.innerHTML += `<div class="archive-msg ${cls}">${d.msg}<span class="msg-time">${new Date(d.time).toLocaleTimeString()}</span></div>`;
-    });
-    l.scrollTop = l.scrollHeight;
-});
+        db.ref('love_archive').limitToLast(15).on('value', snap => {
+            const l = document.getElementById('archive-list'); l.innerHTML = "";
+            snap.forEach(c => {
+                const d = c.val(); const cls = d.sender === 'Böcek' ? 'msg-me' : 'msg-other';
+                l.innerHTML += `<div class="archive-msg ${cls}">${d.msg}<span class="msg-time">${new Date(d.time).toLocaleTimeString()}</span></div>`;
+            });
+            l.scrollTop = l.scrollHeight;
+        });
 
         // --- TODO LIST ---
         function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
@@ -338,11 +371,8 @@ db.ref('love_archive').limitToLast(15).on('value', snap => {
         db.ref('alerts/tylerAlert').on('value', snap => { const d = snap.val(); if(d && Date.now() - d.time < 5000) { const n = document.getElementById("love-notification"); n.innerHTML = `<div style="font-size:3rem;">❤️</div><h2>${d.msg}</h2>`; n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000); } });
         db.ref('scores').on('value', s => { const d = s.val() || {}; const t = d.Tyler || 0; const m = d.Mina || 0; document.getElementById('score-tyler').innerText = t; document.getElementById('score-mina').innerText = m; const ct = document.getElementById('champion-text'); if(t>m) ct.innerText = "👑 Lider: Böcek"; else if(m>t) ct.innerText = "👑 Lider: Mina"; else ct.innerText = "💞 Eşitlik!"; });
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
-        db.ref('status').on('value', s => { const d = s.val(); if(!d) return; const batVal = (d.Mina && d.Mina.battery) ? (typeof d.Mina.battery === 'object' ? d.Mina.battery.battery : d.Mina.battery) : "--%"; document.getElementById('mina-bat').innerText = batVal; document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = d.meinNote||"Not bekleniyor..."; });
+        db.ref('status').on('value', s => { const d = s.val(); if(!d) return; document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = d.meinNote||"Not bekleniyor..."; });
         setInterval(() => { const diff = new Date("2026-02-06T00:00:00") - new Date(); document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; }, 1000);
     </script>
 </body>
 </html>
-
-
-
