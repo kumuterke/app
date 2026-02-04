@@ -189,21 +189,23 @@
             window.scrollTo(0,0);
         }
 
-       // --- BÖCEK OS: SADECE MINA'DAN GELENLERİ GÖSTER ---
-db.ref('active_coupon').on('value', snap => {
+       // --- BÖCEK OS: SADECE MINA'DAN GELENLERİ GÖSTER (GÜNCELLENDİ) ---
+// Artık direkt olarak Mina'nın kanalını dinliyoruz
+db.ref('active_coupon_Mina').on('value', snap => {
     const val = snap.val();
     const widget = document.getElementById('coupon-widget');
     const display = document.getElementById('coupon-display');
     const label = document.getElementById('coupon-label');
 
-    // Varsayılan (Kupon Yoksa veya Sen Aktif Ettiysen)
+    // Varsayılan (Kupon Yoksa)
     const resetWidget = () => {
-        display.innerText = "Yükleniyor..."; // Veya Batarya Yüzdesi
+        display.innerText = "Yükleniyor..."; 
         label.innerText = "Durum";
         display.style.color = "var(--text)";
         widget.style.border = "1px solid rgba(128,128,128,0.1)";
         widget.style.boxShadow = "none";
-        // Batarya kodun varsa buraya o gelir
+        
+        // Batarya kodun
         if ('getBattery' in navigator) { 
             navigator.getBattery().then(bat => { 
                 display.innerText = Math.round(bat.level * 100) + "%"; 
@@ -212,23 +214,18 @@ db.ref('active_coupon').on('value', snap => {
     };
 
     if (val && val.status === "Aktif") {
-        // FİLTRE: Sadece kullanıcı "Mina" ise göster
-        if (val.user === "Mina") {
-            display.innerText = "👸 İstek: " + val.name;
-            label.innerText = "⚠️ GÖREV";
-            
-            // Nadirlik Rengi
-            if (val.rarity === "legendary") {
-                display.style.color = "gold";
-                widget.style.border = "2px solid gold";
-                widget.style.boxShadow = "0 0 15px rgba(255,215,0,0.3)";
-            } else {
-                display.style.color = "#ff9a9e";
-                widget.style.border = "1px solid #ff9a9e";
-            }
+        // Yol zaten Mina'ya özel olduğu için isim kontrolüne gerek kalmadı
+        display.innerText = "👸 İstek: " + val.name;
+        label.innerText = "⚠️ GÖREV";
+        
+        // Nadirlik Rengi
+        if (val.rarity === "legendary") {
+            display.style.color = "gold";
+            widget.style.border = "2px solid gold";
+            widget.style.boxShadow = "0 0 15px rgba(255,215,0,0.3)";
         } else {
-            // Eğer "Tyler" aktif ettiyse senin ekranında normal durmaya devam etsin
-            resetWidget();
+            display.style.color = "#ff9a9e";
+            widget.style.border = "1px solid #ff9a9e";
         }
     } else {
         resetWidget();
@@ -387,4 +384,5 @@ db.ref('active_coupon').on('value', snap => {
     </script>
 </body>
 </html>
+
 
