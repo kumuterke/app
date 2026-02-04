@@ -283,7 +283,7 @@
             document.getElementById('tyler-note').innerText = d.böcekNote||"Not bekleniyor..."; 
         });
 
-        // --- DURUM GÜNCELLEME ---
+       // --- DURUM GÜNCELLEME ---
         function updateMinaStatus() { 
             const noteBox = document.getElementById('minaNote');
             const noteText = noteBox.value;
@@ -311,7 +311,22 @@
         });
 
         function updateMinaMood(emoji) { db.ref('status').update({ meinMood: emoji }); db.ref('alerts/tylerAlert').set({ msg: `${emoji} Mina ${emoji} moduna geçti!`, time: Date.now() }); document.getElementById('status-popup').classList.add('show'); setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000); }
-        const ms = ['😊', '🥰', '😴', '🥺', '😤', '😈', '🔞', '🫦', '🔥', '🍷']; document.getElementById('mina-mood-selector').innerHTML = ms.map(m => `<span style="font-size:2rem; cursor:pointer; padding:5px;" onclick="updateMinaMood('${m}')">${m}</span>`).join('');
+        
+        // --- GECE MODLU MOOD RENDER ---
+        function renderMinaMoods() {
+            const now = new Date();
+            const hour = now.getHours();
+            let ms = ['😊', '🥰', '😴', '🥺', '😤', '😈', '🌹', '🕯️', '🤫','🤍','😁'];
+            
+            if (hour >= 0 && hour < 4) {
+                ms = [...ms, '💦', '🍑', '🍆', '⛓️', '🌹', '🕯️', '🤫','🔞', '🫦', '🔥', '🍷'];
+            }
+            
+            document.getElementById('mina-mood-selector').innerHTML = ms.map(m => `<span style="font-size:2rem; cursor:pointer; padding:5px;" onclick="updateMinaMood('${m}')">${m}</span>`).join('');
+        }
+        
+        renderMinaMoods();
+        setInterval(renderMinaMoods, 60000);
 
         function sendMissYou() { db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() }); db.ref('kisses/Mina').transaction(c => (c || 0) + 1); document.getElementById("sent-notification").classList.add("show"); setTimeout(() => document.getElementById("sent-notification").classList.remove("show"), 2000); }
         db.ref('alerts/minaAlert').on('value', snap => { const data = snap.val(); if(data && Date.now() - data.time < 5000) { const n = document.getElementById("love-notification"); n.innerHTML = `<div style="font-size:3rem;">❤️</div><h2>${data.msg}</h2>`; n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000); } });
@@ -328,7 +343,14 @@
         });
 
         if ('getBattery' in navigator) { navigator.getBattery().then(bat => { const send = () => db.ref('status/Mina/battery').set({ battery: Math.round(bat.level * 100) + "%", lastUpdate: new Date().toLocaleTimeString() }); bat.onlevelchange = send; send(); }); }
-        setInterval(() => { const now = new Date(); document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}); document.getElementById('tyler-time').innerText = new Date(now.getTime()-(2*60*60*1000)).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}); const diff = new Date("2026-02-06T00:00:00") - now; document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; }, 1000);
+        
+        setInterval(() => { 
+            const now = new Date(); 
+            document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}); 
+            document.getElementById('tyler-time').innerText = new Date(now.getTime()-(2*60*60*1000)).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}); 
+            const diff = new Date("2026-02-06T00:00:00") - now; 
+            document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; 
+        }, 1000);
     </script>
 </body>
 </html>
