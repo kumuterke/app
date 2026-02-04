@@ -164,36 +164,49 @@
             window.scrollTo(0,0);
         }
 
-        // --- DÜZELTİLMİŞ KUPON WIDGET ---
-        db.ref('active_coupon').on('value', snap => {
-            const val = snap.val();
-            const widget = document.getElementById('coupon-widget');
-            const display = document.getElementById('coupon-display');
-            const label = document.getElementById('coupon-label');
+        // --- MINA OS: SADECE BÖCEK'TEN GELENLERİ GÖSTER ---
+db.ref('active_coupon').on('value', snap => {
+    const val = snap.val();
+    const widget = document.getElementById('coupon-widget');
+    const display = document.getElementById('coupon-display');
+    const label = document.getElementById('coupon-label');
 
-            if(val && val.status === "Aktif") {
-                if (val.user === "Tyler") {
-                    display.innerText = "🤴 Böcek'ten: " + val.name;
-                    label.innerText = "🎁 HEDİYE VAR";
-                } else {
-                    display.innerText = "👸 Senin: " + val.name;
-                    label.innerText = "🎫 AKTİF";
-                }
-                
-                if(val.rarity === "legendary") {
-                    display.style.color = "gold";
-                    widget.style.border = "1px solid gold";
-                } else {
-                    display.style.color = "var(--main-pink)";
-                    widget.style.border = "1px solid var(--border-color)";
-                }
+    // Varsayılan
+    const resetWidget = () => {
+        label.innerText = "Durum";
+        display.style.color = "var(--main-pink)";
+        widget.style.border = "1px solid var(--border-color)";
+        widget.style.boxShadow = "none";
+        // Batarya göstergesi
+        if ('getBattery' in navigator) { 
+            navigator.getBattery().then(bat => { 
+                display.innerText = Math.round(bat.level * 100) + "%"; 
+            }); 
+        }
+    };
+
+    if (val && val.status === "Aktif") {
+        // FİLTRE: Sadece kullanıcı "Tyler" ise göster
+        if (val.user === "Tyler") {
+            display.innerText = "🎁 Hediye: " + val.name;
+            label.innerText = "🤴 BÖCEK'TEN";
+            
+            if (val.rarity === "legendary") {
+                display.style.color = "gold";
+                widget.style.border = "2px solid gold";
+                widget.style.boxShadow = "0 0 15px rgba(255,215,0,0.3)";
             } else {
-                display.innerText = "Kupon Yok";
-                label.innerText = "Durum";
-                display.style.color = "var(--text)";
-                widget.style.border = "1px solid var(--border-color)";
+                display.style.color = "#00d2ff"; // Tyler Mavisi
+                widget.style.border = "1px solid #00d2ff";
             }
-        });
+        } else {
+            // Mina kendi aktif ettiyse ana ekranda bir şey değişmesin
+            resetWidget();
+        }
+    } else {
+        resetWidget();
+    }
+});
 
         // --- DİĞER ORİJİNAL SİSTEMLER ---
         let isNewestAtBottom = true; let galleryData = [];
@@ -231,3 +244,4 @@
     </script>
 </body>
 </html>
+
