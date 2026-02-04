@@ -263,32 +263,56 @@
         }
         initLocation();
 
-        // --- MOOD & STATUS ---
-        function updateTylerMood(emoji) {
-            db.ref('status').update({ böcekMood: emoji });
-            db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek ${emoji} moduna geçti!`, time: Date.now() });
-            document.getElementById('status-popup').classList.add('show'); setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
-        }
-        const moods = ['😎', '😴', '💻', '🍺', '🎮', '❤️', '🥺', '😤', '😈', '🔥'];
-        document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => `<span style="font-size:1.8rem; cursor:pointer; padding:5px;" onclick="updateTylerMood('${m}')">${m}</span>`).join('');
+        // --- MOOD & STATUS (SAAT AYARLI GÜNCELLEME) ---
+function updateTylerMood(emoji) {
+    db.ref('status').update({ böcekMood: emoji });
+    db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek ${emoji} moduna geçti!`, time: Date.now() });
+    document.getElementById('status-popup').classList.add('show'); 
+    setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
+}
 
-        function updateTylerStatus() {
-            const txt = document.getElementById('tylerNote').value;
-            if(!txt.trim()) return;
-            db.ref('status').update({ böcekNote: txt });
-            db.ref('love_archive').push({ sender: 'Böcek', msg: txt, time: Date.now() });
-            document.getElementById('tylerNote').value = "";
-            document.getElementById('status-popup').classList.add('show'); setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
-        }
+// Saat kontrolü yapan ve emojileri listeleyen fonksiyon
+function renderMoods() {
+    const now = new Date();
+    const hour = now.getHours();
+    
+    // Orijinal listene dokunmadım
+    let currentMoods = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍'];
+    
+    // Gece 12 (0) ile sabah 4 arası kontrolü
+    if (hour >= 0 && hour < 4) {
+        // Senin listene ek olarak geceye özel emojiler
+        currentMoods = [...currentMoods, '🔞', '🫦', '💦', '🍑', '🍆', '⛓️', '🍷', '😈', '🔥'];
+    }
+    
+    document.getElementById('tyler-mood-selector').innerHTML = currentMoods.map(m => 
+        `<span style="font-size:1.8rem; cursor:pointer; padding:5px;" onclick="updateTylerMood('${m}')">${m}</span>`
+    ).join('');
+}
 
-        db.ref('love_archive').limitToLast(15).on('value', snap => {
-            const l = document.getElementById('archive-list'); l.innerHTML = "";
-            snap.forEach(c => {
-                const d = c.val(); const cls = d.sender === 'Böcek' ? 'msg-me' : 'msg-other';
-                l.innerHTML += `<div class="archive-msg ${cls}">${d.msg}<span class="msg-time">${new Date(d.time).toLocaleTimeString()}</span></div>`;
-            });
-            l.scrollTop = l.scrollHeight;
-        });
+// Sayfa açıldığında çalıştır
+renderMoods();
+// Saat değişirse liste güncellensin diye her dakikada bir kontrol et
+setInterval(renderMoods, 60000);
+
+function updateTylerStatus() {
+    const txt = document.getElementById('tylerNote').value;
+    if(!txt.trim()) return;
+    db.ref('status').update({ böcekNote: txt });
+    db.ref('love_archive').push({ sender: 'Böcek', msg: txt, time: Date.now() });
+    document.getElementById('tylerNote').value = "";
+    document.getElementById('status-popup').classList.add('show'); 
+    setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
+}
+
+db.ref('love_archive').limitToLast(15).on('value', snap => {
+    const l = document.getElementById('archive-list'); l.innerHTML = "";
+    snap.forEach(c => {
+        const d = c.val(); const cls = d.sender === 'Böcek' ? 'msg-me' : 'msg-other';
+        l.innerHTML += `<div class="archive-msg ${cls}">${d.msg}<span class="msg-time">${new Date(d.time).toLocaleTimeString()}</span></div>`;
+    });
+    l.scrollTop = l.scrollHeight;
+});
 
         // --- TODO LIST ---
         function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
@@ -319,3 +343,4 @@
     </script>
 </body>
 </html>
+
