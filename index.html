@@ -17,7 +17,7 @@
         h1 { font-family: 'Pacifico'; color: var(--accent-blue); margin: 0; font-size: 1.6rem; }
         .theme-toggle { background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: white; }
         
-        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px px 12px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
         .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(128,128,128,0.1); text-align: center; transition: all 0.3s ease; }
         .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; }
@@ -380,10 +380,11 @@ db.ref('active_coupon_Mina').on('value', snap => {
         db.ref('scores').on('value', s => { const d = s.val() || {}; const t = d.Tyler || 0; const m = d.Mina || 0; document.getElementById('score-tyler').innerText = t; document.getElementById('score-mina').innerText = m; const ct = document.getElementById('champion-text'); if(t>m) ct.innerText = "👑 Lider: Böcek"; else if(m>t) ct.innerText = "👑 Lider: Mina"; else ct.innerText = "💞 Eşitlik!"; });
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
         db.ref('status').on('value', s => { const d = s.val(); if(!d) return; document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = d.meinNote||"Not bekleniyor..."; });
-        setInterval(() => { const diff = new Date("2026-02-15T00:00:00") - new Date(); document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; }, 1000);
+        setInterval(() => { const diff = new Date("2026-02-15T19:00:00") - new Date(); document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; }, 1000);
     </script>
 </body>
 </html>
+
 
 
 
