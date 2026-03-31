@@ -252,11 +252,9 @@ function uploadPhoto() {
 }
 
 // Resimleri anlık dinle ve listele
-db.ref('gallery').orderByChild('time').limitToLast(50).on('value', snap => {
+db.ref('gallery').orderByChild('time').on('value', snap => {
     galleryData = []; 
-    snap.forEach(c => { 
-        galleryData.push({ id: c.key, src: c.val().image }); 
-    });
+    snap.forEach(c => { galleryData.push(c.val().image); });
     renderGallery(); 
 });
 
