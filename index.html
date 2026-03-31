@@ -266,11 +266,11 @@ db.ref('active_coupon_Mina').on('value', snap => {
             }
         }
 
-        db.ref('gallery').orderByChild('time').limitToLast(100).on('value', snap => {
-            galleryData = []; 
-            snap.forEach(c => { galleryData.push(c.val().image); });
-            renderGallery(); 
-        });
+        db.ref('gallery').orderByChild('time').on('value', snap => {
+    galleryData = []; 
+    snap.forEach(c => { galleryData.push(c.val().image); });
+    renderGallery(); 
+});
 
         // SIRALAMA FONKSİYONU VE RENDER
         function renderGallery() {
