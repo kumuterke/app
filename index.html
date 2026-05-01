@@ -38,12 +38,13 @@
         /* GALERİ VE KLASÖR SİSTEMİ */
         .folder-nav { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; margin-bottom: 15px; scrollbar-width: none; }
         .folder-nav::-webkit-scrollbar { display: none; }
-        .folder-chip { background: var(--input-bg); padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; white-space: nowrap; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
-        .folder-chip.active { background: var(--accent-blue); color: #000; font-weight: bold; }
+        .folder-chip { background: var(--input-bg); padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; white-space: nowrap; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
+        .folder-chip.active { background: var(--accent-blue); color: #000; font-weight: bold; transform: scale(1.05); }
         .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-        .gallery-item-container { position: relative; }
-        .gallery-item { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 15px; border: 2px solid rgba(255,255,255,0.1); }
-        .tag-badge { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); font-size: 0.6rem; padding: 2px 6px; border-radius: 5px; }
+        .gallery-item-container { position: relative; width: 100%; aspect-ratio: 1; }
+        .gallery-item { width: 100%; height: 100%; object-fit: cover; border-radius: 15px; border: 2px solid rgba(255,255,255,0.1); }
+        .tag-container { position: absolute; bottom: 5px; left: 5px; right: 5px; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
+        .tag-badge { background: rgba(0,0,0,0.7); color: var(--accent-blue); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; }
         .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
         .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
 
@@ -73,7 +74,7 @@
 <body>
     <div id="love-notification" style="background:rgba(255, 71, 87, 0.95); padding:30px; border-radius:30px; border:2px solid white;"><div style="font-size: 3rem;">❤️</div><h2>Mina Seni Çok Özledi!</h2><p>Hemen ona bir öpücük gönder.</p></div>
     <div id="sent-notification" style="background:rgba(46, 204, 113, 0.95); color:white; padding:15px 30px; border-radius:50px;">❤️ Bildirim Yollandı!</div>
-    <div id="status-popup">✅ İşlem Tamam!</div>
+    <div id="status-popup">✅ İşlem Başarılı!</div>
 
     <div id="home" class="page active">
         <div class="header-container"><h1>Böcek OS</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
@@ -139,21 +140,27 @@
     <div id="gallery-page" class="page">
         <div class="header-container"><h1>Aşk Galerisi 🖼️</h1></div>
         <div class="status-card">
+            <!-- KLASÖR SEÇİM VE EKLEME -->
             <div style="display:flex; gap:10px; margin-bottom:10px;">
                 <select id="target-folder-select" style="flex:2; margin-top:0;">
                     <option value="Genel">📁 Genel</option>
                 </select>
-                <button class="btn" onclick="addNewFolder()" style="flex:1; margin-top:0; padding:10px;">Yeni Klasör</button>
+                <button class="btn" onclick="addNewFolder()" style="flex:1; margin-top:0; padding:10px; font-size:0.8rem;">+ Klasör</button>
             </div>
-            <input type="text" id="photo-tags" placeholder="Etiketler (virgülle ayır)..." style="margin-bottom:10px;">
+            
+            <input type="text" id="photo-tags" placeholder="Etiketler (ör: tatil, kedi)..." style="margin-bottom:10px;">
+            
             <div class="upload-btn-wrapper">
                 <button class="btn">📸 Çoklu Fotoğraf Yükle</button>
                 <input type="file" id="photo-upload" accept="image/*" multiple onchange="uploadMultiplePhotos()">
             </div>
+            
             <button class="btn" id="sort-btn" onclick="toggleSort()" style="margin-top:10px; background:rgba(255,255,255,0.1); border:1px solid rgba(0,210,255,0.2);">🔄 Sırala: Yeniler Altta</button>
             
+            <!-- KLASÖR FİLTRELEME ÇİPLERİ -->
             <div id="folder-nav" class="folder-nav">
-                <div class="folder-chip active" onclick="setGalleryFilter('All')">Hepsi</div>
+                <div class="folder-chip active" onclick="setGalleryFilter('All')">All</div>
+                <div class="folder-chip" onclick="setGalleryFilter('Genel')">Genel</div>
             </div>
 
             <div id="gallery-grid" class="gallery-grid"></div>
@@ -199,6 +206,7 @@
         
         firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
+        // --- TEMA VE NAVİGASYON ---
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -212,125 +220,107 @@
             setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
         }
 
-        // --- KUPON WIDGET ---
-        db.ref('active_coupon_Mina').on('value', snap => {
-            const val = snap.val();
-            const widget = document.getElementById('coupon-widget');
-            const display = document.getElementById('coupon-display');
-            const label = document.getElementById('coupon-label');
-
-            const resetWidget = () => {
-                display.innerText = "Yükleniyor..."; 
-                label.innerText = "Durum";
-                display.style.color = "var(--text)";
-                widget.style.border = "1px solid rgba(128,128,128,0.1)";
-                widget.style.boxShadow = "none";
-                if ('getBattery' in navigator) { 
-                    navigator.getBattery().then(bat => { 
-                        display.innerText = Math.round(bat.level * 100) + "%"; 
-                    }); 
-                }
-            };
-
-            if (val && val.status === "Aktif") {
-                display.innerText = "👸 İstek: " + val.name;
-                label.innerText = "⚠️ GÖREV";
-                if (val.rarity === "legendary") {
-                    display.style.color = "gold";
-                    widget.style.border = "2px solid gold";
-                    widget.style.boxShadow = "0 0 15px rgba(255,215,0,0.3)";
-                } else {
-                    display.style.color = "#ff9a9e";
-                    widget.style.border = "1px solid #ff9a9e";
-                }
-            } else {
-                resetWidget();
-            }
-        });
-
-        // --- GELİŞMİŞ GALERİ SİSTEMİ (ÇOKLU, KLASÖRLÜ, ETİKETLİ) ---
+        // --- GALERİ VE KLASÖR SİSTEMİ (FIXED) ---
         let isNewestAtBottom = true; 
         let galleryData = []; 
+        let customFolders = [];
         let currentGalleryFilter = 'All';
 
-        // Klasörleri Veritabanından Çek ve Select'i Doldur
+        // Klasörleri DB'den dinle ve listeleri güncelle
         db.ref('gallery_folders').on('value', snap => {
-            const folderSelect = document.getElementById('target-folder-select');
-            const folderNav = document.getElementById('folder-nav');
-            folderSelect.innerHTML = '<option value="Genel">📁 Genel</option>';
-            folderNav.innerHTML = `<div class="folder-chip ${currentGalleryFilter === 'All' ? 'active' : ''}" onclick="setGalleryFilter('All')">Hepsi</div>`;
-            folderNav.innerHTML += `<div class="folder-chip ${currentGalleryFilter === 'Genel' ? 'active' : ''}" onclick="setGalleryFilter('Genel')">Genel</div>`;
-            
+            customFolders = [];
             if(snap.exists()){
-                snap.forEach(c => {
-                    const fName = c.val();
-                    folderSelect.innerHTML += `<option value="${fName}">📁 ${fName}</option>`;
-                    folderNav.innerHTML += `<div class="folder-chip ${currentGalleryFilter === fName ? 'active' : ''}" onclick="setGalleryFilter('${fName}')">${fName}</div>`;
-                });
+                snap.forEach(c => { customFolders.push(c.val()); });
             }
+            renderFolderUI();
         });
 
+        function renderFolderUI() {
+            const folderSelect = document.getElementById('target-folder-select');
+            const folderNav = document.getElementById('folder-nav');
+            
+            // Yükleme Select Menüsü
+            let selectHtml = '<option value="Genel">📁 Genel</option>';
+            customFolders.forEach(f => { selectHtml += `<option value="${f}">📁 ${f}</option>`; });
+            folderSelect.innerHTML = selectHtml;
+
+            // Filtreleme Çipleri
+            let navHtml = `<div class="folder-chip ${currentGalleryFilter === 'All' ? 'active' : ''}" onclick="setGalleryFilter('All')">All</div>`;
+            navHtml += `<div class="folder-chip ${currentGalleryFilter === 'Genel' ? 'active' : ''}" onclick="setGalleryFilter('Genel')">Genel</div>`;
+            customFolders.forEach(f => {
+                navHtml += `<div class="folder-chip ${currentGalleryFilter === f ? 'active' : ''}" onclick="setGalleryFilter('${f}')">${f}</div>`;
+            });
+            folderNav.innerHTML = navHtml;
+        }
+
         function addNewFolder() {
-            const name = prompt("Yeni klasör adı:");
-            if(name) db.ref('gallery_folders').push(name);
+            const name = prompt("Klasör ismi girin:");
+            if(name && name.trim()) {
+                db.ref('gallery_folders').push(name.trim());
+                showStatusPopup();
+            }
         }
 
         function setGalleryFilter(filter) {
             currentGalleryFilter = filter;
+            renderFolderUI(); // Çip aktifliğini güncellemek için
             renderGallery();
         }
 
         function uploadMultiplePhotos() {
             const files = document.getElementById('photo-upload').files;
             const folder = document.getElementById('target-folder-select').value;
-            const tags = document.getElementById('photo-tags').value.split(',').map(t => t.trim()).filter(t => t);
+            const tagInput = document.getElementById('photo-tags').value;
+            const tags = tagInput.split(',').map(t => t.trim()).filter(t => t !== "");
             
-            if(files.length > 0) {
-                Array.from(files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        if (file.type === "image/gif") {
+            if(files.length === 0) return;
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (file.type === "image/gif") {
+                        db.ref('gallery').push({ 
+                            image: e.target.result, 
+                            time: Date.now(), 
+                            folder: folder, 
+                            tags: tags 
+                        });
+                    } else {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 1000; 
+                            const scaleSize = MAX_WIDTH / img.width;
+                            canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            const compressed = canvas.toDataURL('image/jpeg', 0.8);
                             db.ref('gallery').push({ 
-                                image: e.target.result, 
+                                image: compressed, 
                                 time: Date.now(), 
                                 folder: folder, 
                                 tags: tags 
                             });
-                        } else {
-                            const img = new Image();
-                            img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                const MAX_WIDTH = 1200; 
-                                const scaleSize = MAX_WIDTH / img.width;
-                                canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
-                                const ctx = canvas.getContext('2d');
-                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
-                                db.ref('gallery').push({ 
-                                    image: compressedBase64, 
-                                    time: Date.now(), 
-                                    folder: folder, 
-                                    tags: tags 
-                                });
-                            };
-                            img.src = e.target.result;
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                });
-                document.getElementById('photo-tags').value = "";
-                showStatusPopup();
-            }
+                        };
+                        img.src = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            document.getElementById('photo-tags').value = "";
+            showStatusPopup();
         }
 
         db.ref('gallery').orderByChild('time').on('value', snap => {
             galleryData = []; 
             snap.forEach(c => { 
-                const data = c.val();
+                const d = c.val();
                 galleryData.push({
-                    image: data.image,
-                    folder: data.folder || 'Genel',
-                    tags: data.tags || []
+                    image: d.image,
+                    folder: d.folder || 'Genel',
+                    tags: d.tags || [],
+                    time: d.time
                 }); 
             });
             renderGallery(); 
@@ -339,30 +329,26 @@
         function renderGallery() {
             const grid = document.getElementById('gallery-grid');
             const btn = document.getElementById('sort-btn');
-            let htmlContent = "";
-            let photosToShow = [...galleryData]; 
-
-            // Filtrele
-            if (currentGalleryFilter !== 'All') {
-                photosToShow = photosToShow.filter(p => p.folder === currentGalleryFilter);
-            }
+            
+            let filtered = currentGalleryFilter === 'All' 
+                ? [...galleryData] 
+                : galleryData.filter(p => p.folder === currentGalleryFilter);
 
             if (isNewestAtBottom) {
                 btn.innerText = "⬇️ Sırala: Yeniler Altta";
             } else {
-                photosToShow.reverse();
+                filtered.reverse();
                 btn.innerText = "⬆️ Sırala: Yeniler Üstte";
             }
 
-            photosToShow.forEach(p => {
-                const tagHtml = p.tags.map(t => `<span class="tag-badge">#${t}</span>`).join('');
-                htmlContent += `
-                    <div class="gallery-item-container">
-                        <img src="${p.image}" class="gallery-item" onclick="window.open(this.src)">
-                        ${tagHtml}
-                    </div>`;
-            });
-            grid.innerHTML = htmlContent;
+            grid.innerHTML = filtered.map(p => `
+                <div class="gallery-item-container">
+                    <img src="${p.image}" class="gallery-item" onclick="window.open(this.src)">
+                    <div class="tag-container">
+                        ${p.tags.map(t => `<span class="tag-badge">#${t}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
         }
 
         function toggleSort() {
@@ -370,39 +356,55 @@
             renderGallery(); 
         }
 
-        // --- GPS ---
-        function toRad(v) { return v * Math.PI / 180; }
-        function initLocation() {
-            navigator.geolocation.watchPosition((p) => {
-                const R = 6371; 
-                const dLat = toRad(39.9334 - p.coords.latitude); const dLon = toRad(32.8597 - p.coords.longitude);
-                const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(39.9334)) * Math.sin(dLon/2)**2;
-                const d = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3);
-                document.getElementById('distance-display').innerText = d.replace('.', ',') + " KM";
-            });
-        }
-        initLocation();
+        // --- KUPON / DURUM WIDGET ---
+        db.ref('active_coupon_Mina').on('value', snap => {
+            const val = snap.val();
+            const widget = document.getElementById('coupon-widget');
+            const display = document.getElementById('coupon-display');
+            const label = document.getElementById('coupon-label');
 
-        // --- MOOD & STATUS ---
+            if (val && val.status === "Aktif") {
+                display.innerText = "👸 " + val.name;
+                label.innerText = "⚠️ GÖREV";
+                display.style.color = val.rarity === "legendary" ? "gold" : "#ff9a9e";
+                widget.style.border = val.rarity === "legendary" ? "2px solid gold" : "1px solid #ff9a9e";
+            } else {
+                label.innerText = "Durum";
+                display.style.color = "var(--text)";
+                widget.style.border = "1px solid rgba(128,128,128,0.1)";
+                if ('getBattery' in navigator) { 
+                    navigator.getBattery().then(bat => { display.innerText = Math.round(bat.level * 100) + "%"; }); 
+                }
+            }
+        });
+
+        // --- GPS VE SAAT ---
+        function toRad(v) { return v * Math.PI / 180; }
+        navigator.geolocation.watchPosition((p) => {
+            const R = 6371; 
+            const dLat = toRad(39.9334 - p.coords.latitude); 
+            const dLon = toRad(32.8597 - p.coords.longitude);
+            const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(39.9334)) * Math.sin(dLon/2)**2;
+            const d = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3);
+            document.getElementById('distance-display').innerText = d.replace('.', ',') + " KM";
+        });
+
+        // --- MOD VE NOTLAR ---
         function updateTylerMood(emoji) {
             db.ref('status').update({ böcekMood: emoji });
-            db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek ${emoji} moduna geçti!`, time: Date.now() });
+            db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek ${emoji} modunda!`, time: Date.now() });
             showStatusPopup();
         }
 
         function renderMoods() {
-            const now = new Date();
-            const hour = now.getHours();
-            let currentMoods = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍'];
-            if (hour >= 0 && hour < 4) {
-                currentMoods = [...currentMoods, '🔞', '🫦', '💦', '🍑', '🍆', '⛓️', '🍷', '😈', '🔥'];
-            }
-            document.getElementById('tyler-mood-selector').innerHTML = currentMoods.map(m => 
+            const hour = new Date().getHours();
+            let moods = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍'];
+            if (hour >= 0 && hour < 4) moods = [...moods, '🔞', '🫦', '💦', '🍑', '🍆', '🍷', '😈', '🔥'];
+            document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => 
                 `<span style="font-size:1.8rem; cursor:pointer; padding:5px;" onclick="updateTylerMood('${m}')">${m}</span>`
             ).join('');
         }
-        renderMoods();
-        setInterval(renderMoods, 60000);
+        renderMoods(); setInterval(renderMoods, 60000);
 
         function updateTylerStatus() {
             const txt = document.getElementById('tylerNote').value;
@@ -422,32 +424,34 @@
             l.scrollTop = l.scrollHeight;
         });
 
-        // --- TODO LIST ---
+        // --- TODO, MÜZİK VE DİĞER ---
         function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
-        function toggleTodo(key, currentDone) { db.ref('todos/' + key).update({ done: !currentDone }); }
-        function deleteTodo(key) { db.ref('todos/' + key).remove(); }
+        function toggleTodo(k, d) { db.ref('todos/' + k).update({ done: !d }); }
+        function deleteTodo(k) { db.ref('todos/' + k).remove(); }
         db.ref('todos').on('value', s => { 
             const l = document.getElementById('todo-list'); l.innerHTML = ""; 
             s.forEach(c => { 
-                const i = c.val(); const chk = i.done ? 'checked' : ''; const cls = i.done ? 'done' : '';
-                l.innerHTML += `<div class="todo-item ${cls}"><div class="todo-check ${chk}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div><span class="todo-text">${i.text}</span><span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span></div>`; 
+                const i = c.val(); const chk = i.done ? 'checked' : '';
+                l.innerHTML += `<div class="todo-item ${i.done?'done':''}"><div class="todo-check ${chk}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div><span class="todo-text">${i.text}</span><span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span></div>`; 
             }); 
         });
 
-        // --- MÜZİK ---
         function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
-        db.ref('shared_music').on('value', snap => {
-            const id = snap.val()?.id || "qMsEVXrfuvA";
+        db.ref('shared_music').on('value', s => {
+            const id = s.val()?.id || "qMsEVXrfuvA";
             document.getElementById('music-display').innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${id}?rel=0" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
         });
 
-        // --- DİĞER FONKSİYONLAR ---
         function sendMissYou() { db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() }); db.ref('kisses/Tyler').transaction(c => (c || 0) + 1); document.getElementById("sent-notification").classList.add("show"); setTimeout(() => document.getElementById("sent-notification").classList.remove("show"), 2000); }
-        db.ref('alerts/tylerAlert').on('value', snap => { const d = snap.val(); if(d && Date.now() - d.time < 5000) { const n = document.getElementById("love-notification"); n.innerHTML = `<div style="font-size:3rem;">❤️</div><h2>${d.msg}</h2>`; n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000); } });
-        db.ref('scores').on('value', s => { const d = s.val() || {}; const t = d.Tyler || 0; const m = d.Mina || 0; document.getElementById('score-tyler').innerText = t; document.getElementById('score-mina').innerText = m; const ct = document.getElementById('champion-text'); if(t>m) ct.innerText = "👑 Lider: Böcek"; else if(m>t) ct.innerText = "👑 Lider: Mina"; else ct.innerText = "💞 Eşitlik!"; });
+        db.ref('alerts/tylerAlert').on('value', s => { const d = s.val(); if(d && Date.now() - d.time < 5000) { const n = document.getElementById("love-notification"); n.innerHTML = `❤️<h2>${d.msg}</h2>`; n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000); } });
+        db.ref('scores').on('value', s => { const d = s.val() || {}; document.getElementById('score-tyler').innerText = d.Tyler || 0; document.getElementById('score-mina').innerText = d.Mina || 0; });
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
-        db.ref('status').on('value', s => { const d = s.val(); if(!d) return; document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = d.meinNote||"Not bekleniyor..."; });
-        setInterval(() => { const diff = new Date("2026-08-01T19:00:00") - new Date(); document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; }, 1000);
+        db.ref('status').on('value', s => { const d = s.val(); if(d) { document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = d.meinNote||"Not bekleniyor..."; } });
+        
+        setInterval(() => { 
+            const diff = new Date("2026-08-01T19:00:00") - new Date(); 
+            document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; 
+        }, 1000);
     </script>
 </body>
 </html>
