@@ -24,60 +24,55 @@
         .btn:active { transform: scale(0.98); }
         textarea, input[type="text"], select { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid transparent; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
         
-        /* MULTI-SELECT STYLE */
-        select[multiple] { height: 80px; }
+        /* TO-DO LIST */
+        .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; transition: 0.3s; }
+        .todo-item.done span.todo-text { text-decoration: line-through; opacity: 0.5; }
+        .todo-check { width: 22px; height: 22px; border: 2px solid var(--accent-blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
+        .todo-check.checked { background: var(--accent-blue); color: #000; font-weight: bold; }
+        .todo-text { flex: 1; }
+        .todo-delete { cursor: pointer; opacity: 0.7; font-size: 1.1rem; }
+        .todo-input-container { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border-radius: 50px; padding: 5px 5px 5px 15px; margin-top: 15px; border: 1px solid rgba(0,210,255,0.2); }
+        .todo-input-container input { margin-top: 0; background: transparent; padding: 8px 0; border: none !important; flex: 1; color: var(--text); outline: none; }
+        .todo-add-btn { background: var(--accent-blue); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
         /* GALERİ VE KLASÖR SİSTEMİ */
         .folder-nav { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; margin-bottom: 15px; scrollbar-width: none; }
         .folder-nav::-webkit-scrollbar { display: none; }
-        .folder-chip { background: var(--input-bg); padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; white-space: nowrap; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; }
-        .folder-chip.active { background: var(--accent-blue); color: #000; font-weight: bold; transform: scale(1.05); }
+        .folder-chip { background: var(--input-bg); padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; white-space: nowrap; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
+        .folder-chip.active { background: var(--accent-blue); color: #000; font-weight: bold; }
         .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
         .gallery-item-container { position: relative; width: 100%; aspect-ratio: 1; }
         .gallery-item { width: 100%; height: 100%; object-fit: cover; border-radius: 15px; border: 2px solid rgba(255,255,255,0.1); }
-        
-        /* AKSİYON BUTONLARI */
+        .tag-container { position: absolute; bottom: 5px; left: 5px; right: 5px; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
+        .tag-badge { background: rgba(0,0,0,0.7); color: var(--accent-blue); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; }
         .photo-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 5px; z-index: 10; }
         .action-btn { background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .action-btn.delete { color: #ff4757; }
 
-        /* KLASÖR YÖNETİM PANELİ (MODAL) */
-        #folder-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10002; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: var(--card); border-radius: 25px; padding: 25px; width: 100%; max-width: 400px; border: 1px solid var(--accent-blue); }
-        .folder-list-item { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .folder-list-item input { width: 20px; height: 20px; margin: 0; }
-
-        /* DİĞER STİLLER (TODO, ARŞİV VB) */
-        .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; }
-        .todo-item.done { opacity: 0.5; text-decoration: line-through; }
-        .todo-check { width: 22px; height: 22px; border: 2px solid var(--accent-blue); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .todo-check.checked { background: var(--accent-blue); color: #000; }
-        .todo-text { flex: 1; }
-        .archive-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 5px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
-        .archive-msg { padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; max-width: 80%; line-height: 1.4; position: relative; }
-        .msg-me { background: rgba(0, 210, 255, 0.2); align-self: flex-end; border-right: 3px solid var(--accent-blue); }
-        .msg-other { background: rgba(255, 154, 158, 0.2); align-self: flex-start; border-left: 3px solid #ff9a9e; }
         .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-between; padding: 15px 15px; z-index: 1000; border-radius: 20px 20px 0 0; }
         .nav-item { cursor: pointer; font-size: 1.3rem; opacity: 0.5; filter: grayscale(1); transition: 0.3s; }
         .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); }
         .page { display: none; animation: slideUp 0.4s ease; }
         .page.active { display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* MULTI FOLDER MODAL */
+        #folder-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: var(--card); border-radius: 25px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--accent-blue); }
+        .folder-option { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .folder-option input { width: 18px; height: 18px; }
     </style>
 </head>
 <body>
-    <!-- MODAL: Klasör Yönetimi -->
     <div id="folder-modal">
-        <div class="modal-content">
-            <h2 style="font-family:'Pacifico'; color:var(--accent-blue); margin-top:0;">Klasörleri Yönet</h2>
-            <div id="modal-folder-list" style="max-height:300px; overflow-y:auto; margin-bottom:20px;"></div>
-            <button class="btn" onclick="closeFolderModal()">Kapat ve Kaydet</button>
+        <div class="modal-card">
+            <h3 style="margin-top:0;">Klasörleri Seç</h3>
+            <div id="modal-folder-list" style="max-height: 250px; overflow-y: auto;"></div>
+            <button class="btn" onclick="savePhotoFolders()">Kaydet ve Kapat</button>
         </div>
     </div>
 
-    <div id="status-popup" style="visibility:hidden; position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--accent-blue); color:#000; padding:10px 20px; border-radius:50px; font-weight:bold; z-index:10001; transition:0.3s;">✅ İşlem Başarılı!</div>
+    <div id="status-popup" style="visibility:hidden; position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--accent-blue); color:#000; padding:10px 20px; border-radius:50px; font-weight:bold; z-index:10001; transition:0.3s;">✅ Başarılı!</div>
 
-    <!-- HOME PAGE -->
     <div id="home" class="page active">
         <div class="header-container"><h1>Böcek OS</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
         <div class="grid-container">
@@ -107,32 +102,27 @@
             <button class="btn" onclick="updateTylerStatus()">Güncelle & Arşivle</button>
             <div id="archive-list" class="archive-list"></div>
         </div>
-        <div class="status-card">
-            <h3>📝 Aşk Görevleri</h3>
-            <div id="todo-list"></div>
-            <div class="todo-input-container">
-                <input type="text" id="todo-input" placeholder="Yeni görev...">
-                <button class="todo-add-btn" onclick="addTodo()">+</button>
-            </div>
-        </div>
     </div>
 
-    <!-- GALLERY PAGE -->
     <div id="gallery-page" class="page">
         <div class="header-container"><h1>Aşk Galerisi 🖼️</h1></div>
         <div class="status-card">
-            <input type="text" id="tag-search" placeholder="🔍 Klasör veya Tag ara..." oninput="renderGallery()" style="background:rgba(0,210,255,0.1); border:1px solid var(--accent-blue);">
+            <input type="text" id="tag-search" placeholder="🔍 Tag veya Klasör Ara..." oninput="renderGallery()">
             
             <div style="margin-top:10px;">
-                <label style="font-size:0.7rem; opacity:0.7;">Yüklenecek Klasörleri Seç (Çoklu Seçilebilir):</label>
-                <select id="target-folder-select" multiple style="margin-top:5px;"></select>
-                <button class="btn" onclick="addNewFolder()" style="margin-top:10px; padding:8px; font-size:0.8rem;">+ Yeni Klasör Oluştur</button>
+                <label style="font-size:0.7rem; opacity:0.7;">Yüklenecek Klasörleri Seç (Çoklu):</label>
+                <div id="upload-folder-list" style="max-height: 100px; overflow-y:auto; background:rgba(255,255,255,0.05); border-radius:10px; padding:10px; margin-top:5px;"></div>
+                <button class="btn" onclick="addNewFolder()" style="margin-top:5px; padding:8px; font-size:0.7rem;">+ Yeni Klasör</button>
             </div>
 
-            <div class="upload-btn-wrapper" style="margin-top:10px;">
+            <input type="text" id="photo-tags" placeholder="Etiketler (ör: tatil, deniz)..." style="margin-top:10px;">
+
+            <div class="upload-btn-wrapper" style="margin-top:10px; position:relative; overflow:hidden; display:inline-block; width:100%;">
                 <button class="btn">📸 Çoklu Fotoğraf Yükle</button>
-                <input type="file" id="photo-upload" accept="image/*" multiple onchange="uploadMultiplePhotos()">
+                <input type="file" id="photo-upload" accept="image/*" multiple onchange="uploadMultiplePhotos()" style="position:absolute; left:0; top:0; opacity:0; width:100%; height:100%;">
             </div>
+            
+            <button class="btn" id="sort-btn" onclick="toggleSort()" style="margin-top:10px; background:rgba(255,255,255,0.1); border:1px solid rgba(0,210,255,0.2);">🔄 Sırala: Yeniler Altta</button>
             
             <div id="folder-nav" class="folder-nav">
                 <div class="folder-chip active" onclick="setGalleryFilter('All')">Hepsi</div>
@@ -141,11 +131,11 @@
         </div>
     </div>
 
-    <!-- OTHER PAGES -->
+    <!-- IFRAME PAGES -->
     <div id="music-page" class="page">
         <div class="header-container"><h1>Müzik Kutusu 🎵</h1></div>
-        <div class="status-card" id="music-display" style="min-height:200px; text-align:center;">Yükleniyor...</div>
-        <input type="text" id="music-input" placeholder="YouTube Video ID">
+        <div class="status-card" id="music-display" style="text-align:center; min-height:200px;">Yükleniyor...</div>
+        <input type="text" id="music-input" placeholder="YouTube ID">
         <button class="btn" onclick="changeMusic()">Değiştir</button>
     </div>
     <div id="quiz-page" class="page"><iframe src="https://quiz-gamma-lime.vercel.app/" style="width:100%; height:75vh; border:none; border-radius:20px;"></iframe></div>
@@ -171,12 +161,10 @@
             projectId: "tylermina-61718", 
             storageBucket: "tylermina-61718.firebasestorage.app", 
             messagingSenderId: "494227494785", 
-            appId: "1:494227494785:web:65cd8a4a50bc0b7531fa80", 
-            measurementId: "G-X7BVRSXWWD" 
+            appId: "1:494227494785:web:65cd8a4a50bc0b7531fa80"
         };
         firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
-        // --- TEMA VE NAVİGASYON ---
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -188,72 +176,69 @@
             setTimeout(() => p.style.visibility = 'hidden', 2000);
         }
 
-        // --- GALERİ VE ÇOKLU KLASÖR SİSTEMİ ---
-        let galleryData = []; 
+        // --- GALERİ MANTIĞI ---
+        let isNewestAtBottom = true;
+        let galleryData = [];
         let customFolders = ["Genel"];
         let currentGalleryFilter = 'All';
-        let activePhotoKey = null;
+        let editingPhotoKey = null;
 
-        // Klasörleri DB'den çek
         db.ref('gallery_folders').on('value', snap => {
             customFolders = ["Genel"];
-            if(snap.exists()){ snap.forEach(c => { customFolders.push(c.val()); }); }
-            renderFolderUI();
+            if(snap.exists()) snap.forEach(c => customFolders.push(c.val()));
+            updateFolderUI();
         });
 
-        function renderFolderUI() {
-            const select = document.getElementById('target-folder-select');
-            const nav = document.getElementById('folder-nav');
+        function updateFolderUI() {
+            // Upload listesi
+            document.getElementById('upload-folder-list').innerHTML = customFolders.map(f => `
+                <div style="font-size:0.8rem; display:inline-block; margin-right:10px;">
+                    <input type="checkbox" class="upload-f-check" value="${f}"> ${f}
+                </div>
+            `).join('');
             
-            // Yükleme listesi
-            select.innerHTML = customFolders.map(f => `<option value="${f}">${f}</option>`).join('');
-            
-            // Filtreleme butonları
+            // Navigasyon
             let navHtml = `<div class="folder-chip ${currentGalleryFilter === 'All' ? 'active' : ''}" onclick="setGalleryFilter('All')">Hepsi</div>`;
             customFolders.forEach(f => {
                 navHtml += `<div class="folder-chip ${currentGalleryFilter === f ? 'active' : ''}" onclick="setGalleryFilter('${f}')">${f}</div>`;
             });
-            nav.innerHTML = navHtml;
+            document.getElementById('folder-nav').innerHTML = navHtml;
         }
+
+        function setGalleryFilter(f) { currentGalleryFilter = f; renderGallery(); }
+        function toggleSort() { isNewestAtBottom = !isNewestAtBottom; renderGallery(); }
 
         function addNewFolder() {
-            const name = prompt("Yeni klasör ismi:");
-            if(name && name.trim()) { db.ref('gallery_folders').push(name.trim()); showStatusPopup(); }
+            const n = prompt("Klasör İsmi:");
+            if(n && n.trim()) db.ref('gallery_folders').push(n.trim());
         }
 
-        function setGalleryFilter(filter) { currentGalleryFilter = filter; renderFolderUI(); renderGallery(); }
-
-        // FOTOĞRAF YÖNETİMİ (MODAL)
+        // KLASÖR DÜZENLEME MODALI
         function openFolderModal(key, currentFolders) {
-            activePhotoKey = key;
-            const list = document.getElementById('modal-folder-list');
-            list.innerHTML = customFolders.map(f => `
-                <div class="folder-list-item">
-                    <input type="checkbox" id="check-${f}" value="${f}" ${currentFolders.includes(f) ? 'checked' : ''}>
-                    <label for="check-${f}">${f}</label>
+            editingPhotoKey = key;
+            document.getElementById('modal-folder-list').innerHTML = customFolders.map(f => `
+                <div class="folder-option">
+                    <input type="checkbox" class="modal-f-check" value="${f}" ${currentFolders.includes(f) ? 'checked' : ''}> ${f}
                 </div>
             `).join('');
             document.getElementById('folder-modal').style.display = 'flex';
         }
 
-        function closeFolderModal() {
-            const selected = [];
-            customFolders.forEach(f => {
-                if(document.getElementById(`check-${f}`).checked) selected.push(f);
-            });
+        function savePhotoFolders() {
+            const selected = Array.from(document.querySelectorAll('.modal-f-check:checked')).map(el => el.value);
             if(selected.length === 0) selected.push("Genel");
-            db.ref('gallery/' + activePhotoKey).update({ folders: selected });
+            db.ref('gallery/' + editingPhotoKey).update({ folders: selected });
             document.getElementById('folder-modal').style.display = 'none';
             showStatusPopup();
         }
 
         function uploadMultiplePhotos() {
             const files = document.getElementById('photo-upload').files;
-            const select = document.getElementById('target-folder-select');
-            const selectedFolders = Array.from(select.selectedOptions).map(opt => opt.value);
+            const folders = Array.from(document.querySelectorAll('.upload-f-check:checked')).map(el => el.value);
+            const tags = document.getElementById('photo-tags').value.split(',').map(t => t.trim()).filter(t => t);
             
             if(files.length === 0) return;
-            if(selectedFolders.length === 0) selectedFolders.push("Genel");
+            if(folders.length === 0) folders.push("Genel");
 
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
@@ -261,58 +246,59 @@
                     const img = new Image();
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1000;
-                        canvas.width = MAX_WIDTH; canvas.height = img.height * (MAX_WIDTH / img.width);
+                        const MAX = 1000;
+                        canvas.width = MAX; canvas.height = img.height * (MAX / img.width);
                         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        db.ref('gallery').push({ 
-                            image: canvas.toDataURL('image/jpeg', 0.8), 
-                            time: Date.now(), 
-                            folders: selectedFolders 
-                        });
+                        db.ref('gallery').push({ image: canvas.toDataURL('image/jpeg', 0.8), time: Date.now(), folders: folders, tags: tags });
                     };
                     img.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             });
+            document.getElementById('photo-tags').value = "";
             showStatusPopup();
         }
 
         db.ref('gallery').orderByChild('time').on('value', snap => {
-            galleryData = []; 
-            snap.forEach(c => { 
+            galleryData = [];
+            snap.forEach(c => {
                 const d = c.val();
-                galleryData.push({ 
-                    key: c.key, 
-                    image: d.image, 
-                    folders: d.folders || ["Genel"], 
-                    time: d.time 
-                }); 
+                galleryData.push({ key: c.key, ...d, folders: d.folders || ["Genel"], tags: d.tags || [] });
             });
-            renderGallery(); 
+            renderGallery();
         });
 
         function renderGallery() {
             const grid = document.getElementById('gallery-grid');
             const search = document.getElementById('tag-search').value.toLowerCase();
-            
+            const btn = document.getElementById('sort-btn');
+
             let filtered = galleryData.filter(p => {
                 const folderMatch = (currentGalleryFilter === 'All' || p.folders.includes(currentGalleryFilter));
-                const searchMatch = p.folders.some(f => f.toLowerCase().includes(search)) || search === "";
-                return folderMatch && searchMatch;
+                const tagMatch = p.tags.some(t => t.toLowerCase().includes(search)) || p.folders.some(f => f.toLowerCase().includes(search)) || search === "";
+                return folderMatch && tagMatch;
             });
 
-            grid.innerHTML = filtered.reverse().map(p => `
+            if(!isNewestAtBottom) {
+                filtered.reverse();
+                btn.innerText = "⬆️ Sırala: Yeniler Üstte";
+            } else {
+                btn.innerText = "⬇️ Sırala: Yeniler Altta";
+            }
+
+            grid.innerHTML = filtered.map(p => `
                 <div class="gallery-item-container">
                     <div class="photo-actions">
-                        <button class="action-btn" onclick="openFolderModal('${p.key}', ${JSON.stringify(p.folders)})" title="Klasörleri Yönet">📂</button>
-                        <button class="action-btn delete" onclick="if(confirm('Silinsin mi?')) db.ref('gallery/${p.key}').remove()" title="Sil">🗑️</button>
+                        <button class="action-btn" onclick="openFolderModal('${p.key}', ${JSON.stringify(p.folders)})">📂</button>
+                        <button class="action-btn" style="color:#ff4757" onclick="if(confirm('Silinsin mi?')) db.ref('gallery/${p.key}').remove()">🗑️</button>
                     </div>
                     <img src="${p.image}" class="gallery-item" onclick="window.open(this.src)">
+                    <div class="tag-container">${p.tags.map(t => `<span class="tag-badge">#${t}</span>`).join('')}</div>
                 </div>
             `).join('');
         }
 
-        // --- GPS VE DİĞER ---
+        // --- DİĞER FONKSİYONLAR ---
         function toRad(v) { return v * Math.PI / 180; }
         navigator.geolocation.watchPosition((p) => {
             const R = 6371; const dLat = toRad(39.9334 - p.coords.latitude); const dLon = toRad(32.8597 - p.coords.longitude);
@@ -321,41 +307,26 @@
             document.getElementById('distance-display').innerText = d.replace('.', ',') + " KM";
         });
 
-        function updateTylerMood(emoji) {
-            db.ref('status').update({ böcekMood: emoji });
-            db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek ${emoji} modunda!`, time: Date.now() });
-            showStatusPopup();
-        }
+        db.ref('active_coupon_Mina').on('value', snap => {
+            const val = snap.val(); const widget = document.getElementById('coupon-widget'); const display = document.getElementById('coupon-display');
+            if (val && val.status === "Aktif") { display.innerText = "👸 " + val.name; display.style.color = val.rarity === "legendary" ? "gold" : "#ff9a9e"; widget.style.border = val.rarity === "legendary" ? "2px solid gold" : "1px solid #ff9a9e"; } 
+            else { display.style.color = "var(--text)"; widget.style.border = "1px solid rgba(128,128,128,0.1)"; if ('getBattery' in navigator) { navigator.getBattery().then(bat => { display.innerText = Math.round(bat.level * 100) + "%"; }); } }
+        });
 
-        function renderMoods() {
-            const hour = new Date().getHours();
-            let moods = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍'];
-            if (hour >= 0 && hour < 4) moods = [...moods, '🔞', '🫦', '💦', '🍑', '🍆', '😈', '🔥'];
-            document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => `<span style="font-size:1.8rem; cursor:pointer;" onclick="updateTylerMood('${m}')">${m}</span>`).join('');
-        }
-        renderMoods(); setInterval(renderMoods, 60000);
+        function updateTylerMood(emoji) { db.ref('status').update({ böcekMood: emoji }); showStatusPopup(); }
+        const moods = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍'];
+        document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => `<span style="font-size:1.8rem; cursor:pointer;" onclick="updateTylerMood('${m}')">${m}</span>`).join('');
 
         function updateTylerStatus() {
-            const txt = document.getElementById('tylerNote').value;
-            if(!txt.trim()) return;
+            const txt = document.getElementById('tylerNote').value; if(!txt.trim()) return;
             db.ref('status').update({ böcekNote: txt });
             db.ref('love_archive').push({ sender: 'Böcek', msg: txt, time: Date.now() });
             document.getElementById('tylerNote').value = ""; showStatusPopup();
         }
 
-        db.ref('love_archive').limitToLast(10).on('value', snap => {
+        db.ref('love_archive').limitToLast(5).on('value', snap => {
             const l = document.getElementById('archive-list'); l.innerHTML = "";
-            snap.forEach(c => {
-                const d = c.val(); const cls = d.sender === 'Böcek' ? 'msg-me' : 'msg-other';
-                l.innerHTML += `<div class="archive-msg ${cls}">${d.msg}</div>`;
-            });
-        });
-
-        function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
-        function toggleTodo(k, d) { db.ref('todos/' + k).update({ done: !d }); }
-        db.ref('todos').on('value', s => { 
-            const l = document.getElementById('todo-list'); l.innerHTML = ""; 
-            s.forEach(c => { const i = c.val(); l.innerHTML += `<div class="todo-item ${i.done?'done':''}"><div class="todo-check ${i.done?'checked':''}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div><span class="todo-text">${i.text}</span></div>`; }); 
+            snap.forEach(c => { l.innerHTML += `<div class="archive-msg ${c.val().sender==='Böcek'?'msg-me':'msg-other'}">${c.val().msg}</div>`; });
         });
 
         function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
