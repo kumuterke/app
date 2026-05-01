@@ -190,14 +190,12 @@
         });
 
         function updateFolderUI() {
-            // Upload listesi
             document.getElementById('upload-folder-list').innerHTML = customFolders.map(f => `
                 <div style="font-size:0.8rem; display:inline-block; margin-right:10px;">
                     <input type="checkbox" class="upload-f-check" value="${f}"> ${f}
                 </div>
             `).join('');
             
-            // Navigasyon
             let navHtml = `<div class="folder-chip ${currentGalleryFilter === 'All' ? 'active' : ''}" onclick="setGalleryFilter('All')">Hepsi</div>`;
             customFolders.forEach(f => {
                 navHtml += `<div class="folder-chip ${currentGalleryFilter === f ? 'active' : ''}" onclick="setGalleryFilter('${f}')">${f}</div>`;
@@ -213,9 +211,19 @@
             if(n && n.trim()) db.ref('gallery_folders').push(n.trim());
         }
 
+        // HALİ HAZIRDAKİ RESME TAG EKLEME / DÜZENLEME
+        function editPhotoTags(key, currentTags) {
+            const newTagsStr = prompt("Etiketleri düzenle (virgül ile ayırarak yaz):", currentTags.join(', '));
+            if (newTagsStr !== null) {
+                const newTags = newTagsStr.split(',').map(t => t.trim()).filter(t => t !== "");
+                db.ref('gallery/' + key).update({ tags: newTags });
+                showStatusPopup();
+            }
+        }
+
         // KLASÖR DÜZENLEME MODALI
         function openFolderModal(key, currentFolders) {
-            editingPhotoKey = key;
+            editingPhotoKey = key; // Hangi fotoğrafın düzenlendiğini değişkene atıyoruz
             document.getElementById('modal-folder-list').innerHTML = customFolders.map(f => `
                 <div class="folder-option">
                     <input type="checkbox" class="modal-f-check" value="${f}" ${currentFolders.includes(f) ? 'checked' : ''}> ${f}
@@ -289,7 +297,8 @@
             grid.innerHTML = filtered.map(p => `
                 <div class="gallery-item-container">
                     <div class="photo-actions">
-                        <button class="action-btn" onclick="openFolderModal('${p.key}', ${JSON.stringify(p.folders)})">📂</button>
+                        <button class="action-btn" onclick="editPhotoTags('${p.key}', ${JSON.stringify(p.tags)})" title="Tag Düzenle">🏷️</button>
+                        <button class="action-btn" onclick="openFolderModal('${p.key}', ${JSON.stringify(p.folders)})" title="Klasör Düzenle">📂</button>
                         <button class="action-btn" style="color:#ff4757" onclick="if(confirm('Silinsin mi?')) db.ref('gallery/${p.key}').remove()">🗑️</button>
                     </div>
                     <img src="${p.image}" class="gallery-item" onclick="window.open(this.src)">
