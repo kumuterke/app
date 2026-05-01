@@ -31,9 +31,6 @@
         .todo-check.checked { background: var(--accent-blue); color: #000; font-weight: bold; }
         .todo-text { flex: 1; }
         .todo-delete { cursor: pointer; opacity: 0.7; font-size: 1.1rem; }
-        .todo-input-container { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border-radius: 50px; padding: 5px 5px 5px 15px; margin-top: 15px; border: 1px solid rgba(0,210,255,0.2); }
-        .todo-input-container input { margin-top: 0; background: transparent; padding: 8px 0; border: none !important; flex: 1; color: var(--text); outline: none; }
-        .todo-add-btn { background: var(--accent-blue); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
         /* GALERİ VE KLASÖR SİSTEMİ */
         .folder-nav { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; margin-bottom: 15px; scrollbar-width: none; }
@@ -108,22 +105,17 @@
         <div class="header-container"><h1>Aşk Galerisi 🖼️</h1></div>
         <div class="status-card">
             <input type="text" id="tag-search" placeholder="🔍 Tag veya Klasör Ara..." oninput="renderGallery()">
-            
             <div style="margin-top:10px;">
-                <label style="font-size:0.7rem; opacity:0.7;">Yüklenecek Klasörleri Seç (Çoklu):</label>
+                <label style="font-size:0.7rem; opacity:0.7;">Yüklenecek Klasörleri Seç:</label>
                 <div id="upload-folder-list" style="max-height: 100px; overflow-y:auto; background:rgba(255,255,255,0.05); border-radius:10px; padding:10px; margin-top:5px;"></div>
                 <button class="btn" onclick="addNewFolder()" style="margin-top:5px; padding:8px; font-size:0.7rem;">+ Yeni Klasör</button>
             </div>
-
-            <input type="text" id="photo-tags" placeholder="Etiketler (ör: tatil, deniz)..." style="margin-top:10px;">
-
+            <input type="text" id="photo-tags" placeholder="Etiketler (virgülle ayır)..." style="margin-top:10px;">
             <div class="upload-btn-wrapper" style="margin-top:10px; position:relative; overflow:hidden; display:inline-block; width:100%;">
                 <button class="btn">📸 Çoklu Fotoğraf Yükle</button>
                 <input type="file" id="photo-upload" accept="image/*" multiple onchange="uploadMultiplePhotos()" style="position:absolute; left:0; top:0; opacity:0; width:100%; height:100%;">
             </div>
-            
             <button class="btn" id="sort-btn" onclick="toggleSort()" style="margin-top:10px; background:rgba(255,255,255,0.1); border:1px solid rgba(0,210,255,0.2);">🔄 Sırala: Yeniler Altta</button>
-            
             <div id="folder-nav" class="folder-nav">
                 <div class="folder-chip active" onclick="setGalleryFilter('All')">Hepsi</div>
             </div>
@@ -195,7 +187,6 @@
                     <input type="checkbox" class="upload-f-check" value="${f}"> ${f}
                 </div>
             `).join('');
-            
             let navHtml = `<div class="folder-chip ${currentGalleryFilter === 'All' ? 'active' : ''}" onclick="setGalleryFilter('All')">Hepsi</div>`;
             customFolders.forEach(f => {
                 navHtml += `<div class="folder-chip ${currentGalleryFilter === f ? 'active' : ''}" onclick="setGalleryFilter('${f}')">${f}</div>`;
@@ -205,15 +196,16 @@
 
         function setGalleryFilter(f) { currentGalleryFilter = f; renderGallery(); }
         function toggleSort() { isNewestAtBottom = !isNewestAtBottom; renderGallery(); }
-
         function addNewFolder() {
             const n = prompt("Klasör İsmi:");
             if(n && n.trim()) db.ref('gallery_folders').push(n.trim());
         }
 
-        // HALİ HAZIRDAKİ RESME TAG EKLEME / DÜZENLEME
-        function editPhotoTags(key, currentTags) {
-            const newTagsStr = prompt("Etiketleri düzenle (virgül ile ayırarak yaz):", currentTags.join(', '));
+        // TAG DÜZENLEME (Tamir edildi)
+        function editPhotoTags(key) {
+            const photo = galleryData.find(p => p.key === key);
+            const currentTags = photo ? photo.tags : [];
+            const newTagsStr = prompt("Etiketleri düzenle (virgül ile ayır):", currentTags.join(', '));
             if (newTagsStr !== null) {
                 const newTags = newTagsStr.split(',').map(t => t.trim()).filter(t => t !== "");
                 db.ref('gallery/' + key).update({ tags: newTags });
@@ -221,9 +213,11 @@
             }
         }
 
-        // KLASÖR DÜZENLEME MODALI
-        function openFolderModal(key, currentFolders) {
-            editingPhotoKey = key; // Hangi fotoğrafın düzenlendiğini değişkene atıyoruz
+        // KLASÖR MODALI (Tamir edildi)
+        function openFolderModal(key) {
+            const photo = galleryData.find(p => p.key === key);
+            const currentFolders = photo ? photo.folders : ["Genel"];
+            editingPhotoKey = key;
             document.getElementById('modal-folder-list').innerHTML = customFolders.map(f => `
                 <div class="folder-option">
                     <input type="checkbox" class="modal-f-check" value="${f}" ${currentFolders.includes(f) ? 'checked' : ''}> ${f}
@@ -244,17 +238,14 @@
             const files = document.getElementById('photo-upload').files;
             const folders = Array.from(document.querySelectorAll('.upload-f-check:checked')).map(el => el.value);
             const tags = document.getElementById('photo-tags').value.split(',').map(t => t.trim()).filter(t => t);
-            
             if(files.length === 0) return;
             if(folders.length === 0) folders.push("Genel");
-
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const img = new Image();
                     img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX = 1000;
+                        const canvas = document.createElement('canvas'); const MAX = 1000;
                         canvas.width = MAX; canvas.height = img.height * (MAX / img.width);
                         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                         db.ref('gallery').push({ image: canvas.toDataURL('image/jpeg', 0.8), time: Date.now(), folders: folders, tags: tags });
@@ -263,8 +254,7 @@
                 };
                 reader.readAsDataURL(file);
             });
-            document.getElementById('photo-tags').value = "";
-            showStatusPopup();
+            document.getElementById('photo-tags').value = ""; showStatusPopup();
         }
 
         db.ref('gallery').orderByChild('time').on('value', snap => {
@@ -279,26 +269,19 @@
         function renderGallery() {
             const grid = document.getElementById('gallery-grid');
             const search = document.getElementById('tag-search').value.toLowerCase();
-            const btn = document.getElementById('sort-btn');
-
             let filtered = galleryData.filter(p => {
                 const folderMatch = (currentGalleryFilter === 'All' || p.folders.includes(currentGalleryFilter));
                 const tagMatch = p.tags.some(t => t.toLowerCase().includes(search)) || p.folders.some(f => f.toLowerCase().includes(search)) || search === "";
                 return folderMatch && tagMatch;
             });
-
-            if(!isNewestAtBottom) {
-                filtered.reverse();
-                btn.innerText = "⬆️ Sırala: Yeniler Üstte";
-            } else {
-                btn.innerText = "⬇️ Sırala: Yeniler Altta";
-            }
+            if(!isNewestAtBottom) filtered.reverse();
+            document.getElementById('sort-btn').innerText = isNewestAtBottom ? "⬇️ Sırala: Yeniler Altta" : "⬆️ Sırala: Yeniler Üstte";
 
             grid.innerHTML = filtered.map(p => `
                 <div class="gallery-item-container">
                     <div class="photo-actions">
-                        <button class="action-btn" onclick="editPhotoTags('${p.key}', ${JSON.stringify(p.tags)})" title="Tag Düzenle">🏷️</button>
-                        <button class="action-btn" onclick="openFolderModal('${p.key}', ${JSON.stringify(p.folders)})" title="Klasör Düzenle">📂</button>
+                        <button class="action-btn" onclick="editPhotoTags('${p.key}')">🏷️</button>
+                        <button class="action-btn" onclick="openFolderModal('${p.key}')">📂</button>
                         <button class="action-btn" style="color:#ff4757" onclick="if(confirm('Silinsin mi?')) db.ref('gallery/${p.key}').remove()">🗑️</button>
                     </div>
                     <img src="${p.image}" class="gallery-item" onclick="window.open(this.src)">
