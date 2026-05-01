@@ -17,12 +17,12 @@
         h1 { font-family: 'Pacifico'; color: var(--accent-blue); margin: 0; font-size: 1.6rem; }
         .theme-toggle { background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: white; }
         
-        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px px 12px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
         .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(128,128,128,0.1); text-align: center; transition: all 0.3s ease; }
         .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; }
         .btn:active { transform: scale(0.98); }
-        textarea, input[type="text"] { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid transparent; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
+        textarea, input[type="text"], select { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid transparent; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
         
         /* TO-DO LIST */
         .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; transition: 0.3s; }
@@ -35,9 +35,15 @@
         .todo-input-container input { margin-top: 0; background: transparent; padding: 8px 0; border: none !important; flex: 1; color: var(--text); outline: none; }
         .todo-add-btn { background: var(--accent-blue); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* GALERİ */
+        /* GALERİ VE KLASÖR SİSTEMİ */
+        .folder-nav { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; margin-bottom: 15px; scrollbar-width: none; }
+        .folder-nav::-webkit-scrollbar { display: none; }
+        .folder-chip { background: var(--input-bg); padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; white-space: nowrap; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
+        .folder-chip.active { background: var(--accent-blue); color: #000; font-weight: bold; }
         .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .gallery-item-container { position: relative; }
         .gallery-item { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 15px; border: 2px solid rgba(255,255,255,0.1); }
+        .tag-badge { position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.6); font-size: 0.6rem; padding: 2px 6px; border-radius: 5px; }
         .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
         .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
 
@@ -67,7 +73,7 @@
 <body>
     <div id="love-notification" style="background:rgba(255, 71, 87, 0.95); padding:30px; border-radius:30px; border:2px solid white;"><div style="font-size: 3rem;">❤️</div><h2>Mina Seni Çok Özledi!</h2><p>Hemen ona bir öpücük gönder.</p></div>
     <div id="sent-notification" style="background:rgba(46, 204, 113, 0.95); color:white; padding:15px 30px; border-radius:50px;">❤️ Bildirim Yollandı!</div>
-    <div id="status-popup">✅ Durum Güncellendi!</div>
+    <div id="status-popup">✅ İşlem Tamam!</div>
 
     <div id="home" class="page active">
         <div class="header-container"><h1>Böcek OS</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
@@ -133,11 +139,23 @@
     <div id="gallery-page" class="page">
         <div class="header-container"><h1>Aşk Galerisi 🖼️</h1></div>
         <div class="status-card">
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+                <select id="target-folder-select" style="flex:2; margin-top:0;">
+                    <option value="Genel">📁 Genel</option>
+                </select>
+                <button class="btn" onclick="addNewFolder()" style="flex:1; margin-top:0; padding:10px;">Yeni Klasör</button>
+            </div>
+            <input type="text" id="photo-tags" placeholder="Etiketler (virgülle ayır)..." style="margin-bottom:10px;">
             <div class="upload-btn-wrapper">
-                <button class="btn">📸 Fotoğraf Ekle</button>
-                <input type="file" id="photo-upload" accept="image/*" onchange="uploadPhoto()">
+                <button class="btn">📸 Çoklu Fotoğraf Yükle</button>
+                <input type="file" id="photo-upload" accept="image/*" multiple onchange="uploadMultiplePhotos()">
             </div>
             <button class="btn" id="sort-btn" onclick="toggleSort()" style="margin-top:10px; background:rgba(255,255,255,0.1); border:1px solid rgba(0,210,255,0.2);">🔄 Sırala: Yeniler Altta</button>
+            
+            <div id="folder-nav" class="folder-nav">
+                <div class="folder-chip active" onclick="setGalleryFilter('All')">Hepsi</div>
+            </div>
+
             <div id="gallery-grid" class="gallery-grid"></div>
         </div>
     </div>
@@ -189,105 +207,160 @@
             window.scrollTo(0,0);
         }
 
-       // --- BÖCEK OS: SADECE MINA'DAN GELENLERİ GÖSTER (GÜNCELLENDİ) ---
-// Artık direkt olarak Mina'nın kanalını dinliyoruz
-db.ref('active_coupon_Mina').on('value', snap => {
-    const val = snap.val();
-    const widget = document.getElementById('coupon-widget');
-    const display = document.getElementById('coupon-display');
-    const label = document.getElementById('coupon-label');
-
-    // Varsayılan (Kupon Yoksa)
-    const resetWidget = () => {
-        display.innerText = "Yükleniyor..."; 
-        label.innerText = "Durum";
-        display.style.color = "var(--text)";
-        widget.style.border = "1px solid rgba(128,128,128,0.1)";
-        widget.style.boxShadow = "none";
-        
-        // Batarya kodun
-        if ('getBattery' in navigator) { 
-            navigator.getBattery().then(bat => { 
-                display.innerText = Math.round(bat.level * 100) + "%"; 
-            }); 
+        function showStatusPopup() {
+            document.getElementById('status-popup').classList.add('show'); 
+            setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
         }
-    };
 
-    if (val && val.status === "Aktif") {
-        // Yol zaten Mina'ya özel olduğu için isim kontrolüne gerek kalmadı
-        display.innerText = "👸 İstek: " + val.name;
-        label.innerText = "⚠️ GÖREV";
-        
-        // Nadirlik Rengi
-        if (val.rarity === "legendary") {
-            display.style.color = "gold";
-            widget.style.border = "2px solid gold";
-            widget.style.boxShadow = "0 0 15px rgba(255,215,0,0.3)";
-        } else {
-            display.style.color = "#ff9a9e";
-            widget.style.border = "1px solid #ff9a9e";
-        }
-    } else {
-        resetWidget();
-    }
-});
+        // --- KUPON WIDGET ---
+        db.ref('active_coupon_Mina').on('value', snap => {
+            const val = snap.val();
+            const widget = document.getElementById('coupon-widget');
+            const display = document.getElementById('coupon-display');
+            const label = document.getElementById('coupon-label');
 
-        // --- GELİŞMİŞ GALERİ SİSTEMİ (GIF, Sıkıştırma, SIRALAMA ÖZELLİĞİ) ---
+            const resetWidget = () => {
+                display.innerText = "Yükleniyor..."; 
+                label.innerText = "Durum";
+                display.style.color = "var(--text)";
+                widget.style.border = "1px solid rgba(128,128,128,0.1)";
+                widget.style.boxShadow = "none";
+                if ('getBattery' in navigator) { 
+                    navigator.getBattery().then(bat => { 
+                        display.innerText = Math.round(bat.level * 100) + "%"; 
+                    }); 
+                }
+            };
+
+            if (val && val.status === "Aktif") {
+                display.innerText = "👸 İstek: " + val.name;
+                label.innerText = "⚠️ GÖREV";
+                if (val.rarity === "legendary") {
+                    display.style.color = "gold";
+                    widget.style.border = "2px solid gold";
+                    widget.style.boxShadow = "0 0 15px rgba(255,215,0,0.3)";
+                } else {
+                    display.style.color = "#ff9a9e";
+                    widget.style.border = "1px solid #ff9a9e";
+                }
+            } else {
+                resetWidget();
+            }
+        });
+
+        // --- GELİŞMİŞ GALERİ SİSTEMİ (ÇOKLU, KLASÖRLÜ, ETİKETLİ) ---
         let isNewestAtBottom = true; 
         let galleryData = []; 
+        let currentGalleryFilter = 'All';
 
-        function uploadPhoto() {
-            const file = document.getElementById('photo-upload').files[0];
-            if(file) {
-                if (file.type === "image/gif") {
+        // Klasörleri Veritabanından Çek ve Select'i Doldur
+        db.ref('gallery_folders').on('value', snap => {
+            const folderSelect = document.getElementById('target-folder-select');
+            const folderNav = document.getElementById('folder-nav');
+            folderSelect.innerHTML = '<option value="Genel">📁 Genel</option>';
+            folderNav.innerHTML = `<div class="folder-chip ${currentGalleryFilter === 'All' ? 'active' : ''}" onclick="setGalleryFilter('All')">Hepsi</div>`;
+            folderNav.innerHTML += `<div class="folder-chip ${currentGalleryFilter === 'Genel' ? 'active' : ''}" onclick="setGalleryFilter('Genel')">Genel</div>`;
+            
+            if(snap.exists()){
+                snap.forEach(c => {
+                    const fName = c.val();
+                    folderSelect.innerHTML += `<option value="${fName}">📁 ${fName}</option>`;
+                    folderNav.innerHTML += `<div class="folder-chip ${currentGalleryFilter === fName ? 'active' : ''}" onclick="setGalleryFilter('${fName}')">${fName}</div>`;
+                });
+            }
+        });
+
+        function addNewFolder() {
+            const name = prompt("Yeni klasör adı:");
+            if(name) db.ref('gallery_folders').push(name);
+        }
+
+        function setGalleryFilter(filter) {
+            currentGalleryFilter = filter;
+            renderGallery();
+        }
+
+        function uploadMultiplePhotos() {
+            const files = document.getElementById('photo-upload').files;
+            const folder = document.getElementById('target-folder-select').value;
+            const tags = document.getElementById('photo-tags').value.split(',').map(t => t.trim()).filter(t => t);
+            
+            if(files.length > 0) {
+                Array.from(files).forEach(file => {
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        db.ref('gallery').push({ image: e.target.result, time: Date.now() });
+                        if (file.type === "image/gif") {
+                            db.ref('gallery').push({ 
+                                image: e.target.result, 
+                                time: Date.now(), 
+                                folder: folder, 
+                                tags: tags 
+                            });
+                        } else {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const MAX_WIDTH = 1200; 
+                                const scaleSize = MAX_WIDTH / img.width;
+                                canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+                                db.ref('gallery').push({ 
+                                    image: compressedBase64, 
+                                    time: Date.now(), 
+                                    folder: folder, 
+                                    tags: tags 
+                                });
+                            };
+                            img.src = e.target.result;
+                        }
                     };
                     reader.readAsDataURL(file);
-                } else {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            const MAX_WIDTH = 1200; 
-                            const scaleSize = MAX_WIDTH / img.width;
-                            canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
-                            db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
-                        };
-                        img.src = e.target.result;
-                    }
-                    reader.readAsDataURL(file);
-                }
+                });
+                document.getElementById('photo-tags').value = "";
+                showStatusPopup();
             }
         }
 
         db.ref('gallery').orderByChild('time').on('value', snap => {
-    galleryData = []; 
-    snap.forEach(c => { galleryData.push(c.val().image); });
-    renderGallery(); 
-});
+            galleryData = []; 
+            snap.forEach(c => { 
+                const data = c.val();
+                galleryData.push({
+                    image: data.image,
+                    folder: data.folder || 'Genel',
+                    tags: data.tags || []
+                }); 
+            });
+            renderGallery(); 
+        });
 
-        // SIRALAMA FONKSİYONU VE RENDER
         function renderGallery() {
             const grid = document.getElementById('gallery-grid');
             const btn = document.getElementById('sort-btn');
             let htmlContent = "";
             let photosToShow = [...galleryData]; 
 
+            // Filtrele
+            if (currentGalleryFilter !== 'All') {
+                photosToShow = photosToShow.filter(p => p.folder === currentGalleryFilter);
+            }
+
             if (isNewestAtBottom) {
-                btn.innerText = "⬇️ Sırala: Yeniler Altta (Varsayılan)";
+                btn.innerText = "⬇️ Sırala: Yeniler Altta";
             } else {
                 photosToShow.reverse();
                 btn.innerText = "⬆️ Sırala: Yeniler Üstte";
             }
 
-            photosToShow.forEach(src => {
-                htmlContent += `<img src="${src}" class="gallery-item" onclick="window.open(this.src)">`;
+            photosToShow.forEach(p => {
+                const tagHtml = p.tags.map(t => `<span class="tag-badge">#${t}</span>`).join('');
+                htmlContent += `
+                    <div class="gallery-item-container">
+                        <img src="${p.image}" class="gallery-item" onclick="window.open(this.src)">
+                        ${tagHtml}
+                    </div>`;
             });
             grid.innerHTML = htmlContent;
         }
@@ -310,29 +383,24 @@ db.ref('active_coupon_Mina').on('value', snap => {
         }
         initLocation();
 
-        // --- MOOD & STATUS (SAAT AYARLI GÜNCELLEME) ---
+        // --- MOOD & STATUS ---
         function updateTylerMood(emoji) {
             db.ref('status').update({ böcekMood: emoji });
             db.ref('alerts/minaAlert').set({ msg: `${emoji} Böcek ${emoji} moduna geçti!`, time: Date.now() });
-            document.getElementById('status-popup').classList.add('show'); 
-            setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
+            showStatusPopup();
         }
 
         function renderMoods() {
             const now = new Date();
             const hour = now.getHours();
-            
             let currentMoods = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍'];
-            
             if (hour >= 0 && hour < 4) {
                 currentMoods = [...currentMoods, '🔞', '🫦', '💦', '🍑', '🍆', '⛓️', '🍷', '😈', '🔥'];
             }
-            
             document.getElementById('tyler-mood-selector').innerHTML = currentMoods.map(m => 
                 `<span style="font-size:1.8rem; cursor:pointer; padding:5px;" onclick="updateTylerMood('${m}')">${m}</span>`
             ).join('');
         }
-
         renderMoods();
         setInterval(renderMoods, 60000);
 
@@ -342,8 +410,7 @@ db.ref('active_coupon_Mina').on('value', snap => {
             db.ref('status').update({ böcekNote: txt });
             db.ref('love_archive').push({ sender: 'Böcek', msg: txt, time: Date.now() });
             document.getElementById('tylerNote').value = "";
-            document.getElementById('status-popup').classList.add('show'); 
-            setTimeout(() => document.getElementById('status-popup').classList.remove('show'), 2000);
+            showStatusPopup();
         }
 
         db.ref('love_archive').limitToLast(15).on('value', snap => {
@@ -374,7 +441,7 @@ db.ref('active_coupon_Mina').on('value', snap => {
             document.getElementById('music-display').innerHTML = `<iframe width="100%" height="250" src="https://www.youtube.com/embed/${id}?rel=0" frameborder="0" allow="autoplay; encrypted-media"></iframe>`;
         });
 
-        // --- DİĞER ---
+        // --- DİĞER FONKSİYONLAR ---
         function sendMissYou() { db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() }); db.ref('kisses/Tyler').transaction(c => (c || 0) + 1); document.getElementById("sent-notification").classList.add("show"); setTimeout(() => document.getElementById("sent-notification").classList.remove("show"), 2000); }
         db.ref('alerts/tylerAlert').on('value', snap => { const d = snap.val(); if(d && Date.now() - d.time < 5000) { const n = document.getElementById("love-notification"); n.innerHTML = `<div style="font-size:3rem;">❤️</div><h2>${d.msg}</h2>`; n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000); } });
         db.ref('scores').on('value', s => { const d = s.val() || {}; const t = d.Tyler || 0; const m = d.Mina || 0; document.getElementById('score-tyler').innerText = t; document.getElementById('score-mina').innerText = m; const ct = document.getElementById('champion-text'); if(t>m) ct.innerText = "👑 Lider: Böcek"; else if(m>t) ct.innerText = "👑 Lider: Mina"; else ct.innerText = "💞 Eşitlik!"; });
@@ -384,7 +451,3 @@ db.ref('active_coupon_Mina').on('value', snap => {
     </script>
 </body>
 </html>
-
-
-
-
