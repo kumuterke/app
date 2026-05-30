@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mina'nın Paneli ❤️</title>
+    <title>Jarvis OS - Mina Control Panel</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,71 +11,98 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
-        :root { --main-pink: #ff9a9e; --dark-pink: #d63384; --bg: #0f0f0f; --card: #1a1a1a; --text: #ffffff; --nav: #151515; --input-bg: rgba(255,255,255,0.1); --border-color: rgba(255, 154, 158, 0.3); }
-        body.light-mode { --bg: #fff5f7; --card: #ffffff; --text: #444; --nav: #ffffff; --input-bg: #fff; --border-color: rgba(255, 154, 158, 0.5); }
+        :root {
+            --bg-color: #0a0a12;
+            --panel-bg: rgba(16, 16, 30, 0.75);
+            --accent-neon: #00ffcc;
+            --accent-pink: #ff007f;
+            --text-main: #ffffff;
+            --text-muted: #8a8ab0;
+            --card: #141423;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(0, 255, 204, 0.2);
+        }
+
+        body.light-mode {
+            --bg-color: #fff5f7;
+            --panel-bg: rgba(255, 255, 255, 0.9);
+            --accent-neon: #ff007f;
+            --accent-pink: #00ffcc;
+            --text-main: #333333;
+            --text-muted: #666688;
+            --card: #ffffff;
+            --input-bg: rgba(0, 0, 0, 0.03);
+            --border-color: rgba(255, 0, 127, 0.3);
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; min-height: 100vh; overflow-x: hidden; padding-bottom: 120px; width: 100%; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-color); color: var(--text-main); transition: 0.3s; min-height: 100vh; overflow-x: hidden; padding-bottom: 120px; width: 100%; }
         
         .header-container { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px; }
-        h1 { font-family: 'Pacifico'; color: var(--main-pink); margin: 0; font-size: 1.6rem; }
-        .theme-toggle { background: var(--input-bg); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: var(--text); }
+        h1 { font-family: 'Pacifico'; color: var(--text-main); margin: 0; font-size: 1.6rem; letter-spacing: 1px; }
+        .theme-toggle { background: var(--input-bg); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: var(--text-main); }
         
-        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
         .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid var(--border-color); text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .btn { background: linear-gradient(135deg, #ff9a9e, #f687b3); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; }
+        
+        .btn { background: transparent; border: 2px solid var(--accent-pink); color: var(--text-main); padding: 15px; border-radius: 50px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; font-family: inherit; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease; }
+        .btn:hover { background: var(--accent-pink); color: #000; box-shadow: 0 0 15px rgba(255, 0, 127, 0.4); }
         .btn:active { transform: scale(0.98); }
-        textarea, input[type="text"] { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid var(--border-color); outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
-
-        /* GALERİ */
-        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
-        .gallery-item { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 15px; border: 2px solid var(--border-color); }
-        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
-        .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+        
+        textarea, input[type="text"], select { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
 
         /* TO-DO */
-        .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,154,158,0.1); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; }
+        .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,0,127,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; }
         .todo-item.done span.todo-text { text-decoration: line-through; opacity: 0.5; }
-        .todo-check { width: 22px; height: 22px; border: 2px solid var(--main-pink); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; color: transparent; }
-        .todo-check.checked { background: var(--main-pink); color: white; font-weight: bold; }
+        .todo-check { width: 22px; height: 22px; border: 2px solid var(--accent-pink); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; color: transparent; }
+        .todo-check.checked { background: var(--accent-pink); color: white; font-weight: bold; }
         .todo-text { flex: 1; }
         .todo-delete { cursor: pointer; opacity: 0.7; }
         .todo-input-container { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border-radius: 50px; padding: 5px 5px 5px 15px; margin-top: 15px; border: 1px solid var(--border-color); }
-        .todo-input-container input { margin-top: 0; background: transparent; padding: 8px 0; border: none !important; flex: 1; color: var(--text); outline: none; }
-        .todo-add-btn { background: var(--main-pink); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .todo-input-container input { margin-top: 0; background: transparent; padding: 8px 0; border: none !important; flex: 1; color: var(--text-main); outline: none; }
+        .todo-add-btn { background: var(--accent-pink); border: none; width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
         /* ARŞİV */
         .archive-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 5px; margin-top: 15px; border-top: 1px solid rgba(255,154,158,0.2); padding-top: 10px; }
         .archive-msg { padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; max-width: 80%; line-height: 1.4; position: relative; }
-        .msg-me { background: var(--main-pink); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg-me { background: var(--accent-pink); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .msg-other { background: rgba(0, 210, 255, 0.1); align-self: flex-start; border-bottom-left-radius: 2px; border-left: 3px solid #00d2ff; }
         .msg-time { font-size: 0.6rem; opacity: 0.7; display: block; margin-top: 3px; text-align: right; }
 
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-between; padding: 15px 15px; z-index: 1000; border-top: 1px solid rgba(255,154,158,0.1); border-radius: 20px 20px 0 0; overflow-x: auto; }
+        /* ADVANCED GALLERY SYSTEM (UMUT'UN MİMARİSİ) */
+        .folder-nav { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; margin-bottom: 15px; scrollbar-width: none; }
+        .folder-nav::-webkit-scrollbar { display: none; }
+        .folder-chip { background: var(--input-bg); padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; white-space: nowrap; cursor: pointer; border: 1px solid var(--border-color); color: var(--text-muted); }
+        .folder-chip.active { background: var(--accent-neon); color: #000; font-weight: bold; border-color: var(--accent-neon); }
+        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .gallery-item-container { position: relative; width: 100%; aspect-ratio: 1; }
+        .gallery-item { width: 100%; height: 100%; object-fit: cover; border-radius: 15px; border: 2px solid var(--border-color); }
+        .tag-container { position: absolute; bottom: 5px; left: 5px; right: 5px; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
+        .tag-badge { background: rgba(0,0,0,0.7); color: var(--accent-neon); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; }
+        .photo-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 5px; z-index: 10; }
+        .action-btn { background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-between; padding: 15px 15px; z-index: 1000; border-top: 1px solid var(--border-color); border-radius: 20px 20px 0 0; }
         .nav-item { cursor: pointer; font-size: 1.3rem; opacity: 0.5; filter: grayscale(1); transition: 0.3s; padding: 0 5px; }
-        .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); color: var(--main-pink); }
+        .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); color: var(--accent-pink); }
 
         .page { display: none; animation: slideUp 0.4s ease; padding-top: 5px; }
         .page.active { display: block; }
         iframe { width: 100%; height: 78vh; border: none; border-radius: 20px; background: white; margin-top: 10px; }
         
-        #love-notification, #sent-notification { 
-            visibility: hidden; 
-            position: fixed; 
-            left: 50%; 
-            top: 50%; 
-            transform: translate(-50%, -50%); 
-            z-index: 9999; 
-            transition: 0.4s; 
-            opacity: 0; 
-            text-align: center; 
-            width: 320px; 
-            max-width: 90%; 
-        }
+        /* MULTI FOLDER MODAL SYSTEM */
+        #folder-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { background: var(--card); border-radius: 25px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--accent-neon); color: var(--text-main); }
+        .folder-option { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .folder-option input { width: 18px; height: 18px; }
+
+        #love-notification, #sent-notification { visibility: hidden; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 9999; transition: 0.4s; opacity: 0; text-align: center; width: 320px; max-width: 90%; }
         #love-notification.show, #sent-notification.show { visibility: visible; opacity: 1; }
-        
-        #status-popup { visibility: hidden; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--main-pink); color: white; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 10001; opacity: 0; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,154,158,0.3); }
+        #status-popup { visibility: hidden; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--accent-neon); color: #000; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 10001; opacity: 0; transition: 0.3s; box-shadow: 0 5px 15px rgba(0, 255, 204, 0.3); }
         #status-popup.show { visibility: visible; opacity: 1; bottom: 120px; }
         .champion-badge { background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
 
@@ -83,6 +110,14 @@
     </style>
 </head>
 <body>
+    <div id="folder-modal">
+        <div class="modal-card">
+            <h3 style="margin-top:0;">Klasörleri Seç</h3>
+            <div id="modal-folder-list" style="max-height: 250px; overflow-y: auto;"></div>
+            <button class="btn" onclick="savePhotoFolders()" style="border-color: var(--accent-neon);">Kaydet ve Kapat</button>
+        </div>
+    </div>
+
     <div id="love-notification" style="background:rgba(255, 71, 87, 0.95); padding:30px; border-radius:30px; border:2px solid white; box-shadow: 0 10px 40px rgba(0,0,0,0.5);"><div style="font-size: 3rem;">❤️</div><h2>Böcek Seni Çok Özledi!</h2><p>Hemen ona bir öpücük gönder.</p></div>
     <div id="sent-notification" style="background:rgba(46, 204, 113, 0.95); color:white; padding:15px 30px; border-radius:50px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);">❤️ Bildirim Yollandı!</div>
     <div id="status-popup">✅ Durumun Böcek'e İletildi!</div>
@@ -93,14 +128,13 @@
         <div class="grid-container">
             <div class="mini-card" id="coupon-widget" onclick="showPage('coupons', document.querySelector('.nav-item:nth-child(6)'))" style="cursor:pointer;">
                 <small style="opacity:0.7" id="coupon-label">Durum</small>
-                <div id="coupon-display" style="color:var(--main-pink); font-weight:bold; margin-top:5px; font-size:1.1rem;">Yükleniyor...</div>
+                <div id="coupon-display" style="color:var(--accent-pink); font-weight:bold; margin-top:5px; font-size:1.1rem;">Yükleniyor...</div>
             </div>
-            
-            <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="color:var(--main-pink); font-weight: bold;">--:--</div></div>
+            <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="color:var(--accent-pink); font-weight: bold;">--:--</div></div>
         </div>
 
         <div class="status-card" style="text-align:center;">
-            <h3 style="font-family:'Pacifico'; font-size:0.9rem; color:var(--main-pink); margin:0;">Mesafe (GPS)</h3>
+            <h3 style="font-family:'Pacifico'; font-size:0.9rem; color:var(--accent-pink); margin:0;">Mesafe (GPS)</h3>
             <div id="distance-display" style="font-size:1.3rem; font-weight:bold; margin:8px 0;">Hesaplanıyor...</div>
             <div style="display:flex; justify-content:space-around; font-size:0.7rem; margin-top:8px; opacity:0.8;">
                 <div>🇹🇷 Ank: <span id="local-time">--:--</span></div>
@@ -110,7 +144,7 @@
 
         <div class="status-card">
             <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Böcek'in Modu</h3><span id="tyler-mood-display" style="font-size:1.8rem;">⌛</span></div>
-            <p id="tyler-note" style="background:rgba(255,154,158,0.1); padding:12px; border-radius:12px; border-left:3px solid var(--main-pink); font-style:italic; font-size:0.85rem; margin-top:10px;">Not bekleniyor...</p>
+            <p id="tyler-note" style="background:rgba(255,0,127,0.05); padding:12px; border-radius:12px; border-left:3px solid var(--accent-pink); font-style:italic; font-size:0.85rem; margin-top:10px;">Not bekleniyor...</p>
         </div>
 
         <div class="grid-container">
@@ -138,9 +172,33 @@
         </div>
     </div>
 
+    <div id="gallery-page" class="page">
+        <div class="header-container"><h1>Aşk Galerisi 🖼️</h1></div>
+        <div class="status-card">
+            <input type="text" id="tag-search" placeholder="🔍 Tag veya Klasör Ara..." oninput="renderGallery()">
+            <div style="margin-top:10px;">
+                <label style="font-size:0.7rem; opacity:0.7;">Yüklenecek Klasörleri Seç:</label>
+                <div id="upload-folder-list" style="max-height: 100px; overflow-y:auto; background:rgba(255,255,255,0.05); border-radius:10px; padding:10px; margin-top:5px;"></div>
+                <button class="btn" onclick="addNewFolder()" style="margin-top:5px; padding:8px; font-size:0.7rem; border-color: var(--accent-neon);">+ Yeni Klasör</button>
+            </div>
+            <input type="text" id="photo-tags" placeholder="Etiketler (virgülle ayır)..." style="margin-top:10px;">
+            
+            <div class="upload-btn-wrapper" style="margin-top:10px; position:relative; overflow:hidden; display:inline-block; width:100%;">
+                <button class="btn" style="border-color: var(--accent-pink);">📸 Çoklu Fotoğraf Yükle</button>
+                <input type="file" id="photo-upload" accept="image/*" multiple onchange="uploadMultiplePhotos()" style="position:absolute; left:0; top:0; opacity:0; width:100%; height:100%;">
+            </div>
+            
+            <button class="btn" id="sort-btn" onclick="toggleSort()" style="margin-top:10px; background:rgba(255,255,255,0.1); border:1px solid var(--border-color);">🔄 Sırala: Yeniler Altta</button>
+            
+            <div id="folder-nav" class="folder-nav">
+                <div class="folder-chip active" onclick="setGalleryFilter('All')">Hepsi</div>
+            </div>
+            <div id="gallery-grid" class="gallery-grid"></div>
+        </div>
+    </div>
+
     <div id="music-page" class="page"><div class="header-container"><h1>Müzik Kutusu 🎵</h1></div><div class="status-card" style="text-align: center;"><p style="opacity: 0.7; margin-bottom: 10px;">Birlikte dinlemek için ID girin.</p><div id="music-display" style="border-radius: 15px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.3); min-height: 200px; display: flex; align-items: center; justify-content: center;">Yükleniyor...</div><input type="text" id="music-input" placeholder="YouTube Video ID (örn: qMsEVXrfuvA)"><button class="btn" onclick="changeMusic()">Şarkıyı Değiştir</button></div></div>
-    <div id="gallery-page" class="page"><div class="header-container"><h1>Aşk Galerisi 🖼️</h1></div><div class="status-card"><div class="upload-btn-wrapper"><button class="btn">📸 Fotoğraf Ekle</button><input type="file" id="photo-upload" onchange="uploadPhoto()"></div><button class="btn" id="sort-btn" onclick="toggleSort()" style="margin-top:10px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,154,158,0.2);">🔄 Sırala: Yeniler Altta</button><div id="gallery-grid" class="gallery-grid"></div></div></div>
-    <div id="quiz-page" class="page"><div class="status-card" style="text-align:center;"><h2>Aşk Ligi 🏆</h2><div class="grid-container"><div class="mini-card"><small>Böcek</small><div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:#00d2ff;">0</div></div><div class="mini-card"><small>Mina</small><div id="score-mina" style="font-size:1.5rem; font-weight:bold; color:var(--main-pink);">0</div></div></div><div id="champion-text" class="champion-badge">...</div></div><iframe data-src="https://quiz-gamma-lime.vercel.app/"></iframe></div>
+    <div id="quiz-page" class="page"><div class="status-card" style="text-align:center;"><h2>Aşk Ligi 🏆</h2><div class="grid-container"><div class="mini-card"><small>Böcek</small><div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:#00d2ff;">0</div></div><div class="mini-card"><small>Mina</small><div id="score-mina" style="font-size:1.5rem; font-weight:bold; color:var(--accent-pink);">0</div></div></div><div id="champion-text" class="champion-badge">...</div></div><iframe data-src="https://quiz-gamma-lime.vercel.app/"></iframe></div>
     <div id="history" class="page"><iframe data-src="https://time-eight-eta.vercel.app/"></iframe></div>
     <div id="coupons" class="page"><iframe data-src="https://kupon-coral.vercel.app/"></iframe></div>
     <div id="gift" class="page"><iframe data-src="https://hediye-alpha.vercel.app/"></iframe></div>
@@ -159,143 +217,181 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
+        // FIREBASE INITIALIZATION (ORİJİNAL YAPINIZ KORUNDU)
         const firebaseConfig = { apiKey: "AIzaSyDzhUgqGWffaHilyO8vFzcIez9HyzMK6r4", authDomain: "tylermina-61718.firebaseapp.com", databaseURL: "https://tylermina-61718-default-rtdb.europe-west1.firebasedatabase.app", projectId: "tylermina-61718", storageBucket: "tylermina-61718.firebasestorage.app", messagingSenderId: "494227494785", appId: "1:494227494785:web:65cd8a4a50bc0b7531fa80", measurementId: "G-X7BVRSXWWD" };
         firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
+        // SUPABASE REALTIME PROTOKOLÜ (TR-DE HIZ OPTİMİZASYONLU NETWORK BRIDGE)
+        const SUPABASE_URL = "https://BURAYA_SUPABASE_PROJECT_URL_YAZIN.supabase.co";
+        const SUPABASE_ANON_KEY = "BURAYA_SUPABASE_ANON_KEY_YAZIN";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: { persistSession: false },
+            global: { headers: { 'X-Region-Optimize': 'true' } }
+        });
+
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
         
-        // Iframe Lazy Load Mantığı eklendi
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
             const activePage = document.getElementById(id);
-            activePage.classList.add('active'); 
-            el.classList.add('active');
+            activePage.classList.add('active'); el.classList.add('active');
             window.scrollTo(0,0);
-
-            // Eğer sayfanın içinde bir iframe varsa ve henüz src'si yoksa şimdi yükle
             const iframe = activePage.querySelector('iframe');
-            if (iframe && !iframe.src) {
-                iframe.src = iframe.getAttribute('data-src');
+            if (iframe && !iframe.src) { iframe.src = iframe.getAttribute('data-src'); }
+            if (id === 'gallery-page') { renderGallery(); }
+        }
+
+        // --- ADVANCED GALLERY MOTORU (UMUT'UN KODU - MİNA TARAFINA ENTEGRE EDİLDİ) ---
+        let isNewestAtBottom = true;
+        let galleryData = [];
+        let customFolders = ["Genel"];
+        let currentGalleryFilter = 'All';
+        let editingPhotoKey = null;
+
+        db.ref('gallery_folders').on('value', snap => {
+            customFolders = ["Genel"];
+            if(snap.exists()) snap.forEach(c => customFolders.push(c.val()));
+            updateFolderUI();
+        });
+
+        function updateFolderUI() {
+            const uploadList = document.getElementById('upload-folder-list');
+            if(uploadList) {
+                uploadList.innerHTML = customFolders.map(f => `
+                    <div style="font-size:0.8rem; display:inline-block; margin-right:10px;">
+                        <input type="checkbox" class="upload-f-check" value="${f}"> ${f}
+                    </div>
+                `).join('');
+            }
+            let navHtml = `<div class="folder-chip ${currentGalleryFilter === 'All' ? 'active' : ''}" onclick="setGalleryFilter('All')">Hepsi</div>`;
+            customFolders.forEach(f => {
+                navHtml += `<div class="folder-chip ${currentGalleryFilter === f ? 'active' : ''}" onclick="setGalleryFilter('${f}')">${f}</div>`;
+            });
+            document.getElementById('folder-nav').innerHTML = navHtml;
+        }
+
+        function setGalleryFilter(f) { currentGalleryFilter = f; renderGallery(); }
+        function toggleSort() { isNewestAtBottom = !isNewestAtBottom; renderGallery(); }
+        function addNewFolder() {
+            const n = prompt("Klasör İsmi:");
+            if(n && n.trim()) db.ref('gallery_folders').push(n.trim());
+        }
+
+        function editPhotoTags(key) {
+            const photo = galleryData.find(p => p.key === key);
+            const currentTags = photo ? photo.tags : [];
+            const newTagsStr = prompt("Etiketleri düzenle (virgül ile ayır):", currentTags.join(', '));
+            if (newTagsStr !== null) {
+                const newTags = newTagsStr.split(',').map(t => t.trim()).filter(t => t !== "");
+                db.ref('gallery/' + key).update({ tags: newTags });
+                document.getElementById('status-popup').classList.add('show');
+                setTimeout(()=>document.getElementById('status-popup').classList.remove('show'), 2000);
             }
         }
 
-db.ref('active_coupon_Tyler').on('value', snap => {
-    const val = snap.val();
-    const widget = document.getElementById('coupon-widget');
-    const display = document.getElementById('coupon-display');
-    const label = document.getElementById('coupon-label');
-
-    const resetWidget = () => {
-        label.innerText = "Durum";
-        display.style.color = "var(--main-pink)";
-        widget.style.border = "1px solid var(--border-color)";
-        widget.style.boxShadow = "none";
-        if ('getBattery' in navigator) { 
-            navigator.getBattery().then(bat => { 
-                display.innerText = Math.round(bat.level * 100) + "%"; 
-            }); 
+        function openFolderModal(key) {
+            const photo = galleryData.find(p => p.key === key);
+            const currentFolders = photo ? photo.folders : ["Genel"];
+            editingPhotoKey = key;
+            document.getElementById('modal-folder-list').innerHTML = customFolders.map(f => `
+                <div class="folder-option">
+                    <input type="checkbox" class="modal-f-check" value="${f}" ${currentFolders.includes(f) ? 'checked' : ''}> ${f}
+                </div>
+            `).join('');
+            document.getElementById('folder-modal').style.display = 'flex';
         }
-    };
 
-    if (val && val.status === "Aktif") {
-        if (val.user === "Tyler") {
-            display.innerText = "🎁 Hediye: " + val.name;
-            label.innerText = "🤴 BÖCEK'TEN";
-            
-            if (val.rarity === "legendary") {
-                display.style.color = "gold";
-                widget.style.border = "2px solid gold";
-                widget.style.boxShadow = "0 0 15px rgba(255,215,0,0.3)";
-            } else {
-                display.style.color = "#00d2ff"; 
-                widget.style.border = "1px solid #00d2ff";
-            }
-        } else {
-            resetWidget();
+        function savePhotoFolders() {
+            const selected = Array.from(document.querySelectorAll('.modal-f-check:checked')).map(el => el.value);
+            if(selected.length === 0) selected.push("Genel");
+            db.ref('gallery/' + editingPhotoKey).update({ folders: selected });
+            document.getElementById('folder-modal').style.display = 'none';
+            document.getElementById('status-popup').classList.add('show');
+            setTimeout(()=>document.getElementById('status-popup').classList.remove('show'), 2000);
         }
-    } else {
-        resetWidget();
-    }
-});
 
-let isNewestAtBottom = true; 
-let galleryData = []; 
-
-function uploadPhoto() {
-    const file = document.getElementById('photo-upload').files[0];
-    if(file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            if (file.type === "image/gif") {
-                db.ref('gallery').push({ image: e.target.result, time: Date.now() });
-            } else {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 1000; 
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.80);
-                    db.ref('gallery').push({ image: compressedBase64, time: Date.now() });
+        function uploadMultiplePhotos() {
+            const files = document.getElementById('photo-upload').files;
+            const folders = Array.from(document.querySelectorAll('.upload-f-check:checked')).map(el => el.value);
+            const tags = document.getElementById('photo-tags').value.split(',').map(t => t.trim()).filter(t => t);
+            if(files.length === 0) return;
+            if(folders.length === 0) folders.push("Genel");
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas'); const MAX = 1000;
+                        canvas.width = MAX; canvas.height = img.height * (MAX / img.width);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        db.ref('gallery').push({ image: canvas.toDataURL('image/jpeg', 0.8), time: Date.now(), folders: folders, tags: tags });
+                    };
+                    img.src = e.target.result;
                 };
-                img.src = e.target.result;
-            }
-        };
-        reader.readAsDataURL(file);
-    }
-}
+                reader.readAsDataURL(file);
+            });
+            document.getElementById('photo-tags').value = "";
+            document.getElementById('status-popup').classList.add('show');
+            setTimeout(()=>document.getElementById('status-popup').classList.remove('show'), 2000);
+        }
 
-// Sınırsız resim mantığı korundu
-db.ref('gallery').orderByChild('time').on('value', snap => {
-    galleryData = []; 
-    snap.forEach(c => { galleryData.push(c.val().image); });
-    // Sadece galeri sayfasındaysa anında renderla, değilse arka planda diziyi hazır tut
-    if(document.getElementById('gallery-page').classList.contains('active')) {
-        renderGallery(); 
-    }
-});
+        db.ref('gallery').orderByChild('time').on('value', snap => {
+            galleryData = [];
+            snap.forEach(c => {
+                const d = c.val();
+                galleryData.push({ key: c.key, ...d, folders: d.folders || ["Genel"], tags: d.tags || [] });
+            });
+            renderGallery();
+        });
 
-function renderGallery() {
-    const grid = document.getElementById('gallery-grid');
-    const btn = document.getElementById('sort-btn');
-    if(!grid) return;
-    
-    let htmlContent = "";
-    let photosToShow = isNewestAtBottom ? galleryData : [...galleryData].reverse();
+        function renderGallery() {
+            const grid = document.getElementById('gallery-grid');
+            if(!grid) return;
+            const search = document.getElementById('tag-search').value.toLowerCase();
+            let filtered = galleryData.filter(p => {
+                const folderMatch = (currentGalleryFilter === 'All' || p.folders.includes(currentGalleryFilter));
+                const tagMatch = p.tags.some(t => t.toLowerCase().includes(search)) || p.folders.some(f => f.toLowerCase().includes(search)) || search === "";
+                return folderMatch && tagMatch;
+            });
+            if(!isNewestAtBottom) filtered.reverse();
+            document.getElementById('sort-btn').innerText = isNewestAtBottom ? "⬇️ Sırala: Yeniler Altta" : "⬆️ Sırala: Yeniler Üstte";
 
-    if(btn) btn.innerText = isNewestAtBottom ? "⬇️ Sırala: Yeniler Altta" : "⬆️ Sırala: Yeniler Üstte";
+            grid.innerHTML = filtered.map(p => `
+                <div class="gallery-item-container">
+                    <div class="photo-actions">
+                        <button class="action-btn" onclick="editPhotoTags('${p.key}')">🏷️</button>
+                        <button class="action-btn" onclick="openFolderModal('${p.key}')">📂</button>
+                        <button class="action-btn" style="color:#ff4757" onclick="if(confirm('Silinsin mi?')) db.ref('gallery/${p.key}').remove()">🗑️</button>
+                    </div>
+                    <img src="${p.image}" class="gallery-item" onclick="window.open(this.src)" loading="lazy">
+                    <div class="tag-container">${p.tags.map(t => `<span class="tag-badge">#${t}</span>`).join('')}</div>
+                </div>
+            `).join('');
+        }
 
-    photosToShow.forEach(src => {
-        htmlContent += `<img src="${src}" class="gallery-item" onclick="window.open(this.src)" style="cursor:pointer;" loading="lazy">`;
-    });
-
-    grid.innerHTML = htmlContent || "<p style='width:100%; text-align:center; opacity:0.5;'>Henüz anı eklenmemiş...</p>";
-}
-
-function toggleSort() {
-    isNewestAtBottom = !isNewestAtBottom; 
-    renderGallery(); 
-}
-
+        // --- SİSTEMİN DİĞER PROTOKOLLERİ ---
         function toRad(v) { return v * Math.PI / 180; }
         navigator.geolocation.watchPosition(p => { const R = 6371; const dLat = toRad(39.9334 - p.coords.latitude); const dLon = toRad(32.8597 - p.coords.longitude); const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(39.9334)) * Math.sin(dLon/2)**2; document.getElementById('distance-display').innerText = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3).replace('.', ',') + " KM"; });
 
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
         db.ref('status').on('value', s => { const d = s.val(); if(!d) return; document.getElementById('tyler-mood-display').innerText = d.böcekMood||"⌛"; document.getElementById('tyler-note').innerText = d.böcekNote||"Not bekleniyor..."; });
         db.ref('scores').on('value', s => { const d = s.val() || {}; const t = d.Tyler || 0; const m = d.Mina || 0; document.getElementById('score-tyler').innerText = t; document.getElementById('score-mina').innerText = m; document.getElementById('champion-text').innerText = t>m?"👑 Lider: Böcek":m>t?"👑 Lider: Mina":"💞 Eşitlik!"; });
+
+        // DIGITIAL KISS NETWORK SIGNAL SEND
+        async function sendDigitalKissSignal() {
+            try {
+                await supabase.from('love_tokens').insert([{ type: 'kiss', message: 'Mina sent a digital kiss!' }]);
+            } catch (err) { console.error("Realtime beam failed:", err); }
+        }
+
+        function sendMissYou() { 
+            db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() }); 
+            db.ref('kisses/Mina').transaction(c => (c || 0) + 1); 
+            sendDigitalKissSignal(); // Supabase tünelini ateşler, odadaki LED ve sesi canlandırır
+            document.getElementById("sent-notification").classList.add("show"); 
+            setTimeout(() => document.getElementById("sent-notification").classList.remove("show"), 2000); 
+        }
 
         function updateMinaStatus() { const n = document.getElementById('minaNote'); if(!n.value.trim()) return; db.ref('status').update({ meinNote: n.value }); db.ref('love_archive').push({ sender: 'Mina', msg: n.value, time: Date.now() }); n.value = ""; document.getElementById('status-popup').classList.add('show'); setTimeout(()=>document.getElementById('status-popup').classList.remove('show'), 2000); }
         db.ref('love_archive').limitToLast(15).on('value', s => { const l = document.getElementById('archive-list'); l.innerHTML = ""; s.forEach(c => { const d = c.val(); l.innerHTML += `<div class="archive-msg ${d.sender==='Mina'?'msg-me':'msg-other'}">${d.msg}<span class="msg-time">${new Date(d.time).toLocaleTimeString()}</span></div>`; }); l.scrollTop = l.scrollHeight; });
@@ -307,13 +403,18 @@ function toggleSort() {
         function renderMinaMoods() { const h = new Date().getHours(); let ms = ['😊', '🥰', '😴', '🥺', '😤', '😈', '🌹', '🕯️', '🤫','🤍','😁']; if(h>=0 && h<4) ms=[...ms, '💦', '🍑', '🍆', '⛓️', '🔞', '🫦', '🔥', '🍷']; document.getElementById('mina-mood-selector').innerHTML = ms.map(m => `<span style="font-size:2rem; cursor:pointer; padding:5px;" onclick="updateMinaMood('${m}')">${m}</span>`).join(''); }
         renderMinaMoods(); setInterval(renderMinaMoods, 60000);
 
-        function sendMissYou() { db.ref('alerts/tylerAlert').set({ msg: "Özledim!", time: Date.now() }); db.ref('kisses/Mina').transaction(c => (c || 0) + 1); document.getElementById("sent-notification").classList.add("show"); setTimeout(() => document.getElementById("sent-notification").classList.remove("show"), 2000); }
         db.ref('alerts/minaAlert').on('value', s => { const d = s.val(); if(d && Date.now() - d.time < 5000) { const n = document.getElementById("love-notification"); n.innerHTML = `<div style="font-size:3rem;">❤️</div><h2>${d.msg}</h2>`; n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000); } });
 
         function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
         function toggleTodo(k, d) { db.ref('todos/' + k).update({ done: !d }); }
         function deleteTodo(k) { db.ref('todos/' + k).remove(); }
         db.ref('todos').on('value', s => { const l = document.getElementById('todo-list'); l.innerHTML = ""; s.forEach(c => { const i = c.val(); l.innerHTML += `<div class="todo-item ${i.done?'done':''}"><div class="todo-check ${i.done?'checked':''}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div><span class="todo-text">${i.text}</span><span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span></div>`; }); });
+
+        db.ref('active_coupon_Tyler').on('value', snap => {
+            const val = snap.val(); const widget = document.getElementById('coupon-widget'); const display = document.getElementById('coupon-display'); const label = document.getElementById('coupon-label');
+            const resetWidget = () => { label.innerText = "Durum"; display.style.color = "var(--accent-pink)"; widget.style.border = "1px solid var(--border-color)"; widget.style.boxShadow = "none"; if ('getBattery' in navigator) { navigator.getBattery().then(bat => { display.innerText = Math.round(bat.level * 100) + "%"; }); } };
+            if (val && val.status === "Aktif" && val.user === "Tyler") { display.innerText = "🎁 Hediye: " + val.name; label.innerText = "🤴 BÖCEK'TEN"; if (val.rarity === "legendary") { display.style.color = "gold"; widget.style.border = "2px solid gold"; widget.style.boxShadow = "0 0 15px rgba(255,215,0,0.3)"; } else { display.style.color = "#00d2ff"; widget.style.border = "1px solid #00d2ff"; } } else { resetWidget(); }
+        });
 
         setInterval(() => { const now = new Date(); document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}); document.getElementById('tyler-time').innerText = new Date(now.getTime()-(2*60*60*1000)).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}); const diff = new Date("2026-08-01T19:00:00") - now; document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; }, 1000);
     </script>
