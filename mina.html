@@ -24,7 +24,6 @@
             --card: #141423;
             --input-bg: rgba(255, 255, 255, 0.05);
             --border-color: rgba(0, 255, 204, 0.2);
-            --nav: #10101e;
         }
 
         body.light-mode {
@@ -37,7 +36,6 @@
             --card: #ffffff;
             --input-bg: rgba(0, 0, 0, 0.03);
             --border-color: rgba(255, 0, 127, 0.3);
-            --nav: #ffffff;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -145,7 +143,7 @@
         </div>
 
         <div class="status-card">
-            <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Böcek'in Modu</h3><span id="tyler-mood-display" style="font-size:1.8rem;">⌛</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Böcek'in Modu</h3><span id="tyler-mood-display">⌛</span></div>
             <p id="tyler-note" style="background:rgba(255,0,127,0.05); padding:12px; border-radius:12px; border-left:3px solid var(--accent-pink); font-style:italic; font-size:0.85rem; margin-top:10px;">Not bekleniyor...</p>
         </div>
 
@@ -224,12 +222,12 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // FIREBASE INITIALIZATION (DÜZGÜN ÇALIŞAN HALİ)
+        // SİZİN ORİJİNAL ÇALIŞAN FİREBASE YAPINIZ
         const firebaseConfig = { apiKey: "AIzaSyDzhUgqGWffaHilyO8vFzcIez9HyzMK6r4", authDomain: "tylermina-61718.firebaseapp.com", databaseURL: "https://tylermina-61718-default-rtdb.europe-west1.firebasedatabase.app", projectId: "tylermina-61718", storageBucket: "tylermina-61718.firebasestorage.app", messagingSenderId: "494227494785", appId: "1:494227494785:web:65cd8a4a50bc0b7531fa80" };
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // TAMIR EDILMIS SUPABASE BAĞLANTISI
+        // TAMİR EDİLMİŞ SUPABASE
         const SUPABASE_URL = "https://oiomboymswjulzgpyamj.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_2c7DDrRIVGRiCzFncTsI8w_LpT2Z2-j";
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -250,7 +248,7 @@
             if (id === 'gallery-page') { renderGallery(); }
         }
 
-        // --- GELİŞMİŞ GALERİ MOTORU ---
+        // --- BİREBİR GALERİ MOTORUNUZ ---
         let isNewestAtBottom = true;
         let galleryData = [];
         let customFolders = ["Genel"];
@@ -379,27 +377,18 @@
         }
 
         // --- GÜNÜN SORUSU ---
-        const questions = [
-            "Bugün Böcek'i düşünürken hangi şarkıyı mırıldandın?",
-            "İleride kuracağımız evde senin için olmazsa olmaz köşe neresi?",
-            "Şu an Augsburg'da yan yana olsak ilk nereye yürümek isterdin?",
-            "Bana söylemek isteyip de ertelediğin tatlı bir itirafın var mı?",
-            "Şu ana kadar beraber geçirdiğimiz en komik an sence hangisiydi?"
-        ];
-        function newQuestion() {
-            document.getElementById("daily-q").innerText = questions[Math.floor(Math.random() * questions.length)];
-        }
+        const questions = ["Bugün Böcek'i düşünürken hangi şarkıyı mırıldandın?", "İleride kuracağımız evde senin için olmazsa olmaz köşe neresi?", "Şu an Augsburg'da yan yana olsak ilk nereye yürümek isterdin?", "Şu ana kadar beraber geçirdiğimiz en komik an sence hangisiydi?"];
+        function newQuestion() { document.getElementById("daily-q").innerText = questions[Math.floor(Math.random() * questions.length)]; }
 
-        // --- COĞRAFYA VE CANLI VERİ DİNLEME ---
+        // --- GERÇEK ZAMANLI VERİ DİNLEME VE TRANSFERLERİ ---
         function toRad(v) { return v * Math.PI / 180; }
         navigator.geolocation.watchPosition(p => { const R = 6371; const dLat = toRad(39.9334 - p.coords.latitude); const dLon = toRad(32.8597 - p.coords.longitude); const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(39.9334)) * Math.sin(dLon/2)**2; document.getElementById('distance-display').innerText = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3).replace('.', ',') + " KM"; });
 
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
         
-        // SİZİN ORİJİNAL VERİ DİNLEME YOLUNUZ ('status')
+        // DOĞRU DÜĞÜM DİNLEYİCİSİ: Mina, Tyler'ın verilerini ('böcekMood' ve 'böcekNote') dinler
         db.ref('status').on('value', snap => {
             const d = snap.val(); if(!d) return;
-            document.getElementById('bat-val').innerText = "%" + (d.böcekBattery || "--");
             document.getElementById('tyler-mood-display').innerText = d.böcekMood || "⌛";
             document.getElementById('tyler-note').innerText = `"${d.böcekNote || 'Mesaj bekleniyor...'}"`;
         });
@@ -420,6 +409,7 @@
             setTimeout(() => document.getElementById("sent-notification").classList.remove("show"), 2000); 
         }
 
+        // Mina durumunu güncellediğinde kendi tarafını ('meinNote') yazar
         function updateMinaStatus() { const n = document.getElementById('minaNote'); if(!n.value.trim()) return; db.ref('status').update({ meinNote: n.value }); db.ref('love_archive').push({ sender: 'Mina', msg: n.value, time: Date.now() }); n.value = ""; document.getElementById('status-popup').classList.add('show'); setTimeout(()=>document.getElementById('status-popup').classList.remove('show'), 2000); }
         db.ref('love_archive').limitToLast(15).on('value', s => { const l = document.getElementById('archive-list'); l.innerHTML = ""; s.forEach(c => { const d = c.val(); l.innerHTML += `<div class="archive-msg ${d.sender==='Mina'?'msg-me':'msg-other'}">${d.msg}<span class="msg-time">${new Date(d.time).toLocaleTimeString()}</span></div>`; }); l.scrollTop = l.scrollHeight; });
 
@@ -438,11 +428,11 @@
         function deleteTodo(k) { db.ref('todos/' + k).remove(); }
         db.ref('todos').on('value', s => { const l = document.getElementById('todo-list'); l.innerHTML = ""; s.forEach(c => { const i = c.val(); l.innerHTML += `<div class="todo-item ${i.done?'done':''}"><div class="todo-check ${i.done?'checked':''}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div><span class="todo-text">${i.text}</span><span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span></div>`; }); });
 
-        // WIDGET BATARYA & KUPON ENTEGRASYONU
+        // BATARYA AYARI
         db.ref('active_coupon_Tyler').on('value', snap => {
             const val = snap.val(); const widget = document.getElementById('coupon-widget'); const display = document.getElementById('coupon-display'); const label = document.getElementById('coupon-label');
-            const resetWidget = () => { label.innerText = "Durum"; display.style.color = "var(--accent-pink)"; widget.style.border = "1px solid var(--border-color)"; widget.style.boxShadow = "none"; if ('getBattery' in navigator) { navigator.getBattery().then(bat => { display.innerText = Math.round(bat.level * 100) + "%"; }); } };
-            if (val && val.status === "Aktif" && val.user === "Tyler") { display.innerText = "🎁 Hediye: " + val.name; label.innerText = "🤴 BÖCEK'TEN"; if (val.rarity === "legendary") { display.style.color = "gold"; widget.style.border = "2px solid gold"; widget.style.boxShadow = "0 0 15px rgba(255,215,0,0.3)"; } else { display.style.color = "#00d2ff"; widget.style.border = "1px solid #00d2ff"; } } else { resetWidget(); }
+            const resetWidget = () => { label.innerText = "Durum"; display.style.color = "var(--accent-pink)"; widget.style.border = "1px solid var(--border-color)"; if ('getBattery' in navigator) { navigator.getBattery().then(bat => { display.innerText = Math.round(bat.level * 100) + "%"; }); } };
+            if (val && val.status === "Aktif" && val.user === "Tyler") { display.innerText = "🎁 Hediye: " + val.name; label.innerText = "🤴 BÖCEK'TEN"; if (val.rarity === "legendary") { display.style.color = "gold"; widget.style.border = "2px solid gold"; } else { display.style.color = "#00d2ff"; widget.style.border = "1px solid #00d2ff"; } } else { resetWidget(); }
         });
 
         setInterval(() => { const now = new Date(); document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}); document.getElementById('tyler-time').innerText = new Date(now.getTime()-(2*60*60*1000)).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'}); const diff = new Date("2026-08-01T19:00:00") - now; document.getElementById('countdown').innerText = diff > 0 ? Math.floor(diff/(1000*60*60*24)) + "g " + Math.floor((diff%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; }, 1000);
