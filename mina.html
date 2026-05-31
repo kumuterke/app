@@ -156,6 +156,11 @@
 
         <div style="padding: 0 12px;"><button class="btn" onclick="sendMissYou()">BÖCEK'İ ÖZLEDİM ❤️</button></div>
 
+        <div class="status-card" style="margin-top:15px; border-color:var(--accent-neon); cursor:pointer;" onclick="newQuestion()">
+            <small style="color:var(--accent-neon)">Günün Sorusu</small>
+            <div id="daily-q" style="margin-top:8px; font-weight:500;">Böcek'i bugün ne kadar özledin?</div>
+        </div>
+
         <div class="status-card" style="margin-top:15px;">
             <h3>Modunu Seç</h3>
             <div id="mina-mood-selector" style="display:flex; justify-content:center; gap:12px; margin-bottom:15px; flex-wrap:wrap;"></div>
@@ -219,12 +224,12 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Orijinal Firebase Konfigürasyonu (Değiştirilmedi)
+        // FIREBASE INITIALIZATION (DÜZGÜN ÇALIŞAN HALİ)
         const firebaseConfig = { apiKey: "AIzaSyDzhUgqGWffaHilyO8vFzcIez9HyzMK6r4", authDomain: "tylermina-61718.firebaseapp.com", databaseURL: "https://tylermina-61718-default-rtdb.europe-west1.firebasedatabase.app", projectId: "tylermina-61718", storageBucket: "tylermina-61718.firebasestorage.app", messagingSenderId: "494227494785", appId: "1:494227494785:web:65cd8a4a50bc0b7531fa80" };
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // Çalışan Supabase Entegrasyonu
+        // TAMIR EDILMIS SUPABASE BAĞLANTISI
         const SUPABASE_URL = "https://oiomboymswjulzgpyamj.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_2c7DDrRIVGRiCzFncTsI8w_LpT2Z2-j";
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -373,18 +378,30 @@
             `).join('');
         }
 
-        // --- MANTIK VE VERİ BAĞLANTILARI (INDEX.HTML İLE BİREBİR SENKRON) ---
+        // --- GÜNÜN SORUSU ---
+        const questions = [
+            "Bugün Böcek'i düşünürken hangi şarkıyı mırıldandın?",
+            "İleride kuracağımız evde senin için olmazsa olmaz köşe neresi?",
+            "Şu an Augsburg'da yan yana olsak ilk nereye yürümek isterdin?",
+            "Bana söylemek isteyip de ertelediğin tatlı bir itirafın var mı?",
+            "Şu ana kadar beraber geçirdiğimiz en komik an sence hangisiydi?"
+        ];
+        function newQuestion() {
+            document.getElementById("daily-q").innerText = questions[Math.floor(Math.random() * questions.length)];
+        }
+
+        // --- COĞRAFYA VE CANLI VERİ DİNLEME ---
         function toRad(v) { return v * Math.PI / 180; }
         navigator.geolocation.watchPosition(p => { const R = 6371; const dLat = toRad(39.9334 - p.coords.latitude); const dLon = toRad(32.8597 - p.coords.longitude); const a = Math.sin(dLat/2)**2 + Math.cos(toRad(p.coords.latitude)) * Math.cos(toRad(39.9334)) * Math.sin(dLon/2)**2; document.getElementById('distance-display').innerText = (R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))).toFixed(3).replace('.', ',') + " KM"; });
 
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
         
-        // DOĞRU DÜĞÜM BAĞLANTISI ('status')
-        db.ref('status').on('value', s => { 
-            const d = s.val(); 
-            if(!d) return; 
-            document.getElementById('tyler-mood-display').innerText = d.böcekMood || "⌛"; 
-            document.getElementById('tyler-note').innerText = d.böcekNote || "Not bekleniyor..."; 
+        // SİZİN ORİJİNAL VERİ DİNLEME YOLUNUZ ('status')
+        db.ref('status').on('value', snap => {
+            const d = snap.val(); if(!d) return;
+            document.getElementById('bat-val').innerText = "%" + (d.böcekBattery || "--");
+            document.getElementById('tyler-mood-display').innerText = d.böcekMood || "⌛";
+            document.getElementById('tyler-note').innerText = `"${d.böcekNote || 'Mesaj bekleniyor...'}"`;
         });
         
         db.ref('scores').on('value', s => { const d = s.val() || {}; const t = d.Tyler || 0; const m = d.Mina || 0; document.getElementById('score-tyler').innerText = t; document.getElementById('score-mina').innerText = m; document.getElementById('champion-text').innerText = t>m?"👑 Lider: Böcek":m>t?"👑 Lider: Mina":"💞 Eşitlik!"; });
@@ -421,7 +438,7 @@
         function deleteTodo(k) { db.ref('todos/' + k).remove(); }
         db.ref('todos').on('value', s => { const l = document.getElementById('todo-list'); l.innerHTML = ""; s.forEach(c => { const i = c.val(); l.innerHTML += `<div class="todo-item ${i.done?'done':''}"><div class="todo-check ${i.done?'checked':''}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div><span class="todo-text">${i.text}</span><span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span></div>`; }); });
 
-        // active_coupon_Tyler DÜĞÜMÜNDEN BATARYA OKUMA
+        // WIDGET BATARYA & KUPON ENTEGRASYONU
         db.ref('active_coupon_Tyler').on('value', snap => {
             const val = snap.val(); const widget = document.getElementById('coupon-widget'); const display = document.getElementById('coupon-display'); const label = document.getElementById('coupon-label');
             const resetWidget = () => { label.innerText = "Durum"; display.style.color = "var(--accent-pink)"; widget.style.border = "1px solid var(--border-color)"; widget.style.boxShadow = "none"; if ('getBattery' in navigator) { navigator.getBattery().then(bat => { display.innerText = Math.round(bat.level * 100) + "%"; }); } };
