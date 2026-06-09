@@ -230,7 +230,9 @@
         // TAMİR EDİLMİŞ SUPABASE
         const SUPABASE_URL = "https://oiomboymswjulzgpyamj.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_2c7DDrRIVGRiCzFncTsI8w_LpT2Z2-j";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        
+        // DEĞİŞİKLİK BURADA: 'supabase' değişken adını 'supabaseClient' yaptık.
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: { persistSession: false },
             global: { headers: { 'X-Region-Optimize': 'true' } }
         });
@@ -397,7 +399,8 @@
 
         async function sendDigitalKissSignal() {
             try {
-                await supabase.from('love_tokens').insert([{ type: 'kiss', message: 'Mina sent a digital kiss!' }]);
+                // BURASI DA GÜNCELLENDİ
+                await supabaseClient.from('love_tokens').insert([{ type: 'kiss', message: 'Mina sent a digital kiss!' }]);
             } catch (err) { console.error("Realtime beam failed:", err); }
         }
 
