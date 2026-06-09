@@ -104,6 +104,7 @@
         #love-notification.show, #sent-notification.show { visibility: visible; opacity: 1; }
         #status-popup { visibility: hidden; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--accent-neon); color: #000; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 10001; opacity: 0; transition: 0.3s; box-shadow: 0 5px 15px rgba(0, 255, 204, 0.3); }
         #status-popup.show { visibility: visible; opacity: 1; bottom: 120px; }
+        .champion-badge { background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.2rem; font-weight: bold; margin-top: 10px; display: block; }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -202,7 +203,19 @@
     </div>
 
     <div id="music-page" class="page"><div class="header-container"><h1>Müzik Kutusu 🎵</h1></div><div class="status-card" style="text-align: center;"><p style="opacity: 0.7; margin-bottom: 10px;">Birlikte dinlemek için ID girin.</p><div id="music-display" style="border-radius: 15px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.3); min-height: 200px; display: flex; align-items: center; justify-content: center;">Yükleniyor...</div><input type="text" id="music-input" placeholder="YouTube Video ID (örn: qMsEVXrfuvA)"><button class="btn" onclick="changeMusic()">Şarkıyı Değiştir</button></div></div>
-    <div id="quiz-page" class="page"><iframe data-src="https://quiz-gamma-lime.vercel.app/"></iframe></div>
+    
+    <div id="quiz-page" class="page">
+        <div class="status-card" style="text-align:center;">
+            <h2>Aşk Ligi 🏆</h2>
+            <div class="grid-container">
+                <div class="mini-card"><small>Böcek</small><div id="score-tyler" style="font-size:1.5rem; font-weight:bold; color:var(--accent-neon);">0</div></div>
+                <div class="mini-card"><small>Mina</small><div id="score-mina" style="font-size:1.5rem; font-weight:bold; color:var(--accent-pink);">0</div></div>
+            </div>
+            <div id="champion-text" class="champion-badge">...</div>
+        </div>
+        <iframe data-src="https://quiz-gamma-lime.vercel.app/"></iframe>
+    </div>
+    
     <div id="history" class="page"><iframe data-src="https://time-eight-eta.vercel.app/"></iframe></div>
     <div id="coupons" class="page"><iframe data-src="https://kupon-coral.vercel.app/"></iframe></div>
     <div id="gift" class="page"><iframe data-src="https://hediye-alpha.vercel.app/"></iframe></div>
@@ -368,7 +381,6 @@
             setTimeout(() => p.classList.remove('show'), 2000);
         }
 
-        // --- BÖCEK İÇİN GÜNÜN SORUSU EKLENDİ ---
         const questions = [
             "Bugün Mina'yı düşünürken aklına ilk gelen şarkı neydi?", 
             "İleride kuracağınız evde Mina ile en çok vakit geçireceğiniz köşe neresi?", 
@@ -393,9 +405,15 @@
             else { resetWidget(); }
         });
 
+        // GECE MODU EMOJİLERİ BURAYA EKLENDİ (Tam da şu an aktif olacaklar)
         function updateTylerMood(emoji) { db.ref('status').update({ böcekMood: emoji }); triggerPopup(); }
-        const moods = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍'];
-        document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => `<span style="font-size:1.8rem; cursor:pointer; padding:2px;" onclick="updateTylerMood('${m}')">${m}</span>`).join('');
+        function renderTylerMoods() {
+            const h = new Date().getHours();
+            let ms = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍', '😁'];
+            if (h >= 0 && h < 4) ms = [...ms, '💦', '🍑', '🍆', '⛓️', '🔞', '🫦', '🔥', '🍷'];
+            document.getElementById('tyler-mood-selector').innerHTML = ms.map(m => `<span style="font-size:1.8rem; cursor:pointer; padding:5px;" onclick="updateTylerMood('${m}')">${m}</span>`).join('');
+        }
+        renderTylerMoods(); setInterval(renderTylerMoods, 60000);
 
         function updateTylerStatus() {
             const txt = document.getElementById('tylerNote'); if(!txt.value.trim()) return;
@@ -407,6 +425,14 @@
         db.ref('status').on('value', s => { const d = s.val(); if(d) { document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = `"${d.meinNote||'Not bekleniyor...'}"`; } });
         db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
         
+        // AŞK LİGİ SKOR DİNLEYİCİSİ BURAYA EKLENDİ
+        db.ref('scores').on('value', s => { 
+            const d = s.val() || {}; const t = d.Tyler || 0; const m = d.Mina || 0; 
+            document.getElementById('score-tyler').innerText = t; 
+            document.getElementById('score-mina').innerText = m; 
+            document.getElementById('champion-text').innerText = t>m?"👑 Lider: Böcek":m>t?"👑 Lider: Mina":"💞 Eşitlik!"; 
+        });
+
         db.ref('love_archive').limitToLast(15).on('value', snap => {
             const l = document.getElementById('archive-list'); l.innerHTML = "";
             snap.forEach(c => { const d = c.val(); l.innerHTML += `<div class="archive-msg ${d.sender==='Böcek'?'msg-me':'msg-other'}">${d.msg}<span class="msg-time">${new Date(d.time).toLocaleTimeString()}</span></div>`; });
