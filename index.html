@@ -4,59 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Böcek'in Paneli 🛠️</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://europe-west1.firebasedatabase.app">
+    
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <style>
-        :root { --accent-blue: #00d2ff; --bg: #0f0f0f; --card: #1a1a1a; --text: #ffffff; --nav: #151515; --input-bg: rgba(255,255,255,0.1); }
-        body.light-mode { --bg: #f0f2f5; --card: #ffffff; --text: #333333; --nav: #ffffff; --input-bg: rgba(0,0,0,0.05); }
+        :root {
+            --bg-color: #0a0a12;
+            --panel-bg: rgba(16, 16, 30, 0.75);
+            --accent-neon: #00ffcc; /* Böcek'in imza rengi */
+            --accent-pink: #ff007f;
+            --text-main: #ffffff;
+            --text-muted: #8a8ab0;
+            --card: #141423;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(0, 255, 204, 0.2);
+            --nav: #10101e;
+        }
+
+        body.light-mode {
+            --bg-color: #f4f6fa;
+            --panel-bg: rgba(255, 255, 255, 0.9);
+            --accent-neon: #00d2ff;
+            --accent-pink: #ff007f;
+            --text-main: #333333;
+            --text-muted: #666688;
+            --card: #ffffff;
+            --input-bg: rgba(0, 0, 0, 0.03);
+            --border-color: rgba(0, 210, 255, 0.3);
+            --nav: #ffffff;
+        }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; min-height: 100vh; overflow-x: hidden; padding-bottom: 120px; width: 100%; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg-color); color: var(--text-main); transition: 0.3s; min-height: 100vh; overflow-x: hidden; padding-bottom: 120px; width: 100%; }
         
         .header-container { display: flex; justify-content: space-between; align-items: center; padding: 20px 15px; }
-        h1 { font-family: 'Pacifico'; color: var(--accent-blue); margin: 0; font-size: 1.6rem; }
-        .theme-toggle { background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: white; }
+        h1 { font-family: 'Pacifico'; color: var(--accent-neon); margin: 0; font-size: 1.6rem; letter-spacing: 1px; }
+        .theme-toggle { background: var(--input-bg); border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; color: var(--text-main); }
         
-        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid rgba(128,128,128,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .status-card { background: var(--card); border-radius: 20px; padding: 18px; margin: 0 12px 15px 12px; border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 12px 15px 12px; }
-        .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid rgba(128,128,128,0.1); text-align: center; transition: all 0.3s ease; }
-        .btn { background: linear-gradient(135deg, #00d2ff, #3a7bd5); border: none; padding: 15px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; }
-        .btn:active { transform: scale(0.98); }
-        textarea, input[type="text"], select { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text); border: 1px solid transparent; outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
+        .mini-card { background: var(--card); border-radius: 18px; padding: 12px; border: 1px solid var(--border-color); text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         
-        /* TO-DO LIST */
-        .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; transition: 0.3s; }
-        .todo-item.done span.todo-text { text-decoration: line-through; opacity: 0.5; }
-        .todo-check { width: 22px; height: 22px; border: 2px solid var(--accent-blue); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
-        .todo-check.checked { background: var(--accent-blue); color: #000; font-weight: bold; }
-        .todo-text { flex: 1; }
-        .todo-delete { cursor: pointer; opacity: 0.7; font-size: 1.1rem; }
+        .btn { background: transparent; border: 2px solid var(--accent-neon); color: var(--text-main); padding: 15px; border-radius: 50px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; font-size: 0.95rem; font-family: inherit; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease; }
+        .btn:hover { background: var(--accent-neon); color: #000; box-shadow: 0 0 15px rgba(0, 255, 204, 0.4); }
+        .btn:active { transform: scale(0.98); }
+        
+        textarea, input[type="text"], select { width: 100%; padding: 12px; border-radius: 15px; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); outline: none; margin-top: 10px; font-family: inherit; font-size: 0.9rem; }
 
-        /* GALERİ VE KLASÖR SİSTEMİ */
+        /* TO-DO (AŞK GÖREVLERİ) STYLES */
+        .todo-item { display: flex; align-items: center; gap: 10px; background: rgba(0, 255, 204, 0.05); padding: 12px; border-radius: 15px; margin-bottom: 8px; font-size: 0.9rem; }
+        .todo-item.done span.todo-text { text-decoration: line-through; opacity: 0.5; }
+        .todo-check { width: 22px; height: 22px; border: 2px solid var(--accent-neon); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; transition: 0.2s; color: transparent; }
+        .todo-check.checked { background: var(--accent-neon); color: #000; font-weight: bold; }
+        .todo-text { flex: 1; }
+        .todo-delete { cursor: pointer; opacity: 0.7; }
+        .todo-input-container { display: flex; align-items: center; gap: 8px; background: var(--input-bg); border-radius: 50px; padding: 5px 5px 5px 15px; margin-top: 15px; border: 1px solid var(--border-color); }
+        .todo-input-container input { margin-top: 0; background: transparent; padding: 8px 0; border: none !important; flex: 1; color: var(--text-main); outline: none; }
+        .todo-add-btn { background: var(--accent-neon); border: none; width: 40px; height: 40px; border-radius: 50%; color: #000; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* ARŞİV */
+        .archive-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 5px; margin-top: 15px; border-top: 1px solid rgba(0, 255, 204, 0.2); padding-top: 10px; }
+        .archive-msg { padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; max-width: 80%; line-height: 1.4; position: relative; }
+        .msg-me { background: var(--accent-neon); color: #000; align-self: flex-end; border-bottom-right-radius: 2px; font-weight: 500; }
+        .msg-other { background: rgba(255, 0, 127, 0.1); align-self: flex-start; border-bottom-left-radius: 2px; border-left: 3px solid var(--accent-pink); }
+        .msg-time { font-size: 0.6rem; opacity: 0.7; display: block; margin-top: 3px; text-align: right; }
+
+        /* ADVANCED GALLERY SYSTEM */
         .folder-nav { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; margin-bottom: 15px; scrollbar-width: none; }
         .folder-nav::-webkit-scrollbar { display: none; }
-        .folder-chip { background: var(--input-bg); padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; white-space: nowrap; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
-        .folder-chip.active { background: var(--accent-blue); color: #000; font-weight: bold; }
+        .folder-chip { background: var(--input-bg); padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; white-space: nowrap; cursor: pointer; border: 1px solid var(--border-color); color: var(--text-muted); }
+        .folder-chip.active { background: var(--accent-neon); color: #000; font-weight: bold; border-color: var(--accent-neon); }
         .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
         .gallery-item-container { position: relative; width: 100%; aspect-ratio: 1; }
-        .gallery-item { width: 100%; height: 100%; object-fit: cover; border-radius: 15px; border: 2px solid rgba(255,255,255,0.1); }
+        .gallery-item { width: 100%; height: 100%; object-fit: cover; border-radius: 15px; border: 2px solid var(--border-color); }
         .tag-container { position: absolute; bottom: 5px; left: 5px; right: 5px; display: flex; flex-wrap: wrap; gap: 4px; pointer-events: none; }
-        .tag-badge { background: rgba(0,0,0,0.7); color: var(--accent-blue); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; }
+        .tag-badge { background: rgba(0,0,0,0.7); color: var(--accent-neon); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; }
         .photo-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 5px; z-index: 10; }
         .action-btn { background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-between; padding: 15px 15px; z-index: 1000; border-radius: 20px 20px 0 0; }
-        .nav-item { cursor: pointer; font-size: 1.3rem; opacity: 0.5; filter: grayscale(1); transition: 0.3s; }
-        .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); }
-        .page { display: none; animation: slideUp 0.4s ease; }
-        .page.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 600px; left: 50%; transform: translateX(-50%); background: var(--nav); display: flex; justify-content: space-between; padding: 15px 15px; z-index: 1000; border-top: 1px solid var(--border-color); border-radius: 20px 20px 0 0; }
+        .nav-item { cursor: pointer; font-size: 1.3rem; opacity: 0.5; filter: grayscale(1); transition: 0.3s; padding: 0 5px; }
+        .nav-item.active { opacity: 1; filter: grayscale(0); transform: scale(1.1); color: var(--accent-neon); }
 
-        /* MULTI FOLDER MODAL */
+        .page { display: none; animation: slideUp 0.4s ease; padding-top: 5px; }
+        .page.active { display: block; }
+        iframe { width: 100%; height: 78vh; border: none; border-radius: 20px; background: white; margin-top: 10px; }
+        
+        /* MULTI FOLDER MODAL SYSTEM */
         #folder-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; align-items: center; justify-content: center; padding: 20px; }
-        .modal-card { background: var(--card); border-radius: 25px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--accent-blue); }
+        .modal-card { background: var(--card); border-radius: 25px; padding: 20px; width: 100%; max-width: 350px; border: 1px solid var(--accent-neon); color: var(--text-main); }
         .folder-option { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .folder-option input { width: 18px; height: 18px; }
+
+        #love-notification, #sent-notification { visibility: hidden; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 9999; transition: 0.4s; opacity: 0; text-align: center; width: 320px; max-width: 90%; }
+        #love-notification.show, #sent-notification.show { visibility: visible; opacity: 1; }
+        #status-popup { visibility: hidden; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: var(--accent-neon); color: #000; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 10001; opacity: 0; transition: 0.3s; box-shadow: 0 5px 15px rgba(0, 255, 204, 0.3); }
+        #status-popup.show { visibility: visible; opacity: 1; bottom: 120px; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -68,36 +117,57 @@
         </div>
     </div>
 
-    <div id="status-popup" style="visibility:hidden; position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--accent-blue); color:#000; padding:10px 20px; border-radius:50px; font-weight:bold; z-index:10001; transition:0.3s;">✅ Başarılı!</div>
+    <div id="love-notification" style="background:rgba(255, 0, 127, 0.95); padding:30px; border-radius:30px; border:2px solid white; box-shadow: 0 10px 40px rgba(0,0,0,0.5); color: white;"><div style="font-size: 3rem;">❤️</div><h2>Mina Seni Çok Özledi!</h2><p>Hemen ona bir öpücük gönder.</p></div>
+    <div id="sent-notification" style="background:rgba(46, 204, 113, 0.95); color:white; padding:15px 30px; border-radius:50px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);">❤️ Bildirim Yollandı!</div>
+    <div id="status-popup">✅ Durumun Mina'ya İletildi!</div>
 
     <div id="home" class="page active">
-        <div class="header-container"><h1>Böcek OS</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
+        <div class="header-container"><h1>Böcek OS 🛠️</h1><button class="theme-toggle" onclick="toggleTheme()">🌓</button></div>
+        
         <div class="grid-container">
-            <div class="mini-card" id="coupon-widget" onclick="showPage('coupons', document.querySelector('.nav-item:nth-child(6)'))" style="cursor:pointer; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                <small style="opacity:0.7">Durum</small>
-                <div id="coupon-display" style="font-weight:bold; margin-top:5px;">Yükleniyor...</div>
+            <div class="mini-card" id="coupon-widget" onclick="showPage('coupons', document.querySelector('.nav-item:nth-child(6)'))" style="cursor:pointer;">
+                <small style="opacity:0.7" id="coupon-label">Durum</small>
+                <div id="coupon-display" style="color:var(--accent-neon); font-weight:bold; margin-top:5px; font-size:1.1rem;">Yükleniyor...</div>
             </div>
-            <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="color:var(--accent-blue); font-weight: bold;">--:--</div></div>
+            <div class="mini-card"><small style="opacity:0.7">Kavuşma</small><div id="countdown" style="color:var(--accent-neon); font-weight: bold;">--:--</div></div>
         </div>
+
         <div class="status-card" style="text-align:center;">
-            <h3 style="font-family:'Pacifico'; font-size:0.9rem; color:var(--accent-blue); margin:0;">Mesafe (GPS)</h3>
+            <h3 style="font-family:'Pacifico'; font-size:0.9rem; color:var(--accent-neon); margin:0;">Mesafe (GPS)</h3>
             <div id="distance-display" style="font-size:1.3rem; font-weight:bold; margin:8px 0;">Hesaplanıyor...</div>
+            <div style="display:flex; justify-content:space-around; font-size:0.7rem; margin-top:8px; opacity:0.8;">
+                <div>🇩🇪 Aug: <span id="local-time">--:--</span></div>
+                <div>🇹🇷 Ank: <span id="mina-time">--:--</span></div>
+            </div>
         </div>
+
         <div class="status-card">
             <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Mina'nın Modu</h3><span id="mina-mood-display" style="font-size:1.8rem;">⌛</span></div>
-            <p id="mina-note" style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; border-left:3px solid #ff9a9e; font-style:italic; font-size:0.85rem;">Not bekleniyor...</p>
+            <p id="mina-note" style="background:rgba(0,255,204,0.05); padding:12px; border-radius:12px; border-left:3px solid var(--accent-neon); font-style:italic; font-size:0.85rem; margin-top:10px;">Not bekleniyor...</p>
         </div>
+
         <div class="grid-container">
             <div class="mini-card">😘 Böcek<div id="kiss-tyler">0</div></div>
             <div class="mini-card">😘 Mina<div id="kiss-mina">0</div></div>
         </div>
-        <div style="padding: 0 12px;"><button class="btn" style="background:linear-gradient(135deg, #ff4757, #ff6b81);" onclick="sendMissYou()">MINA'YI ÖZLEDİM ❤️</button></div>
+
+        <div style="padding: 0 12px;"><button class="btn" style="border-color: var(--accent-pink);" onclick="sendMissYou()">MINA'YI ÖZLEDİM ❤️</button></div>
+
         <div class="status-card" style="margin-top:15px;">
             <h3>Durumunu Güncelle</h3>
             <div id="tyler-mood-selector" style="display:flex; justify-content:center; gap:12px; margin-bottom:15px; flex-wrap: wrap;"></div>
             <textarea id="tylerNote" rows="2" placeholder="Mina'ya mesajın..."></textarea>
             <button class="btn" onclick="updateTylerStatus()">Güncelle & Arşivle</button>
             <div id="archive-list" class="archive-list"></div>
+        </div>
+
+        <div class="status-card">
+            <h3>📝 Aşk Görevleri</h3>
+            <div id="todo-list"></div>
+            <div class="todo-input-container">
+                <input type="text" id="todo-input" placeholder="Yeni görev...">
+                <button class="todo-add-btn" onclick="addTodo()">+</button>
+            </div>
         </div>
     </div>
 
@@ -111,11 +181,14 @@
                 <button class="btn" onclick="addNewFolder()" style="margin-top:5px; padding:8px; font-size:0.7rem;">+ Yeni Klasör</button>
             </div>
             <input type="text" id="photo-tags" placeholder="Etiketler (virgülle ayır)..." style="margin-top:10px;">
+            
             <div class="upload-btn-wrapper" style="margin-top:10px; position:relative; overflow:hidden; display:inline-block; width:100%;">
                 <button class="btn">📸 Çoklu Fotoğraf Yükle</button>
                 <input type="file" id="photo-upload" accept="image/*" multiple onchange="uploadMultiplePhotos()" style="position:absolute; left:0; top:0; opacity:0; width:100%; height:100%;">
             </div>
-            <button class="btn" id="sort-btn" onclick="toggleSort()" style="margin-top:10px; background:rgba(255,255,255,0.1); border:1px solid rgba(0,210,255,0.2);">🔄 Sırala: Yeniler Altta</button>
+            
+            <button class="btn" id="sort-btn" onclick="toggleSort()" style="margin-top:10px; background:rgba(255,255,255,0.1); border:1px solid var(--border-color);">🔄 Sırala: Yeniler Altta</button>
+            
             <div id="folder-nav" class="folder-nav">
                 <div class="folder-chip active" onclick="setGalleryFilter('All')">Hepsi</div>
             </div>
@@ -123,18 +196,12 @@
         </div>
     </div>
 
-    <!-- IFRAME PAGES -->
-    <div id="music-page" class="page">
-        <div class="header-container"><h1>Müzik Kutusu 🎵</h1></div>
-        <div class="status-card" id="music-display" style="text-align:center; min-height:200px;">Yükleniyor...</div>
-        <input type="text" id="music-input" placeholder="YouTube ID">
-        <button class="btn" onclick="changeMusic()">Değiştir</button>
-    </div>
-    <div id="quiz-page" class="page"><iframe src="https://quiz-gamma-lime.vercel.app/" style="width:100%; height:75vh; border:none; border-radius:20px;"></iframe></div>
-    <div id="history" class="page"><iframe src="https://time-eight-eta.vercel.app/" style="width:100%; height:75vh; border:none;"></iframe></div>
-    <div id="coupons" class="page"><iframe src="https://kupon-coral.vercel.app/" style="width:100%; height:75vh; border:none;"></iframe></div>
-    <div id="gift" class="page"><iframe src="https://hediye-alpha.vercel.app/" style="width:100%; height:75vh; border:none;"></iframe></div>
-
+    <div id="music-page" class="page"><div class="header-container"><h1>Müzik Kutusu 🎵</h1></div><div class="status-card" style="text-align: center;"><p style="opacity: 0.7; margin-bottom: 10px;">Birlikte dinlemek için ID girin.</p><div id="music-display" style="border-radius: 15px; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.3); min-height: 200px; display: flex; align-items: center; justify-content: center;">Yükleniyor...</div><input type="text" id="music-input" placeholder="YouTube Video ID (örn: qMsEVXrfuvA)"><button class="btn" onclick="changeMusic()">Şarkıyı Değiştir</button></div></div>
+    <div id="quiz-page" class="page"><iframe data-src="https://quiz-gamma-lime.vercel.app/"></iframe></div>
+    <div id="history" class="page"><iframe data-src="https://time-eight-eta.vercel.app/"></iframe></div>
+    <div id="coupons" class="page"><iframe data-src="https://kupon-coral.vercel.app/"></iframe></div>
+    <div id="gift" class="page"><iframe data-src="https://hediye-alpha.vercel.app/"></iframe></div>
+    
     <nav class="bottom-nav">
         <div class="nav-item active" onclick="showPage('home', this)">🏠</div>
         <div class="nav-item" onclick="showPage('music-page', this)">🎵</div>
@@ -145,30 +212,28 @@
         <div class="nav-item" onclick="showPage('gift', this)">🎁</div>
     </nav>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <script>
-        const firebaseConfig = { 
-            apiKey: "AIzaSyDzhUgqGWffaHilyO8vFzcIez9HyzMK6r4", 
-            authDomain: "tylermina-61718.firebaseapp.com", 
-            databaseURL: "https://tylermina-61718-default-rtdb.europe-west1.firebasedatabase.app", 
-            projectId: "tylermina-61718", 
-            storageBucket: "tylermina-61718.firebasestorage.app", 
-            messagingSenderId: "494227494785", 
-            appId: "1:494227494785:web:65cd8a4a50bc0b7531fa80"
-        };
-        firebase.initializeApp(firebaseConfig); const db = firebase.database();
+        const firebaseConfig = { apiKey: "AIzaSyDzhUgqGWffaHilyO8vFzcIez9HyzMK6r4", authDomain: "tylermina-61718.firebaseapp.com", databaseURL: "https://tylermina-61718-default-rtdb.europe-west1.firebasedatabase.app", projectId: "tylermina-61718", storageBucket: "tylermina-61718.firebasestorage.app", messagingSenderId: "494227494785", appId: "1:494227494785:web:65cd8a4a50bc0b7531fa80" };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const db = firebase.database();
 
         function toggleTheme() { document.body.classList.toggle('light-mode'); }
+        
         function showPage(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active'); el.classList.add('active');
-        }
-        function showStatusPopup() {
-            const p = document.getElementById('status-popup'); p.style.visibility = 'visible';
-            setTimeout(() => p.style.visibility = 'hidden', 2000);
+            const activePage = document.getElementById(id);
+            activePage.classList.add('active'); el.classList.add('active');
+            window.scrollTo(0,0);
+            const iframe = activePage.querySelector('iframe');
+            if (iframe && !iframe.src) { iframe.src = iframe.getAttribute('data-src'); }
+            if (id === 'gallery-page') { renderGallery(); }
         }
 
-        // --- GALERİ MANTIĞI ---
+        // --- GALERİ MOTORU ---
         let isNewestAtBottom = true;
         let galleryData = [];
         let customFolders = ["Genel"];
@@ -182,11 +247,14 @@
         });
 
         function updateFolderUI() {
-            document.getElementById('upload-folder-list').innerHTML = customFolders.map(f => `
-                <div style="font-size:0.8rem; display:inline-block; margin-right:10px;">
-                    <input type="checkbox" class="upload-f-check" value="${f}"> ${f}
-                </div>
-            `).join('');
+            const uploadList = document.getElementById('upload-folder-list');
+            if(uploadList) {
+                uploadList.innerHTML = customFolders.map(f => `
+                    <div style="font-size:0.8rem; display:inline-block; margin-right:10px;">
+                        <input type="checkbox" class="upload-f-check" value="${f}"> ${f}
+                    </div>
+                `).join('');
+            }
             let navHtml = `<div class="folder-chip ${currentGalleryFilter === 'All' ? 'active' : ''}" onclick="setGalleryFilter('All')">Hepsi</div>`;
             customFolders.forEach(f => {
                 navHtml += `<div class="folder-chip ${currentGalleryFilter === f ? 'active' : ''}" onclick="setGalleryFilter('${f}')">${f}</div>`;
@@ -201,7 +269,6 @@
             if(n && n.trim()) db.ref('gallery_folders').push(n.trim());
         }
 
-        // TAG DÜZENLEME (Tamir edildi)
         function editPhotoTags(key) {
             const photo = galleryData.find(p => p.key === key);
             const currentTags = photo ? photo.tags : [];
@@ -209,11 +276,10 @@
             if (newTagsStr !== null) {
                 const newTags = newTagsStr.split(',').map(t => t.trim()).filter(t => t !== "");
                 db.ref('gallery/' + key).update({ tags: newTags });
-                showStatusPopup();
+                triggerPopup();
             }
         }
 
-        // KLASÖR MODALI (Tamir edildi)
         function openFolderModal(key) {
             const photo = galleryData.find(p => p.key === key);
             const currentFolders = photo ? photo.folders : ["Genel"];
@@ -231,7 +297,7 @@
             if(selected.length === 0) selected.push("Genel");
             db.ref('gallery/' + editingPhotoKey).update({ folders: selected });
             document.getElementById('folder-modal').style.display = 'none';
-            showStatusPopup();
+            triggerPopup();
         }
 
         function uploadMultiplePhotos() {
@@ -254,7 +320,8 @@
                 };
                 reader.readAsDataURL(file);
             });
-            document.getElementById('photo-tags').value = ""; showStatusPopup();
+            document.getElementById('photo-tags').value = "";
+            triggerPopup();
         }
 
         db.ref('gallery').orderByChild('time').on('value', snap => {
@@ -268,6 +335,7 @@
 
         function renderGallery() {
             const grid = document.getElementById('gallery-grid');
+            if(!grid) return;
             const search = document.getElementById('tag-search').value.toLowerCase();
             let filtered = galleryData.filter(p => {
                 const folderMatch = (currentGalleryFilter === 'All' || p.folders.includes(currentGalleryFilter));
@@ -284,13 +352,18 @@
                         <button class="action-btn" onclick="openFolderModal('${p.key}')">📂</button>
                         <button class="action-btn" style="color:#ff4757" onclick="if(confirm('Silinsin mi?')) db.ref('gallery/${p.key}').remove()">🗑️</button>
                     </div>
-                    <img src="${p.image}" class="gallery-item" onclick="window.open(this.src)">
+                    <img src="${p.image}" class="gallery-item" onclick="window.open(this.src)" loading="lazy">
                     <div class="tag-container">${p.tags.map(t => `<span class="tag-badge">#${t}</span>`).join('')}</div>
                 </div>
             `).join('');
         }
 
-        // --- DİĞER FONKSİYONLAR ---
+        function triggerPopup() {
+            const p = document.getElementById('status-popup'); p.classList.add('show');
+            setTimeout(() => p.classList.remove('show'), 2000);
+        }
+
+        // --- GERÇEK ZAMANLI VERİ SENKRONİZASYONU ---
         function toRad(v) { return v * Math.PI / 180; }
         navigator.geolocation.watchPosition((p) => {
             const R = 6371; const dLat = toRad(39.9334 - p.coords.latitude); const dLon = toRad(32.8597 - p.coords.longitude);
@@ -300,39 +373,56 @@
         });
 
         db.ref('active_coupon_Mina').on('value', snap => {
-            const val = snap.val(); const widget = document.getElementById('coupon-widget'); const display = document.getElementById('coupon-display');
-            if (val && val.status === "Aktif") { display.innerText = "👸 " + val.name; display.style.color = val.rarity === "legendary" ? "gold" : "#ff9a9e"; widget.style.border = val.rarity === "legendary" ? "2px solid gold" : "1px solid #ff9a9e"; } 
-            else { display.style.color = "var(--text)"; widget.style.border = "1px solid rgba(128,128,128,0.1)"; if ('getBattery' in navigator) { navigator.getBattery().then(bat => { display.innerText = Math.round(bat.level * 100) + "%"; }); } }
+            const val = snap.val(); const widget = document.getElementById('coupon-widget'); const display = document.getElementById('coupon-display'); const label = document.getElementById('coupon-label');
+            const resetWidget = () => { label.innerText = "Durum"; display.style.color = "var(--accent-neon)"; widget.style.border = "1px solid var(--border-color)"; if ('getBattery' in navigator) { navigator.getBattery().then(bat => { display.innerText = Math.round(bat.level * 100) + "%"; }); } };
+            if (val && val.status === "Aktif") { display.innerText = "👸 " + val.name; label.innerText = "MINA'NIN KUPONU"; if(val.rarity === "legendary") { display.style.color = "gold"; widget.style.border = "2px solid gold"; } else { display.style.color = "var(--accent-pink)"; widget.style.border = "1px solid var(--accent-pink)"; } } 
+            else { resetWidget(); }
         });
 
-        function updateTylerMood(emoji) { db.ref('status').update({ böcekMood: emoji }); showStatusPopup(); }
+        function updateTylerMood(emoji) { db.ref('status').update({ böcekMood: emoji }); triggerPopup(); }
         const moods = ['🤍', '😴', '💻', '🍕', '🌹', '🥺', '😤', '😞', '💕', '😍'];
-        document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => `<span style="font-size:1.8rem; cursor:pointer;" onclick="updateTylerMood('${m}')">${m}</span>`).join('');
+        document.getElementById('tyler-mood-selector').innerHTML = moods.map(m => `<span style="font-size:1.8rem; cursor:pointer; padding:2px;" onclick="updateTylerMood('${m}')">${m}</span>`).join('');
 
         function updateTylerStatus() {
-            const txt = document.getElementById('tylerNote').value; if(!txt.trim()) return;
-            db.ref('status').update({ böcekNote: txt });
-            db.ref('love_archive').push({ sender: 'Böcek', msg: txt, time: Date.now() });
-            document.getElementById('tylerNote').value = ""; showStatusPopup();
+            const txt = document.getElementById('tylerNote'); if(!txt.value.trim()) return;
+            db.ref('status').update({ böcekNote: txt.value });
+            db.ref('love_archive').push({ sender: 'Böcek', msg: txt.value, time: Date.now() });
+            txt.value = ""; triggerPopup();
         }
 
-        db.ref('love_archive').limitToLast(5).on('value', snap => {
+        db.ref('status').on('value', s => { const d = s.val(); if(d) { document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = `"${d.meinNote||'Not bekleniyor...'}"`; } });
+        db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
+        
+        db.ref('love_archive').limitToLast(15).on('value', snap => {
             const l = document.getElementById('archive-list'); l.innerHTML = "";
-            snap.forEach(c => { l.innerHTML += `<div class="archive-msg ${c.val().sender==='Böcek'?'msg-me':'msg-other'}">${c.val().msg}</div>`; });
+            snap.forEach(c => { const d = c.val(); l.innerHTML += `<div class="archive-msg ${d.sender==='Böcek'?'msg-me':'msg-other'}">${d.msg}<span class="msg-time">${new Date(d.time).toLocaleTimeString()}</span></div>`; });
+            l.scrollTop = l.scrollHeight;
         });
 
         function changeMusic() { const id = document.getElementById('music-input').value; if(id) db.ref('shared_music').set({ id: id }); }
-        db.ref('shared_music').on('value', s => {
-            const id = s.val()?.id || "qMsEVXrfuvA";
-            document.getElementById('music-display').innerHTML = `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${id}?rel=0" frameborder="0"></iframe>`;
+        db.ref('shared_music').on('value', s => { document.getElementById('music-display').innerHTML = `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${s.val()?.id || "qMsEVXrfuvA"}?rel=0" frameborder="0"></iframe>`; });
+
+        function sendMissYou() { db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() }); db.ref('kisses/Tyler').transaction(c => (c || 0) + 1); document.getElementById("sent-notification").classList.add("show"); setTimeout(() => document.getElementById("sent-notification").classList.remove("show"), 2000); }
+        db.ref('alerts/tylerAlert').on('value', s => { const d = s.val(); if(d && Date.now() - d.time < 5000) { const n = document.getElementById("love-notification"); n.innerHTML = `<div style="font-size:3rem;">❤️</div><h2>${d.msg}</h2>`; n.classList.add("show"); setTimeout(() => n.classList.remove("show"), 4000); } });
+
+        // --- ENTEGRE EDİLEN VE SENKRONİZE TO-DO SİSTEMİ ---
+        function addTodo() { const i = document.getElementById('todo-input'); if(i.value.trim()){ db.ref('todos').push({ text: i.value, done: false }); i.value = ""; } }
+        function toggleTodo(k, d) { db.ref('todos/' + k).update({ done: !d }); }
+        function deleteTodo(k) { db.ref('todos/' + k).remove(); }
+        db.ref('todos').on('value', s => {
+            const l = document.getElementById('todo-list'); l.innerHTML = "";
+            s.forEach(c => {
+                const i = c.val();
+                l.innerHTML += `<div class="todo-item ${i.done?'done':''}"><div class="todo-check ${i.done?'checked':''}" onclick="toggleTodo('${c.key}', ${i.done})">✓</div><span class="todo-text">${i.text}</span><span class="todo-delete" onclick="deleteTodo('${c.key}')">🗑️</span></div>`;
+            });
         });
 
-        function sendMissYou() { db.ref('alerts/minaAlert').set({ msg: "Özledim!", time: Date.now() }); db.ref('kisses/Tyler').transaction(c => (c || 0) + 1); showStatusPopup(); }
-        db.ref('status').on('value', s => { const d = s.val(); if(d) { document.getElementById('mina-mood-display').innerText = d.meinMood||"⌛"; document.getElementById('mina-note').innerText = d.meinNote||"Not bekleniyor..."; } });
-        db.ref('kisses').on('value', s => { const d = s.val() || {}; document.getElementById('kiss-tyler').innerText = d.Tyler || 0; document.getElementById('kiss-mina').innerText = d.Mina || 0; });
-        
+        // SAATLER VE GERİ SAYIM
         setInterval(() => { 
-            const d = new Date("2026-08-01T19:00:00") - new Date(); 
+            const now = new Date();
+            document.getElementById('local-time').innerText = now.toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('mina-time').innerText = new Date(now.getTime()+(2*60*60*1000)).toLocaleTimeString('tr-TR', {hour:'2-digit', minute:'2-digit'});
+            const d = new Date("2026-08-01T19:00:00") - now; 
             document.getElementById('countdown').innerText = d > 0 ? Math.floor(d/(1000*60*60*24)) + "g " + Math.floor((d%(1000*60*60*24))/(1000*60*60)) + "s" : "KAVUŞTUK! ❤️"; 
         }, 1000);
     </script>
