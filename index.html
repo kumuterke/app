@@ -15,7 +15,7 @@
         :root {
             --bg-color: #0a0a12;
             --panel-bg: rgba(16, 16, 30, 0.75);
-            --accent-neon: #00ffcc; /* Böcek'in imza rengi */
+            --accent-neon: #00ffcc;
             --accent-pink: #ff007f;
             --text-main: #ffffff;
             --text-muted: #8a8ab0;
@@ -152,6 +152,11 @@
         </div>
 
         <div style="padding: 0 12px;"><button class="btn" style="border-color: var(--accent-pink);" onclick="sendMissYou()">MINA'YI ÖZLEDİM ❤️</button></div>
+
+        <div class="status-card" style="margin-top:15px; border-color:var(--accent-neon); cursor:pointer;" onclick="newQuestion()">
+            <small style="color:var(--accent-neon)">Günün Sorusu</small>
+            <div id="daily-q" style="margin-top:8px; font-weight:500;">Mina'yı bugün ne kadar özledin?</div>
+        </div>
 
         <div class="status-card" style="margin-top:15px;">
             <h3>Durumunu Güncelle</h3>
@@ -362,6 +367,15 @@
             const p = document.getElementById('status-popup'); p.classList.add('show');
             setTimeout(() => p.classList.remove('show'), 2000);
         }
+
+        // --- BÖCEK İÇİN GÜNÜN SORUSU EKLENDİ ---
+        const questions = [
+            "Bugün Mina'yı düşünürken aklına ilk gelen şarkı neydi?", 
+            "İleride kuracağınız evde Mina ile en çok vakit geçireceğiniz köşe neresi?", 
+            "Şu an Augsburg'da Mina yanına ışınlansa onu ilk nereye götürürdün?", 
+            "Mina ile şu ana kadar beraber geçirdiğiniz en komik an sence hangisiydi?"
+        ];
+        function newQuestion() { document.getElementById("daily-q").innerText = questions[Math.floor(Math.random() * questions.length)]; }
 
         // --- GERÇEK ZAMANLI VERİ SENKRONİZASYONU ---
         function toRad(v) { return v * Math.PI / 180; }
